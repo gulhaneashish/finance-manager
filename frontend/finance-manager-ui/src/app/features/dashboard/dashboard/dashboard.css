@@ -1,0 +1,2605 @@
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboard {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 32px 40px;
+  box-sizing: border-box;
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.header-left h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+}
+
+.header-left p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+
+/* Month */
+
+.month-display {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.month-display mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+
+/* Add Transaction */
+
+.add-transaction-button {
+  height: 42px;
+  padding: 0 18px !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.22) !important;
+}
+
+.add-transaction-button mat-icon {
+  margin-right: 5px;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.dashboard-loading {
+  margin-bottom: 18px;
+  border-radius: 10px;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error-card {
+  margin-bottom: 20px;
+  border: 1px solid #fecaca !important;
+  border-radius: 12px !important;
+  background: #fff7f7 !important;
+  color: #b91c1c;
+  box-shadow: none !important;
+}
+
+.error-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px !important;
+  font-size: 14px;
+}
+
+.error-card mat-icon {
+  color: #dc2626;
+}
+
+
+/* =========================================================
+   SUMMARY GRID
+========================================================= */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
+
+.summary-card {
+  min-height: 116px;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 13px !important;
+  background: #ffffff !important;
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 20px rgba(15, 23, 42, 0.08) !important;
+}
+
+.summary-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  height: 100%;
+  padding: 18px !important;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   SUMMARY ICONS
+========================================================= */
+
+.summary-icon {
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+}
+
+.summary-icon mat-icon {
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+}
+
+
+/* Blue */
+
+.blue-icon {
+  background: #e7f0ff;
+  color: #2563eb;
+}
+
+
+/* Green */
+
+.green-icon {
+  background: #dff8eb;
+  color: #16a34a;
+}
+
+
+/* Red */
+
+.red-icon {
+  background: #ffe5ea;
+  color: #dc2626;
+}
+
+
+/* Purple */
+
+.purple-icon {
+  background: #eee5ff;
+  color: #7c3aed;
+}
+
+
+/* =========================================================
+   SUMMARY CONTENT
+========================================================= */
+
+.summary-content {
+  min-width: 0;
+}
+
+.summary-label {
+  display: block;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.summary-content h2 {
+  margin: 5px 0 3px;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.summary-description {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   TWO COLUMN GRID
+========================================================= */
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   COMMON SECTION CARD
+========================================================= */
+
+.section-card,
+.full-width-card {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow:
+    0 2px 9px rgba(15, 23, 42, 0.035) !important;
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.section-card mat-card-header,
+.full-width-card mat-card-header {
+  min-height: 66px;
+  padding: 14px 18px !important;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #eef2f7;
+}
+
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+
+/* =========================================================
+   SECTION ICON
+========================================================= */
+
+.section-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+}
+
+.section-icon mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.blue-section-icon {
+  background: #e7f0ff;
+  color: #2563eb;
+}
+
+.purple-section-icon {
+  background: #eee8ff;
+  color: #7c3aed;
+}
+
+
+/* =========================================================
+   CARD TITLE
+========================================================= */
+
+.section-card mat-card-title,
+.full-width-card mat-card-title {
+  margin: 0 !important;
+  color: #172554;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+}
+
+.section-card mat-card-subtitle,
+.full-width-card mat-card-subtitle {
+  margin-top: 3px !important;
+  color: #94a3b8 !important;
+  font-size: 10px !important;
+}
+
+
+/* =========================================================
+   MORE BUTTON
+========================================================= */
+
+.more-button {
+  color: #64748b !important;
+}
+
+.more-button mat-icon {
+  font-size: 20px;
+}
+
+
+/* =========================================================
+   MONTHLY BUDGET
+========================================================= */
+
+.section-card mat-card-content {
+  padding: 20px !important;
+}
+
+
+/* Budget values */
+
+.budget-values {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 24px;
+}
+
+
+.budget-value {
+  padding: 0 18px;
+  border-right: 1px solid #e5e7eb;
+}
+
+.budget-value:first-child {
+  padding-left: 8px;
+}
+
+.budget-value:last-child {
+  border-right: none;
+}
+
+
+.budget-value span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+
+.budget-value strong {
+  color: #172554;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+
+.budget-value.remaining strong {
+  color: #059669;
+}
+
+
+/* Progress */
+
+.progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+
+.progress-wrapper mat-progress-bar {
+  flex: 1;
+  height: 9px;
+  border-radius: 20px;
+}
+
+
+.progress-wrapper strong {
+  min-width: 30px;
+  color: #172554;
+  font-size: 13px;
+}
+
+
+.progress-description {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   FINANCIAL TARGETS
+========================================================= */
+
+.target-item {
+  margin-bottom: 20px;
+}
+
+.target-item:last-child {
+  margin-bottom: 0;
+}
+
+
+.target-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+
+.target-heading strong {
+  display: block;
+  color: #172554;
+  font-size: 12px;
+}
+
+
+.target-heading span {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+
+.target-amount {
+  color: #172554;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+
+.target-item mat-progress-bar {
+  height: 7px;
+  border-radius: 20px;
+}
+
+
+.target-progress {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+}
+
+
+.target-progress span {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+
+.target-progress strong {
+  color: #7c3aed;
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   CATEGORY SPENDING
+========================================================= */
+
+/* ===================================================
+   CATEGORY SPENDING
+=================================================== */
+
+/* .category-card {
+  min-height: 0;
+  overflow: hidden;
+} */
+
+
+/* Header */
+
+.category-card mat-card-header {
+  padding-bottom: 12px;
+}
+
+
+/* Chart + Legend */
+
+.category-chart-layout {
+  display: grid;
+
+  grid-template-columns: 190px 1fr;
+
+  gap: 22px;
+
+  align-items: center;
+
+  min-height: 207px;
+}
+
+
+/* ===================================================
+   DOUGHNUT CHART
+=================================================== */
+
+.doughnut-wrapper {
+  position: relative;
+
+  width: 180px;
+  height: 180px;
+
+  margin: auto;
+}
+
+.doughnut-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+/* Center text */
+
+.chart-center {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  pointer-events: none;
+
+  width: 100px;
+}
+
+.chart-center span {
+  font-size: 11px;
+
+  color: #64748b;
+
+  margin-bottom: 3px;
+}
+
+.chart-center strong {
+  font-size: 13px;
+
+  color: #111827;
+
+  white-space: nowrap;
+}
+
+
+/* ===================================================
+   CATEGORY LEGEND
+=================================================== */
+
+.category-legend {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.category-legend-row {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+ 
+
+  min-height: 20px;
+}
+
+
+/* Category name */
+
+.category-name {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  min-width: 0;
+
+  font-size: 12px;
+
+  color: #374151;
+}
+
+
+/* Color dot */
+
+.legend-dot {
+  width: 7px;
+
+  height: 7px;
+
+  min-width: 7px;
+
+  border-radius: 50%;
+}
+
+mat-card-content.accounts-content{
+  min-height: 167px;
+}
+/* Amount + percentage */
+
+.category-values {
+  display: grid;
+
+  grid-template-columns:
+    minmax(75px, 1fr)
+    60px;
+
+  gap: 8px;
+
+  align-items: center;
+
+  text-align: right;
+
+  white-space: nowrap;
+}
+
+
+.category-values strong {
+  font-size: 11px;
+
+  color: #1f2937;
+
+  font-weight: 600;
+}
+
+
+.category-values span {
+  font-size: 10px;
+
+  color: #64748b;
+
+  font-weight: 600;
+}
+
+
+/* ===================================================
+   EMPTY STATE
+=================================================== */
+
+.category-empty {
+  min-height: 200px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  color: #64748b;
+}
+
+.category-empty mat-icon {
+  width: 38px;
+
+  height: 38px;
+
+  font-size: 38px;
+
+  margin-bottom: 8px;
+}
+
+.category-empty h3 {
+  margin: 0 0 4px;
+
+  font-size: 15px;
+
+  color: #374151;
+}
+
+.category-empty p {
+  margin: 0;
+
+  font-size: 12px;
+}
+
+
+/* ===================================================
+   FOOTER
+=================================================== */
+
+/* .category-card .section-footer {
+  padding: 10px;
+
+  text-align: center;
+
+  border-top: 1px solid #eef0f3;
+
+  color: #2563eb;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+} */
+
+
+/* ===================================================
+   MOBILE
+=================================================== */
+
+@media (max-width: 600px) {
+
+  .category-chart-layout {
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+  }
+
+  .doughnut-wrapper {
+    width: 170px;
+
+    height: 170px;
+  }
+
+}
+
+
+/* =========================================================
+   CASH FLOW
+========================================================= */
+
+/* ===================================================
+   MONTHLY CASH FLOW
+=================================================== */
+
+/* .cash-flow-card {
+  margin-top: 24px;
+  border-radius: 16px;
+  overflow: hidden;
+} */
+
+
+/* Table */
+
+.cash-flow-table {
+  margin-top: 8px;
+}
+
+
+/* Header */
+
+.cash-flow-header,
+.cash-flow-row {
+
+  display: grid;
+
+  grid-template-columns:
+    1.3fr
+    1fr
+    1fr
+    1.2fr;
+
+  align-items: center;
+
+  gap: 16px;
+
+}
+
+
+/* Header */
+
+.cash-flow-header {
+
+  padding: 12px 16px;
+
+  background: #f8fafc;
+
+  color: #64748b;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  border-radius: 8px;
+
+}
+
+mat-card-content.cash-flow-content{
+  min-height: 207px;
+}
+
+/* Rows */
+
+.cash-flow-row {
+
+  padding: 1px 16px;
+
+  border-bottom: 1px solid #eef0f3;
+
+  font-size: 13px;
+
+}
+
+
+.cash-flow-row:last-child {
+  border-bottom: none;
+}
+
+
+/* Month */
+
+.cash-flow-month {
+
+  font-weight: 600;
+
+  color: #334155;
+
+}
+
+
+/* Income */
+
+.income {
+
+  color: #15803d;
+
+  font-weight: 600;
+
+}
+
+
+/* Expenses */
+
+.expense {
+
+  color: #dc2626;
+
+  font-weight: 600;
+
+}
+
+
+/* Positive Net */
+
+.positive {
+
+  color: #15803d;
+
+  font-weight: 700;
+
+}
+
+
+/* Negative Net */
+
+.negative {
+
+  color: #dc2626;
+
+  font-weight: 700;
+
+}
+
+
+/* Footer */
+
+/* .cash-flow-card .section-footer {
+
+  padding: 12px;
+
+  text-align: center;
+
+  border-top: 1px solid #eef0f3;
+
+  color: #2563eb;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+} */
+
+
+/* Empty */
+
+.cash-flow-empty {
+
+  min-height: 180px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  color: #64748b;
+
+}
+
+
+.cash-flow-empty mat-icon {
+
+  font-size: 40px;
+
+  width: 40px;
+
+  height: 40px;
+
+  margin-bottom: 8px;
+
+}
+
+
+.cash-flow-empty h3 {
+
+  margin: 0 0 5px;
+
+  font-size: 16px;
+
+  color: #334155;
+
+}
+
+
+.cash-flow-empty p {
+
+  margin: 0;
+
+  font-size: 13px;
+
+}
+
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+
+@media (max-width: 700px) {
+
+  .cash-flow-header,
+  .cash-flow-row {
+
+    grid-template-columns:
+      1.2fr
+      1fr
+      1fr
+      1fr;
+
+    gap: 8px;
+
+  }
+
+  .cash-flow-header {
+
+    font-size: 10px;
+
+    padding: 10px 8px;
+
+  }
+
+  .cash-flow-row {
+
+    padding: 12px 8px;
+
+    font-size: 11px;
+
+  }
+
+}
+
+
+/* =========================================================
+   SECTION FOOTER
+========================================================= */
+
+.section-footer {
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-top: 1px solid #eef2f7;
+
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.section-footer:hover {
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   LOANS & DEBT
+========================================================= */
+
+.full-width-card {
+  margin-bottom: 18px;
+}
+
+
+.loan-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+
+.loan-summary-item {
+  padding: 14px;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+
+.loan-summary-item span {
+  display: block;
+  margin-bottom: 7px;
+  color: #64748b;
+  font-size: 10px;
+}
+
+
+.loan-summary-item strong {
+  color: #172554;
+  font-size: 15px;
+}
+
+
+.debt-value {
+  color: #dc2626 !important;
+}
+
+.receivable-value {
+  color: #059669 !important;
+}
+
+.overdue-value {
+  color: #ea580c !important;
+}
+
+
+.loan-placeholder {
+  min-height: 90px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  border-top: 1px solid #eef2f7;
+
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+
+.loan-placeholder mat-icon {
+  color: #2563eb;
+}
+
+
+/* =========================================================
+   ACCOUNTS
+========================================================= */
+
+/* ===================================================
+   ACCOUNTS + SAVINGS / INVESTMENTS
+=================================================== */
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+
+/* ===================================================
+   COMPACT SECTION CARD
+=================================================== */
+
+.compact-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.compact-card mat-card-header {
+  padding-bottom: 8px;
+}
+
+.compact-card mat-card-content {
+  padding-top: 8px;
+  padding-bottom: 12px;
+}
+
+
+/* ===================================================
+   ACCOUNTS
+=================================================== */
+
+.compact-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+.compact-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 58px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  background: #fafafa;
+
+  transition: 0.2s ease;
+}
+
+
+.compact-account:hover {
+  background: #f8fafc;
+}
+
+
+.compact-account-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+}
+
+
+.compact-account-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: #eff6ff;
+}
+
+
+.compact-account-icon mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+
+.compact-account-left strong {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.compact-account-left span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #6b7280;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+
+.compact-account-right {
+  text-align: right;
+
+  flex-shrink: 0;
+}
+
+
+.compact-account-right strong {
+  display: block;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  color: #111827;
+}
+
+
+.compact-account-right span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #6b7280;
+
+  font-size: 10px;
+}
+
+
+/* Credit Card */
+
+.compact-credit-card {
+  background: #f8fafc;
+}
+
+
+.compact-credit-card .compact-account-icon {
+  background: #f3f4f6;
+}
+
+
+/* ===================================================
+   SAVINGS / INVESTMENTS
+=================================================== */
+
+.compact-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+
+.compact-goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+.compact-goal-icon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+}
+
+
+.compact-goal-icon mat-icon {
+  font-size: 21px;
+  width: 21px;
+  height: 21px;
+}
+
+
+.savings-icon {
+  background: #ecfdf5;
+  color: #15803d;
+}
+
+
+.investment-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+
+.compact-goal-content {
+  flex: 1;
+  min-width: 0;
+}
+
+
+.compact-goal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 7px;
+}
+
+
+.compact-goal-top div {
+  min-width: 0;
+}
+
+
+.compact-goal-top strong {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+
+.compact-goal-top span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #6b7280;
+
+  font-size: 10px;
+}
+
+
+.progress-value {
+  font-size: 12px !important;
+  color: #374151 !important;
+
+  white-space: nowrap;
+}
+
+
+.compact-goal mat-progress-bar {
+  height: 6px;
+
+  border-radius: 10px;
+}
+
+
+/* ===================================================
+   EMPTY STATE
+=================================================== */
+
+.compact-empty {
+  min-height: 167px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+}
+
+
+.compact-empty mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+
+  opacity: 0.6;
+}
+
+
+/* ===================================================
+   FOOTER
+=================================================== */
+
+.compact-card .section-footer {
+  padding: 10px 16px;
+
+  border-top: 1px solid #eef0f3;
+
+  color: #2563eb;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+.compact-card .section-footer:hover {
+  background: #f8fafc;
+}
+
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+
+@media (max-width: 900px) {
+
+  .two-column-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .compact-account {
+    padding: 9px;
+  }
+
+  .compact-account-right strong {
+    font-size: 13px;
+  }
+
+  .compact-goal {
+    gap: 9px;
+  }
+
+}
+
+/* =========================================================
+   MATERIAL PROGRESS BAR
+========================================================= */
+
+mat-progress-bar {
+  --mdc-linear-progress-track-height: 8px;
+  --mdc-linear-progress-active-indicator-height: 8px;
+}
+
+
+/* =========================================================
+   RESPONSIVE - 1100px
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .dashboard {
+    padding: 24px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - 850px
+========================================================= */
+
+@media (max-width: 850px) {
+
+  .dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .month-display {
+    flex: 1;
+  }
+
+  .add-transaction-button {
+    flex: 1;
+  }
+
+  .two-column-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .loan-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - 600px
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .dashboard {
+    padding: 18px 14px 30px;
+  }
+
+
+  .dashboard-header {
+    margin-bottom: 18px;
+  }
+
+
+  .header-left h1 {
+    font-size: 25px;
+  }
+
+
+  .header-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .month-display,
+  .add-transaction-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+
+  .summary-card {
+    min-height: 105px;
+  }
+
+
+  .summary-card mat-card-content {
+    padding: 15px !important;
+  }
+
+
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+  }
+
+
+  .summary-content h2 {
+    font-size: 20px;
+  }
+
+
+  .budget-values {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+
+  .budget-value {
+    padding: 0 0 12px;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+
+  .budget-value:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+
+  .budget-value:first-child {
+    padding-left: 0;
+  }
+
+
+  .loan-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .accounts-placeholder,
+  .goal-placeholder {
+    grid-template-columns: 1fr;
+  }
+
+
+  .financial-tip {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+
+  .tip-content {
+    min-width: calc(100% - 55px);
+  }
+
+
+  .financial-tip button {
+    margin-left: 52px;
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - 400px
+========================================================= */
+
+@media (max-width: 400px) {
+
+  .dashboard {
+    padding: 14px 10px 25px;
+  }
+
+
+  .header-left h1 {
+    font-size: 22px;
+  }
+
+
+  .section-card mat-card-header,
+  .full-width-card mat-card-header {
+    padding: 12px !important;
+  }
+
+
+  .section-card mat-card-content {
+    padding: 14px !important;
+  }
+
+
+  .section-title {
+    gap: 8px;
+  }
+
+
+  .section-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+
+  .section-icon mat-icon {
+    font-size: 17px;
+  }
+
+
+  .section-card mat-card-title,
+  .full-width-card mat-card-title {
+    font-size: 12px !important;
+  }
+
+}
+/* ===================================================
+   LOANS & DEBT - COMPACT
+=================================================== */
+
+.loans-card {
+  margin-top: 20px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+
+/* Header */
+
+.loans-card .mat-mdc-card-header {
+  padding: 16px 20px 12px;
+}
+
+
+/* Summary */
+
+.loan-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.loan-summary-item {
+  padding: 11px 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+
+.loan-summary-item span {
+  display: block;
+  margin-bottom: 5px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.loan-summary-item strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.debt-value {
+  color: #dc2626;
+}
+
+.receivable-value {
+  color: #15803d;
+}
+
+
+/* Net Debt */
+
+.net-debt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 10px;
+  padding: 10px 14px;
+
+  border-radius: 9px;
+  background: #f1f5f9;
+}
+
+.net-debt div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.net-debt span {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.net-debt small {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.net-debt strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.net-debt .positive {
+  color: #15803d;
+}
+
+.net-debt .negative {
+  color: #dc2626;
+}
+
+
+/* Loan List */
+
+.loan-list {
+  margin-top: 12px;
+}
+
+
+/* Table Header */
+
+.loan-table-header {
+  display: grid;
+
+  grid-template-columns:
+    2fr
+    1fr
+    1.2fr
+    1fr;
+
+  gap: 12px;
+
+  padding: 8px 12px;
+
+  border-radius: 7px;
+
+  background: #f8fafc;
+
+  color: #64748b;
+
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+
+/* Loan Row */
+
+.dashboard-loan-item {
+  display: grid;
+
+  grid-template-columns:
+    2fr
+    1fr
+    1.2fr
+    1fr;
+
+  gap: 12px;
+
+  align-items: center;
+
+
+  border-bottom: 1px solid #eef0f3;
+}
+
+.dashboard-loan-item:last-child {
+  border-bottom: none;
+}
+
+
+/* Person */
+
+.loan-info strong {
+  color: #1f2937;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* Type */
+
+.loan-type {
+  display: flex;
+  align-items: center;
+}
+
+.borrowed,
+.lent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 3px 7px;
+
+  border-radius: 5px;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.borrowed {
+  /* background: #fee2e2; */
+  color: #b91c1c;
+}
+
+.lent {
+  /* background: #dcfce7; */
+  color: #15803d;
+}
+
+
+/* Remaining */
+
+.loan-remaining {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.loan-remaining strong {
+  color: #111827;
+  font-size: 12px;
+}
+
+.loan-remaining span {
+  color: #94a3b8;
+  font-size: 9px;
+}
+
+
+/* Status */
+
+.loan-status {
+  display: flex;
+  align-items: center;
+}
+
+.overdue,
+.on-track {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 3px 7px;
+
+  border-radius: 5px;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.overdue {
+  /* background: #fff7ed; */
+  color: #c2410c;
+}
+
+.on-track {
+  /* background: #dcfce7; */
+  color: #15803d;
+}
+
+
+
+/* Empty */
+
+.no-loans {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 18px;
+
+  color: #64748b;
+  font-size: 12px;
+}
+
+.no-loans mat-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+}
+
+.no-loans strong {
+  color: #334155;
+}
+
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+
+@media (max-width: 900px) {
+
+  .loan-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .loan-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .loan-table-header {
+    display: none;
+  }
+
+  .dashboard-loan-item {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px 4px;
+  }
+
+  .loan-info {
+    grid-column: 1 / -1;
+  }
+
+  .loan-remaining {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .loan-status {
+    grid-column: 1 / -1;
+  }
+
+  .net-debt div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+}
+
+/* ===================================================
+   ACCOUNTS + SAVINGS / INVESTMENTS
+=================================================== */
+
+.dashboard-bottom-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    1.2fr
+    1fr;
+
+  gap: 16px;
+
+  margin-top: 16px;
+
+}
+
+
+/* ===================================================
+   ACCOUNTS
+=================================================== */
+
+.accounts-card,
+.savings-card {
+
+  border-radius: 16px;
+
+}
+
+
+.accounts-card mat-card-content,
+.savings-card mat-card-content {
+
+  padding-top: 8px;
+  padding-bottom: 14px;
+
+}
+
+
+/* Horizontal account cards */
+
+.accounts-horizontal {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 10px;
+
+}
+
+
+/* Individual account */
+
+.account-mini-card {
+
+  min-width: 0;
+
+  padding: 12px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  background: #fafafa;
+
+  transition: 0.2s ease;
+
+}
+
+
+.account-mini-card:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.06);
+
+}
+
+
+/* Account header */
+
+.account-mini-header {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 6px;
+
+}
+
+
+.account-mini-icon {
+
+  width: 34px;
+
+  height: 34px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #eff6ff;
+
+}
+
+
+.account-mini-icon mat-icon {
+
+  font-size: 19px;
+
+  width: 19px;
+
+  height: 19px;
+
+}
+
+
+.account-type {
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  color: #6b7280;
+
+  letter-spacing: .5px;
+
+}
+
+
+/* Account name */
+
+.account-mini-name {
+
+  margin-top: 12px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  color: #374151;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+
+/* Balance */
+
+.account-mini-balance {
+
+  margin-top: 5px;
+
+  font-size: 17px;
+
+  font-weight: 800;
+
+  color: #111827;
+
+}
+
+
+/* Credit card available */
+
+.account-available {
+
+  margin-top: 4px;
+
+  font-size: 9px;
+
+  color: #6b7280;
+
+}
+
+
+/* More accounts */
+
+.more-accounts {
+
+  margin-top: 10px;
+
+  text-align: right;
+
+  color: #2563eb;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+}
+
+
+/* ===================================================
+   SAVINGS + INVESTMENTS
+=================================================== */
+
+/*
+   Two equal parts
+*/
+
+.goals-horizontal {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+
+}
+
+
+/* Individual goal */
+
+.goal-box {
+
+  padding: 12px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  background: #fafafa;
+
+}
+
+
+/* Header */
+
+.goal-box-header {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+}
+
+
+.goal-icon {
+
+  width: 34px;
+
+  height: 34px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+}
+
+
+.goal-icon mat-icon {
+
+  font-size: 19px;
+
+  width: 19px;
+
+  height: 19px;
+
+}
+
+
+/* Savings */
+
+.savings-icon {
+
+  background: #ecfdf5;
+
+  color: #15803d;
+
+}
+
+
+/* Investment */
+
+.investment-icon {
+
+  background: #f5f3ff;
+
+  color: #7c3aed;
+
+}
+
+
+/* Goal title */
+
+.goal-box-header strong {
+
+  display: block;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  color: #1f2937;
+
+}
+
+
+.goal-box-header span {
+
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 9px;
+
+  color: #6b7280;
+
+}
+
+
+/* Actual amount */
+
+.goal-amount {
+
+  margin-top: 14px;
+
+  font-size: 19px;
+
+  font-weight: 800;
+
+  color: #111827;
+
+}
+
+
+/* Target */
+
+.goal-target {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-top: 8px;
+
+  margin-bottom: 7px;
+
+  font-size: 10px;
+
+  color: #6b7280;
+
+}
+
+
+.goal-target strong {
+
+  color: #374151;
+
+  font-size: 10px;
+
+}
+
+
+/* Progress */
+
+.goal-box mat-progress-bar {
+
+  height: 6px;
+
+  border-radius: 10px;
+
+}
+
+
+/* Progress text */
+
+.goal-progress {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-top: 5px;
+
+  font-size: 9px;
+
+}
+
+
+.goal-progress span {
+
+  color: #6b7280;
+
+}
+
+
+.goal-progress strong {
+
+  color: #374151;
+
+}
+
+
+/* ===================================================
+   EMPTY
+=================================================== */
+
+.compact-empty {
+
+  min-height: 90px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 5px;
+
+  color: #6b7280;
+
+  font-size: 11px;
+
+}
+
+
+.compact-empty mat-icon {
+
+  font-size: 26px;
+
+  width: 26px;
+
+  height: 26px;
+
+  opacity: .6;
+
+}
+
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+
+@media (max-width: 1000px) {
+
+  .dashboard-bottom-grid {
+
+    grid-template-columns: 1fr;
+
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .accounts-horizontal {
+
+    grid-template-columns: 1fr;
+
+  }
+
+  .goals-horizontal {
+
+    grid-template-columns: 1fr;
+
+  }
+
+}
+
+.net-worth-card {
+  margin-bottom: 24px;
+}
+
+.net-worth-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.net-worth-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.net-worth-header h2 {
+  margin: 4px 0 0;
+  font-size: 17px;
+}
+
+.net-worth-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.net-worth-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.net-worth-item span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.net-worth-item strong {
+  font-size: 15px;
+}
+
+.current-investment-value {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.current-investment-value strong {
+  color: #111827;
+}
+
+@media (max-width: 768px) {
+
+  .net-worth-breakdown {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+}

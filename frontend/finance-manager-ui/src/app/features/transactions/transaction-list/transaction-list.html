@@ -1,0 +1,696 @@
+<div class="transactions-page">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Transactions</h1>
+
+      <p>
+        Manage your income, expenses and transfers.
+      </p>
+    </div>
+
+
+    <!-- ACTION BUTTONS -->
+
+    <div class="header-actions">
+
+      <!-- ADD TRANSACTION -->
+
+      <button
+        type="button"
+        class="action-button transaction-button"
+        (click)="openTransactionForm()">
+
+        <span class="button-icon">+</span>
+
+        Add Transaction
+
+      </button>
+
+
+      <!-- ADD TRANSFER -->
+
+      <button
+        type="button"
+        class="action-button transfer-button"
+        (click)="openTransferForm()">
+
+        <span class="button-icon">↔</span>
+
+        Add Transfer
+
+      </button>
+
+
+      <!-- FILTER -->
+
+      <button
+        type="button"
+        class="action-button filter-button"
+        (click)="toggleFilters()">
+
+        <span class="button-icon">🔎</span>
+
+        Filter
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TRANSACTION FORM
+  ====================================================== -->
+
+  @if (showTransactionForm) {
+
+    <div class="form-section">
+
+      <div class="form-section-header">
+
+        <div>
+          <h2>Add Transaction</h2>
+
+          <p>
+            Add income or expense.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="close-form-button"
+          (click)="closeTransactionForm()">
+
+          ✕
+
+        </button>
+
+      </div>
+
+
+      <app-transaction-form
+        (formClosed)="closeTransactionForm()">
+      </app-transaction-form>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       TRANSFER FORM
+  ====================================================== -->
+
+  @if (showTransferForm) {
+
+    <div class="form-section">
+
+      <div class="form-section-header">
+
+        <div>
+          <h2>Add Transfer</h2>
+
+          <p>
+            Transfer money between accounts.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="close-form-button"
+          (click)="closeTransferForm()">
+
+          ✕
+
+        </button>
+
+      </div>
+
+
+      <app-transfer-form
+        (formClosed)="closeTransferForm()">
+      </app-transfer-form>
+
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  @if (showFilters) {
+
+    <section class="filters">
+
+      <div class="filters-header">
+
+        <div>
+          <h2>🔎 Filter Transactions</h2>
+
+          <span>
+            Search your financial activity
+          </span>
+        </div>
+
+
+        <button
+          type="button"
+          class="close-filter-button"
+          (click)="toggleFilters()">
+
+          ✕
+
+        </button>
+
+      </div>
+
+
+      <form
+        [formGroup]="filterForm"
+        (ngSubmit)="applyFilters()"
+        class="filter-form">
+
+
+        <!-- FROM DATE -->
+
+        <div class="filter-field">
+
+          <label>
+            From Date
+          </label>
+
+          <input
+            type="date"
+            formControlName="fromDate">
+
+        </div>
+
+
+        <!-- TO DATE -->
+
+        <div class="filter-field">
+
+          <label>
+            To Date
+          </label>
+
+          <input
+            type="date"
+            formControlName="toDate">
+
+        </div>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="filter-field">
+
+          <label>
+            Account
+          </label>
+
+          <select
+            formControlName="accountId">
+
+            <option [ngValue]="0">
+              All Accounts
+            </option>
+
+            @for (
+              account of accounts$ | async;
+              track account.id
+            ) {
+
+              <option [ngValue]="account.id">
+                {{ account.name }}
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- TYPE -->
+
+        <div class="filter-field">
+
+          <label>
+            Type
+          </label>
+
+          <select
+            formControlName="type">
+
+            <option [ngValue]="null">
+              All Types
+            </option>
+
+            <option [ngValue]="TransactionType.Income">
+              💰 Income
+            </option>
+
+            <option [ngValue]="TransactionType.Expense">
+              🛒 Expense
+            </option>
+
+            <option [ngValue]="TransactionType.Transfer">
+              🔄 Transfer
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- APPLY -->
+
+        <button
+          type="submit"
+          class="apply-filter-button">
+
+          Apply
+
+        </button>
+
+      </form>
+
+    </section>
+
+  }
+
+
+  <!-- =====================================================
+       TRANSACTIONS
+  ====================================================== -->
+
+ <section class="transactions-section">
+
+  <div class="transactions-header">
+
+    <div>
+      <h2>💳 Transactions</h2>
+
+      <span>
+        Your recent financial activity
+      </span>
+    </div>
+
+    <span class="transaction-count">
+      {{ (transactions$ | async)?.length || 0 }}
+      transactions
+    </span>
+
+  </div>
+
+
+  <!-- LOADING -->
+
+  @if (loading$ | async) {
+
+    <div class="state-message">
+      ⏳ Loading transactions...
+    </div>
+
+  }
+
+
+  <!-- ERROR -->
+
+  @if (error$ | async; as error) {
+
+    <div class="error-message">
+      ⚠️ {{ error }}
+    </div>
+
+  }
+
+
+  <!-- DATA -->
+
+  @if (transactions$ | async; as transactions) {
+
+    @if (transactions.length === 0) {
+
+      <div class="state-message">
+        📭 No transactions found.
+      </div>
+
+    } @else {
+
+      <div class="transaction-table">
+
+        <!-- TABLE HEADER -->
+
+        <div class="transaction-table-header">
+
+          <span>
+            Transaction
+          </span>
+
+          <span>
+            Type
+          </span>
+
+          <span>
+            Date
+          </span>
+
+          <span class="amount-header">
+            Amount
+          </span>
+
+          <span class="action-header">
+            Action
+          </span>
+
+        </div>
+
+
+        <!-- TRANSACTION ROWS -->
+
+        @for (
+          transaction of transactions;
+          track transaction.id
+        ) {
+
+          <div class="transaction-row">
+
+
+            <!-- TRANSACTION -->
+
+            <div class="transaction-description">
+
+              <div
+                class="transaction-icon"
+
+                [class.income-icon]="
+                  transaction.type === TransactionType.Income ||
+                  transaction.type === TransactionType.Deposit
+                "
+
+                [class.expense-icon]="
+                  transaction.type === TransactionType.Expense
+                "
+
+                [class.transfer-icon]="
+                  transaction.type === TransactionType.Transfer
+                "
+
+                [class.credit-card-icon]="
+                  transaction.type === TransactionType.CreditCard
+                "
+
+                [class.settlement-icon]="
+                  transaction.type === TransactionType.Settlement
+                "
+              >
+
+                @if (
+                  transaction.type === TransactionType.Income
+                ) {
+
+                  💰
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Deposit
+                ) {
+
+                  💵
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Expense
+                ) {
+
+                  🛒
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Transfer
+                ) {
+
+                  🔄
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.CreditCard
+                ) {
+
+                  💳
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Settlement
+                ) {
+
+                  💸
+
+                }
+
+                @else {
+
+                  💰
+
+                }
+
+              </div>
+
+
+              <div class="transaction-info">
+
+               <strong>
+  {{
+    transaction.description ||
+    (
+      transaction.type === TransactionType.Income
+        ? 'Income Transaction'
+        : transaction.type === TransactionType.Expense
+          ? 'Expense Transaction'
+          : transaction.type === TransactionType.Transfer 
+            ? 'Account Transfer'
+            : transaction.type === TransactionType.Deposit
+              ? 'Account Deposit'
+              : transaction.type === TransactionType.CreditCard
+                ? 'Credit Card Purchase'
+                : transaction.type === TransactionType.Settlement
+                  ? 'Settlement'
+                  : 'Transaction'
+    )
+  }}
+</strong>
+
+                <small>
+                  #{{ transaction.id }}
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <!-- TYPE -->
+
+            <div>
+
+              <span
+                class="type-badge"
+
+                [class.income]="
+                  transaction.type === TransactionType.Income ||
+                  transaction.type === TransactionType.Deposit
+                "
+
+                [class.expense]="
+                  transaction.type === TransactionType.Expense
+                "
+
+                [class.transfer]="
+                  transaction.type === TransactionType.Transfer
+                "
+
+                [class.credit-card]="
+                  transaction.type === TransactionType.CreditCard
+                "
+
+                [class.settlement]="
+                  transaction.type === TransactionType.Settlement
+                "
+              >
+
+                @if (
+                  transaction.type === TransactionType.Income
+                ) {
+
+                  ↗ Income
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Deposit
+                ) {
+
+                  ↗ Deposit
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Expense
+                ) {
+
+                  ↘ Expense
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Transfer
+                ) {
+
+                  ↔ Transfer
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.CreditCard
+                ) {
+
+                  💳 Credit Card
+
+                }
+
+                @else if (
+                  transaction.type === TransactionType.Settlement
+                ) {
+
+                  💸 Settlement
+
+                }
+
+                @else {
+
+                  Transaction
+
+                }
+
+              </span>
+
+            </div>
+
+
+            <!-- DATE -->
+
+            <div class="transaction-date">
+
+              📅
+
+              {{
+                transaction.transactionDate
+                  | date:'MMM d, y'
+              }}
+
+            </div>
+
+
+            <!-- AMOUNT -->
+
+            <div
+              class="transaction-amount"
+
+              [class.income-amount]="
+                transaction.type === TransactionType.Income ||
+                transaction.type === TransactionType.Deposit
+              "
+
+              [class.expense-amount]="
+                transaction.type === TransactionType.Expense
+              "
+
+              [class.transfer-amount]="
+                transaction.type === TransactionType.Transfer
+              "
+
+              [class.credit-card-amount]="
+                transaction.type === TransactionType.CreditCard
+              "
+
+              [class.settlement-amount]="
+                transaction.type === TransactionType.Settlement
+              "
+            >
+
+              @if (
+                transaction.type === TransactionType.Income ||
+                transaction.type === TransactionType.Deposit
+              ) {
+
+                +
+
+              } @else if (
+                transaction.type === TransactionType.Expense ||
+                transaction.type === TransactionType.CreditCard ||
+                transaction.type === TransactionType.Settlement
+              ) {
+
+                -
+
+              } @else {
+
+                ↔
+
+              }
+
+              ₹{{ transaction.amount | number:'1.0-2' }}
+
+            </div>
+
+
+            <!-- DELETE -->
+
+            <div class="transaction-action">
+
+              <button
+                type="button"
+                class="delete-button"
+                (click)="deleteTransaction(transaction.id)"
+                title="Delete transaction"
+              >
+
+                🗑️
+
+                <span>
+                  Delete
+                </span>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  }
+
+</section>
+
+</div>

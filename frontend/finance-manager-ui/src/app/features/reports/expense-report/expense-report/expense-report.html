@@ -1,0 +1,239 @@
+<div class="report-page">
+
+  <!-- HEADER -->
+
+ <div class="top-section">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <h1>Expense Report</h1>
+      <p>
+        Analyze your income, expenses and spending patterns.
+      </p>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-card">
+
+    <div class="filter-group">
+      <label for="fromDate">
+        From Date
+      </label>
+
+      <input
+        id="fromDate"
+        type="date"
+        [value]="fromDate"
+        (input)="fromDate = $any($event.target).value">
+    </div>
+
+    <div class="filter-group">
+      <label for="toDate">
+        To Date
+      </label>
+
+      <input
+        id="toDate"
+        type="date"
+        [value]="toDate"
+        (input)="toDate = $any($event.target).value">
+    </div>
+
+    <div class="filter-actions">
+      <button
+        type="button"
+        class="apply-button"
+        (click)="applyFilter()">
+        Apply
+      </button>
+
+      <button
+        type="button"
+        class="clear-button"
+        (click)="clearFilter()">
+        Clear
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- LOADING -->
+
+  @if (loading$ | async) {
+
+    <div class="loading">
+      Loading report...
+    </div>
+
+  }
+
+
+  <!-- ERROR -->
+
+  @if (error$ | async; as error) {
+
+    <div class="error">
+      {{ error }}
+    </div>
+
+  }
+
+
+  <!-- SUMMARY -->
+
+  <div class="summary-grid">
+
+    <div class="summary-card income">
+
+      <span class="summary-label">
+        Total Income
+      </span>
+
+      <strong>
+        ₹{{ totalIncome$ | async | number:'1.0-2' }}
+      </strong>
+
+    </div>
+
+
+    <div class="summary-card expense">
+
+      <span class="summary-label">
+        Total Expense
+      </span>
+
+      <strong>
+        ₹{{ totalExpense$ | async | number:'1.0-2' }}
+      </strong>
+
+    </div>
+
+
+    <div class="summary-card net">
+
+      <span class="summary-label">
+        Net Amount
+      </span>
+
+      <strong>
+        ₹{{ netAmount$ | async | number:'1.0-2' }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- CHART -->
+
+ <!-- REPORT DETAILS -->
+<div class="report-details">
+
+  <!-- CHART -->
+  <div class="chart-card">
+
+    <div class="chart-header">
+      <div>
+        <h2>Expenses by Category</h2>
+        <p>Where your money is going</p>
+      </div>
+    </div>
+
+    <div class="chart-container">
+
+      @if (categoryExpenses$ | async; as categories) {
+
+        @if (categories.length > 0) {
+
+          <canvas
+            baseChart
+            [type]="doughnutChartType"
+            [data]="doughnutChartData"
+            [options]="doughnutChartOptions">
+          </canvas>
+
+        } @else {
+
+          <div class="chart-empty">
+            <div>
+              <h3>No expense data</h3>
+              <p>
+                There are no expenses for the selected period.
+              </p>
+            </div>
+          </div>
+
+        }
+
+      }
+
+    </div>
+
+  </div>
+
+
+  <!-- CATEGORY BREAKDOWN -->
+  <div class="category-section">
+
+    <div class="section-header">
+      <div>
+        <h2>Expense by Category</h2>
+        <p>See where your money is going.</p>
+      </div>
+    </div>
+
+    @if (categoryExpenses$ | async; as categories) {
+
+      @if (categories.length === 0) {
+
+        <div class="empty-state">
+
+          <h3>No expenses found</h3>
+
+          <p>
+            There are no expense transactions
+            for the selected period.
+          </p>
+
+        </div>
+
+      } @else {
+
+        <div class="category-list">
+
+          @for (
+            category of categories;
+            track category.categoryId
+          ) {
+
+            <div class="category-item">
+
+              <div class="category-info">
+
+                <span>
+                  {{ category.categoryName }}
+                </span>
+
+                <strong>
+                  ₹{{ category.amount | number:'1.0-2' }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    }
+
+  </div>
+
+</div>

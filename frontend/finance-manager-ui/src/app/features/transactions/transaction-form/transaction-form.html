@@ -1,0 +1,117 @@
+<div class="transaction-form">
+
+  <h2>Add Transaction</h2>
+
+  <form
+    [formGroup]="transactionForm"
+    (ngSubmit)="submit()">
+
+    <!-- Account -->
+    <label for="account">
+      Account
+    </label>
+
+    <select
+      id="account"
+      formControlName="accountId">
+
+      <option [ngValue]="0">
+        Select Account
+      </option>
+
+      @for (account of transactionAccounts$ | async; track account.id) {
+        <option [ngValue]="account.id">
+          {{ account.name }} — ₹{{ account.currentBalance | number:'1.0-2' }}
+        </option>
+      }
+
+    </select>
+
+
+    <!-- Type -->
+    <label for="type">
+      Type
+    </label>
+
+    <select
+      id="type"
+      formControlName="type">
+
+      <option [ngValue]="TransactionType.Income">
+        Income
+      </option>
+
+      <option [ngValue]="TransactionType.Expense">
+        Expense
+      </option>
+
+    </select>
+
+
+    <!-- Amount -->
+    <label for="amount">
+      Amount
+    </label>
+
+    <input
+      id="amount"
+      type="number"
+      formControlName="amount"
+      min="0.01"
+      step="0.01">
+
+
+    <!-- Category -->
+    <label for="category">
+      Category
+    </label>
+
+    <select
+      id="category"
+      formControlName="categoryId">
+
+      <option [ngValue]="null">
+        Select Category
+      </option>
+
+      @for (category of categories$ | async; track category.id) {
+        <option [ngValue]="category.id">
+          {{ category.name }}
+        </option>
+      }
+
+    </select>
+
+
+    <!-- Description -->
+    <label for="description">
+      Description
+    </label>
+
+    <input
+      id="description"
+      type="text"
+      formControlName="description"
+      maxlength="250">
+
+
+    <!-- Transaction Date -->
+    <label for="transactionDate">
+      Transaction Date
+    </label>
+
+    <input
+      id="transactionDate"
+      type="date"
+      formControlName="transactionDate">
+
+
+    <!-- Submit -->
+    <button
+      type="submit">
+      Add Transaction
+    </button>
+
+  </form>
+
+</div>

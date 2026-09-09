@@ -1,0 +1,154 @@
+<div class="transfer-form">
+
+  <h2>Transfer Money</h2>
+
+  <form
+    [formGroup]="transferForm"
+    (ngSubmit)="submit()">
+
+    <!-- From Account -->
+
+    <label>
+      From Account
+    </label>
+
+    <select formControlName="fromAccountId">
+
+      <option [ngValue]="0">
+        Select source account
+      </option>
+
+      @for (
+        account of transferAccounts$ | async;
+        track account.id
+      ) {
+
+        <option [ngValue]="account.id">
+
+          {{ account.name }}
+          — ₹{{ account.currentBalance }}
+
+        </option>
+
+      }
+
+    </select>
+
+
+    <!-- To Account -->
+
+    <label>
+      To Account
+    </label>
+
+    <select formControlName="toAccountId">
+
+      <option [ngValue]="0">
+        Select destination account
+      </option>
+
+      @for (
+        account of transferAccounts$ | async;
+        track account.id
+      ) {
+
+        <option
+          [ngValue]="account.id"
+          [disabled]="
+            account.id ===
+            transferForm.controls.fromAccountId.value
+          "
+        >
+
+          {{ account.name }}
+
+        </option>
+
+      }
+
+    </select>
+
+
+    <!-- Same Account Validation -->
+
+    @if (
+      transferForm.controls.toAccountId.value !== 0 &&
+      transferForm.controls.toAccountId.value ===
+      transferForm.controls.fromAccountId.value
+    ) {
+
+      <small>
+        Source and destination accounts must be different.
+      </small>
+
+    }
+
+
+    <!-- Transfer Purpose -->
+
+    <label>
+      Transfer Purpose
+    </label>
+
+    <select formControlName="transactionPurpose">
+
+      <option [ngValue]="10">
+         Transfer
+      </option>
+
+      <option [ngValue]="1">
+        Savings
+      </option>
+
+    </select>
+
+
+    <!-- Amount -->
+
+    <label>
+      Amount
+    </label>
+
+    <input
+      type="number"
+      formControlName="amount"
+      min="0.01"
+    />
+
+
+    <!-- Date -->
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      formControlName="transactionDate"
+    />
+
+
+    <!-- Description -->
+
+    <label>
+      Description
+    </label>
+
+    <input
+      type="text"
+      formControlName="description"
+    />
+
+
+    <!-- Submit -->
+
+    <button
+      type="submit"
+      [disabled]="transferForm.invalid"
+    >
+      Transfer Money
+    </button>
+
+  </form>
+
+</div>

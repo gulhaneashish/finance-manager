@@ -1,0 +1,126 @@
+<div class="net-worth-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Net Worth</h1>
+      <p>
+        Understand your total assets, liabilities and financial position.
+      </p>
+    </div>
+  </div>
+
+  @if (loading$ | async) {
+    <div class="loading">
+      Loading net worth...
+    </div>
+  }
+
+  @if (error$ | async; as error) {
+    <div class="error">
+      {{ error }}
+    </div>
+  }
+
+  <!-- Net Worth -->
+  <div class="net-worth-card">
+    <span>Net Worth</span>
+
+    <strong>
+      ₹{{ netWorth$ | async | number:'1.0-2' }}
+    </strong>
+  </div>
+
+ <!-- ASSETS + LIABILITIES -->
+<div class="financial-sections">
+
+  <!-- Assets -->
+  <div class="section-card">
+
+    <div class="section-header">
+      <div>
+        <h2>Total Assets</h2>
+        <p>What you currently own</p>
+      </div>
+
+      <strong class="section-total">
+        ₹{{ totalAssets$ | async | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div class="balance-grid">
+
+      <div class="balance-item">
+        <span>🏦 Bank Balance</span>
+        <strong>
+          ₹{{ bankBalance$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="balance-item">
+        <span>💵 Cash Balance</span>
+        <strong>
+          ₹{{ cashBalance$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="balance-item">
+        <span>💰 Savings Balance</span>
+        <strong>
+          ₹{{ savingsBalance$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="balance-item">
+        <span>📈 Investment Balance</span>
+        <strong>
+          ₹{{ investmentBalance$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="balance-item">
+        <span>🤝 Loans Receivable</span>
+        <strong>
+          ₹{{ loansReceivable$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Liabilities -->
+  <div class="section-card">
+
+    <div class="section-header">
+      <div>
+        <h2>Total Liabilities</h2>
+        <p>What you currently owe</p>
+      </div>
+
+      <strong class="section-total liability-total">
+        ₹{{ totalLiabilities$ | async | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div class="balance-grid">
+
+      <div class="balance-item">
+        <span>💳 Credit Card Debt</span>
+        <strong>
+          ₹{{ creditCardDebt$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="balance-item">
+        <span>🤝 Loans Payable</span>
+        <strong>
+          ₹{{ loansPayable$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

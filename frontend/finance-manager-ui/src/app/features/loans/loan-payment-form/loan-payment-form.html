@@ -1,0 +1,126 @@
+<div class="payment-form">
+
+  <h2>Add Loan Payment</h2>
+
+  <form
+    [formGroup]="paymentForm"
+    (ngSubmit)="submit()">
+
+    <div class="form-group">
+
+      <label for="amount">
+        Payment Amount
+      </label>
+
+      <input
+        id="amount"
+        type="number"
+        min="0.01"
+        formControlName="amount"
+        placeholder="Enter payment amount">
+
+      @if (
+        paymentForm.controls.amount.touched &&
+        paymentForm.controls.amount.invalid
+      ) {
+        <small>
+          Enter an amount greater than 0.
+        </small>
+      }
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="account">
+        Payment Account
+      </label>
+
+      <select
+        id="account"
+        formControlName="accountId">
+
+        <option [ngValue]="0">
+          Select Account
+        </option>
+
+        @for (
+          account of accounts$ | async;
+          track account.id
+        ) {
+
+          <option [ngValue]="account.id">
+
+            {{ account.name }}
+
+            — ₹{{ account.currentBalance | number:'1.0-2' }}
+
+          </option>
+
+        }
+
+      </select>
+
+      @if (
+        paymentForm.controls.accountId.touched &&
+        paymentForm.controls.accountId.invalid
+      ) {
+        <small>
+          Please select an account.
+        </small>
+      }
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="paymentDate">
+        Payment Date
+      </label>
+
+      <input
+        id="paymentDate"
+        type="date"
+        formControlName="paymentDate">
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="notes">
+        Notes
+      </label>
+
+      <textarea
+        id="notes"
+        rows="3"
+        formControlName="notes"
+        placeholder="Optional notes">
+      </textarea>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="close()">
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="submit-button">
+        Add Payment
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

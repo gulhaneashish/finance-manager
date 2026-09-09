@@ -1,0 +1,168 @@
+<div class="payment-form">
+
+  <div class="form-header">
+
+    <div>
+      <h2>Credit Card Payment</h2>
+
+      <p>
+        Pay your credit card outstanding amount.
+      </p>
+    </div>
+
+    <!-- <button
+      type="button"
+      class="close-button"
+      (click)="close()">
+
+      ✕
+
+    </button> -->
+
+  </div>
+
+
+  @if (error$ | async; as error) {
+
+    <div class="error-message">
+      {{ error }}
+    </div>
+
+  }
+
+
+  @if (successMessage$ | async; as message) {
+
+    <div class="success-message">
+      {{ message }}
+    </div>
+
+  }
+
+
+  <div class="form-group">
+
+    <label for="fromAccount">
+      Pay From Account
+    </label>
+
+    <select
+      id="fromAccount"
+      [(ngModel)]="fromAccountId">
+
+      <option [ngValue]="null">
+        Select Account
+      </option>
+
+      @if (accounts$ | async; as accounts) {
+
+        @for (
+          account of accounts;
+          track account.id
+        ) {
+
+          @if (
+            account.isActive &&
+            account.id !== creditCardAccountId
+          ) {
+
+            <option
+              [ngValue]="account.id">
+
+              {{ account.name }}
+              -
+              {{ account.accountType }}
+
+            </option>
+
+          }
+
+        }
+
+      }
+
+    </select>
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label for="amount">
+      Payment Amount
+    </label>
+
+    <input
+      id="amount"
+      type="number"
+      min="0.01"
+      step="0.01"
+      [(ngModel)]="amount"
+      placeholder="Enter payment amount">
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label for="description">
+      Description
+    </label>
+
+    <input
+      id="description"
+      type="text"
+      maxlength="250"
+      [(ngModel)]="description"
+      placeholder="Example: Credit card bill payment">
+
+  </div>
+
+
+  <div class="form-group">
+
+    <label for="paymentDate">
+      Payment Date
+    </label>
+
+    <input
+      id="paymentDate"
+      type="date"
+      [(ngModel)]="paymentDate">
+
+  </div>
+
+
+  <div class="form-actions">
+
+    <button
+      type="button"
+      class="cancel-button"
+      (click)="close()">
+
+      Cancel
+
+    </button>
+
+
+    <button
+      type="button"
+      class="submit-button"
+      [disabled]="loading$ | async"
+      (click)="submit()">
+
+      @if (loading$ | async) {
+
+        Processing...
+
+      } @else {
+
+        Make Payment
+
+      }
+
+    </button>
+
+  </div>
+
+</div>

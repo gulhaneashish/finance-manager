@@ -1,0 +1,218 @@
+/* =========================
+   NET WORTH PAGE
+========================= */
+
+.net-worth-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 20px 30px;
+  box-sizing: border-box;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.page-header {
+  margin-bottom: 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.page-header p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+
+/* =========================
+   NET WORTH
+========================= */
+
+.net-worth-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.net-worth-card span {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.net-worth-card strong {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+
+/* =========================
+   ASSETS + LIABILITIES
+========================= */
+
+.financial-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+
+/* =========================
+   SECTION CARD
+========================= */
+
+.section-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================
+   SECTION HEADER
+========================= */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.section-header p {
+  margin: 3px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.section-total {
+  font-size: 15px;
+  color: #16a34a;
+  white-space: nowrap;
+}
+
+.liability-total {
+  color: #dc2626;
+}
+
+
+/* =========================
+   BALANCE GRID
+========================= */
+
+.balance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+
+/* =========================
+   BALANCE ITEM
+========================= */
+
+.balance-item {
+  padding: 12px;
+  border-radius: 9px;
+  background: #f9fafb;
+  border: 1px solid #f1f5f9;
+}
+
+.balance-item span {
+  display: block;
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.balance-item strong {
+  font-size: 12px;
+  color: #111827;
+}
+
+
+/* =========================
+   LOADING / ERROR
+========================= */
+
+.loading,
+.error {
+  padding: 10px 14px;
+  text-align: center;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.loading {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 800px) {
+
+  .financial-sections {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .net-worth-page {
+    padding: 12px;
+  }
+
+  .net-worth-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .net-worth-card strong {
+    font-size: 25px;
+  }
+
+  .balance-grid {
+    grid-template-columns: 1fr;
+  }
+
+}

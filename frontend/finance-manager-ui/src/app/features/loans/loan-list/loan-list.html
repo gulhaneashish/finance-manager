@@ -1,0 +1,308 @@
+<div class="loan-page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Loans</h1>
+
+      <p>
+        Manage money you have borrowed or lent.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      (click)="openAddForm()">
+
+      + Add Loan
+
+    </button>
+
+  </div>
+
+
+  <!-- SUCCESS MESSAGE -->
+
+  @if (successMessage$ | async; as message) {
+
+    <div class="success">
+      {{ message }}
+    </div>
+
+  }
+
+
+  <!-- LOADING -->
+
+  @if (loading$ | async) {
+
+    <div class="loading">
+      Loading loans...
+    </div>
+
+  }
+
+
+  <!-- ERROR -->
+
+  @if (error$ | async; as error) {
+
+    <div class="error">
+      {{ error }}
+    </div>
+
+  }
+
+
+  <!-- LOANS -->
+
+  @if (loans$ | async; as loans) {
+
+    @if (loans.length === 0) {
+
+      <!-- EMPTY STATE -->
+
+      <div class="empty-state">
+
+        <h2>
+          No loans yet
+        </h2>
+
+        <p>
+          Add a borrowed or lent amount to start tracking it.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <!-- LOAN GRID -->
+
+      <div class="loan-grid">
+
+        @for (loan of loans; track loan.id) {
+
+          <div class="loan-card">
+
+            <!-- CARD HEADER -->
+
+            <div class="loan-header">
+
+              <div>
+
+                <h2>
+                  {{ loan.personName }}
+                </h2>
+
+                @if (loan.type === LoanType.Borrowed) {
+
+                  <span class="loan-type borrowed">
+                    Borrowed
+                  </span>
+
+                } @else {
+
+                  <span class="loan-type lent">
+                    Lent
+                  </span>
+
+                }
+
+              </div>
+
+            </div>
+
+
+            <!-- REMAINING AMOUNT -->
+
+            <div class="loan-amount">
+
+              ₹{{ loan.remainingAmount | number:'1.0-2' }}
+
+              <span>
+                remaining
+              </span>
+
+            </div>
+
+
+            <!-- DETAILS -->
+
+            <div class="loan-details">
+
+              <div>
+
+                <span>
+                  Original
+                </span>
+
+                <strong>
+                  ₹{{ loan.originalAmount | number:'1.0-2' }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Paid
+                </span>
+
+                <strong>
+                  ₹{{ loan.paidAmount | number:'1.0-2' }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Loan Date
+                </span>
+
+                <strong>
+                  {{ loan.loanDate | date:'dd MMM yyyy' }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- DUE DATE -->
+
+            @if (loan.dueDate) {
+
+              <div class="due-date">
+
+                Due:
+                {{ loan.dueDate | date:'dd MMM yyyy' }}
+
+              </div>
+
+            }
+
+
+            <!-- NOTES -->
+
+            @if (loan.notes) {
+
+              <p class="loan-notes">
+                {{ loan.notes }}
+              </p>
+
+            }
+
+
+            <!-- ACTIONS -->
+
+            <div class="loan-actions">
+
+              <button
+                type="button"
+                class="edit-button"
+                (click)="openEditForm(loan)">
+
+                Edit
+
+              </button>
+
+
+              <button
+                type="button"
+                class="payment-button"
+                (click)="openPaymentForm(loan.id)">
+
+                Add Payment
+
+              </button>
+
+
+              <button
+                type="button"
+                class="delete-button">
+               
+
+                Delete
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  }
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- ADD / EDIT LOAN MODAL -->
+<!-- ========================================================= -->
+
+@if (showForm || selectedLoan !== null) {
+  <div class="form-overlay">
+
+    <div class="form-modal">
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeAllForms()">
+        ✕
+      </button>
+
+      <app-loan-form
+        [loan]="selectedLoan"
+        (formClosed)="closeAllForms()">
+      </app-loan-form>
+
+    </div>
+
+  </div>
+}
+
+<!-- ========================================================= -->
+<!-- PAYMENT MODAL -->
+<!-- ========================================================= -->
+
+@if (
+  showPaymentForm &&
+  selectedLoanId !== null
+) {
+
+  <div class="form-overlay">
+
+    <div class="form-modal">
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closePaymentForm()">
+
+        ✕
+
+      </button>
+
+
+      <app-loan-payment-form
+        [loanId]="selectedLoanId"
+        (formClosed)="closePaymentForm()">
+
+      </app-loan-payment-form>
+
+    </div>
+
+  </div>
+
+}

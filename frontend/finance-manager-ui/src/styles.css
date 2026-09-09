@@ -1,0 +1,38 @@
+/* You can add global styles to this file, and also import other style files */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+app-root {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* body.dark-theme {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+body.dark-theme .header {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+body.dark-theme .profile-menu {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+body.dark-theme .profile-item {
+  color: #ffffff;
+}
+
+body.dark-theme .profile-divider {
+  background-color: #444;
+} */

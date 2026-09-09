@@ -1,0 +1,74 @@
+<div class="login-container">
+
+  <div class="login-card">
+    <h1>
+  <span class="brand-icon">₹</span>
+  Finance Manager
+</h1>
+    
+
+    <p>
+      Sign in to manage your finances
+    </p>
+
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()">
+
+      <div>
+        <label>Email</label>
+
+      <input
+  type="email"
+  formControlName="email"
+  placeholder="Enter your email"
+>
+
+        @if (
+          loginForm.controls.email.touched &&
+          loginForm.controls.email.invalid
+        ) {
+          <small>
+            Enter a valid email.
+          </small>
+        }
+      </div>
+
+      <div>
+        <label>Password</label>
+
+       <input
+  type="password"
+  formControlName="password"
+  placeholder="Enter your password"
+>
+
+        @if (
+          loginForm.controls.password.touched &&
+          loginForm.controls.password.invalid
+        ) {
+          <small>
+            Password must be at least 6 characters.
+          </small>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div>
+          {{ errorMessage }}
+        </div>
+      }
+
+      <button
+        type="submit"
+        [disabled]="isLoading">
+
+        {{ isLoading ? 'Signing in...' : 'Sign In' }}
+
+      </button>
+
+    </form>
+
+  </div>
+
+</div>

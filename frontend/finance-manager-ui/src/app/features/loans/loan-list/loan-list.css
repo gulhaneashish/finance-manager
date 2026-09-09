@@ -1,0 +1,626 @@
+/* =====================================================
+   LOAN PAGE
+===================================================== */
+
+.loan-page {
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 16px 18px 24px;
+  box-sizing: border-box;
+}
+
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.page-header p {
+  margin: 3px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+/* =====================================================
+   ADD LOAN BUTTON
+===================================================== */
+
+.page-header > button {
+  border: none;
+  border-radius: 7px;
+  padding: 8px 13px;
+  background: #4f46e5;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.page-header > button:hover {
+  background: #4338ca;
+}
+
+
+/* =====================================================
+   MESSAGES
+===================================================== */
+
+.loading,
+.error,
+.success {
+  padding: 8px 12px;
+  border-radius: 7px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.loading {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty-state {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 30px 18px;
+  text-align: center;
+}
+
+.empty-state h2 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+
+/* =====================================================
+   LOAN GRID
+   4 CARDS IN ONE ROW
+===================================================== */
+
+.loan-grid {
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 12px;
+
+  width: 100%;
+}
+
+
+/* =====================================================
+   LOAN CARD
+===================================================== */
+
+.loan-card {
+  min-width: 0;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 10px;
+
+  padding: 13px;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.loan-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 5px 15px rgba(15, 23, 42, 0.07);
+}
+
+
+/* =====================================================
+   LOAN HEADER
+===================================================== */
+
+.loan-header {
+  margin-bottom: 9px;
+}
+
+.loan-header h2 {
+  margin: 0 0 5px;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  color: #111827;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   LOAN TYPE
+===================================================== */
+
+.loan-type {
+  display: inline-block;
+
+  padding: 3px 7px;
+
+  border-radius: 12px;
+
+  font-size: 9px;
+
+  font-weight: 500;
+}
+
+.loan-type.borrowed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.loan-type.lent {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+
+/* =====================================================
+   REMAINING AMOUNT
+===================================================== */
+
+.loan-amount {
+  margin-bottom: 10px;
+
+  font-size: 20px;
+
+  font-weight: 600;
+
+  color: #111827;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.loan-amount span {
+  margin-left: 3px;
+
+  font-size: 10px;
+
+  font-weight: 400;
+
+  color: #6b7280;
+}
+
+
+/* =====================================================
+   LOAN DETAILS
+===================================================== */
+
+.loan-details {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 6px;
+
+  padding: 9px 0;
+
+  border-top: 1px solid #eef0f3;
+
+  border-bottom: 1px solid #eef0f3;
+}
+
+.loan-details div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.loan-details span {
+  font-size: 9px;
+
+  font-weight: 400;
+
+  color: #8a94a6;
+}
+
+.loan-details strong {
+  font-size: 10px;
+
+  font-weight: 500;
+
+  color: #374151;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   DUE DATE
+===================================================== */
+
+.due-date {
+  margin-top: 8px;
+
+  padding: 6px 8px;
+
+  border-radius: 6px;
+
+  background: #fff7ed;
+
+  color: #c2410c;
+
+  font-size: 10px;
+
+  font-weight: 500;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   NOTES
+===================================================== */
+
+.loan-notes {
+  margin: 8px 0 0;
+
+  padding: 6px 7px;
+
+  border-radius: 6px;
+
+  background: #f8fafc;
+
+  color: #64748b;
+
+  font-size: 10px;
+
+  font-weight: 400;
+
+  line-height: 1.35;
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.loan-actions {
+  display: grid;
+
+  grid-template-columns:
+    0.8fr
+    1.2fr
+    0.8fr;
+
+  gap: 5px;
+
+  margin-top: 10px;
+}
+
+.loan-actions button {
+  border: none;
+
+  border-radius: 6px;
+
+  padding: 6px 4px;
+
+  min-width: 0;
+
+  font-size: 10px;
+
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+
+  white-space: nowrap;
+}
+
+.loan-actions button:hover {
+  transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   EDIT BUTTON
+===================================================== */
+
+.edit-button {
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+}
+
+.edit-button:hover {
+  background: #e0e7ff !important;
+}
+
+
+/* =====================================================
+   PAYMENT BUTTON
+===================================================== */
+
+.payment-button {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+}
+
+.payment-button:hover {
+  background: #d1fae5 !important;
+}
+
+
+/* =====================================================
+   DELETE BUTTON
+===================================================== */
+
+.delete-button {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+.delete-button:hover {
+  background: #fee2e2 !important;
+}
+
+
+/* =====================================================
+   MODAL OVERLAY
+===================================================== */
+
+.form-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 15px;
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(4px);
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.form-modal {
+  position: relative;
+
+  width: 100%;
+
+  max-width: 450px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2);
+
+  animation: modalIn 0.2s ease-out;
+}
+
+
+/* =====================================================
+   CLOSE BUTTON
+===================================================== */
+
+.close-button {
+  position: absolute;
+
+  top: 10px;
+
+  right: 10px;
+
+  z-index: 5;
+
+  width: 30px;
+
+  height: 30px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.close-button:hover {
+  background: #e2e8f0;
+
+  color: #111827;
+}
+
+
+/* =====================================================
+   MODAL ANIMATION
+===================================================== */
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(8px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+/* 4 cards */
+@media (min-width: 1000px) {
+
+  .loan-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+  }
+
+}
+
+
+/* 3 cards */
+@media (min-width: 750px) and (max-width: 999px) {
+
+  .loan-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* 2 cards */
+@media (min-width: 500px) and (max-width: 749px) {
+
+  .loan-page {
+    padding: 14px;
+  }
+
+  .loan-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* Mobile */
+@media (max-width: 499px) {
+
+  .loan-page {
+    padding: 12px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .page-header > button {
+    width: 100%;
+  }
+
+  .loan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .loan-actions {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}

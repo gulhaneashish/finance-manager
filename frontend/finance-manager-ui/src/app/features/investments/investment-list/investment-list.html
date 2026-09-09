@@ -1,0 +1,456 @@
+<div class="investment-page">
+
+  <div class="page-header">
+
+    <div>
+      <h2>Investments</h2>
+      <p>Track your investment portfolio</p>
+    </div>
+
+     <button
+    type="button"
+    class="add-btn"
+    (click)="addInvestment()">
+    + Add Investment
+  </button>
+
+  </div>
+
+
+  <!-- SUCCESS -->
+
+  <div
+    class="success"
+    *ngIf="operationSuccess$ | async as success"
+  >
+    {{ success }}
+  </div>
+
+
+  <!-- ERROR -->
+
+  <div
+    class="error"
+    *ngIf="error$ | async as error"
+  >
+    {{ error }}
+  </div>
+
+
+  <!-- LOADING -->
+
+  <div
+    class="loading"
+    *ngIf="loading$ | async"
+  >
+    Loading investments...
+  </div>
+
+
+  <!-- SUMMARY -->
+
+  <ng-container
+    *ngIf="summary$ | async as summary"
+  >
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+
+        <span>Total Invested</span>
+
+        <strong>
+          ₹{{ summary.totalInvestedAmount | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>Current Value</span>
+
+        <strong>
+          ₹{{ summary.totalCurrentValue | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>Profit / Loss</span>
+
+        <strong>
+          ₹{{ summary.totalProfitLoss | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>Return</span>
+
+        <strong>
+          {{ summary.totalProfitLossPercentage | number:'1.2-2' }}%
+
+        </strong>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+
+  <div
+  class="update-panel"
+  *ngIf="showUpdateForm">
+
+  <div class="update-card">
+
+    <h3>Update Investment Value</h3>
+
+    <form
+      [formGroup]="updateForm"
+      (ngSubmit)="submitUpdate()">
+
+      <div class="form-group">
+
+        <label for="currentValue">
+          Current Value
+        </label>
+
+        <input
+          id="currentValue"
+          type="number"
+          formControlName="currentValue"
+          min="0"
+          step="0.01"
+          placeholder="Enter current value">
+
+        <div
+          class="error"
+          *ngIf="
+            updateForm.get('currentValue')?.touched &&
+            updateForm.get('currentValue')?.invalid
+          ">
+
+          Current value must be 0 or greater.
+
+        </div>
+
+      </div>
+
+      <div class="update-actions">
+
+        <button
+          type="submit"
+          class="save-btn"
+          [disabled]="updateForm.invalid">
+
+          Update
+
+        </button>
+
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="closeUpdateForm()">
+
+          Cancel
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+
+
+
+<div
+  class="update-panel"
+  *ngIf="showSellForm">
+
+  <div class="update-card">
+
+    <h3>Sell Investment</h3>
+
+    <p>
+      Current Investment Value:
+      <strong>
+        ₹{{ selectedInvestmentValue | number:'1.2-2' }}
+      </strong>
+    </p>
+
+    <form
+      [formGroup]="sellForm"
+      (ngSubmit)="submitSell()">
+
+      <div class="form-group">
+
+        <label for="sellAccount">
+          Receive Money In
+        </label>
+
+        <select
+          id="sellAccount"
+          formControlName="accountId">
+
+          <option [ngValue]="0">
+            Select Account
+          </option>
+
+          <ng-container
+            *ngIf="accounts$ | async as accounts">
+
+            <option
+              *ngFor="let account of accounts"
+              [ngValue]="account.id">
+
+              {{ account.name }}
+
+            </option>
+
+          </ng-container>
+
+        </select>
+
+        <div
+          class="error"
+          *ngIf="
+            sellForm.get('accountId')?.touched &&
+            sellForm.get('accountId')?.invalid
+          ">
+
+          Please select an account.
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="sellAmount">
+          Sell Amount
+        </label>
+
+        <input
+          id="sellAmount"
+          type="number"
+          formControlName="sellAmount"
+          min="0.01"
+          step="0.01">
+
+        <div
+          class="error"
+          *ngIf="
+            sellForm.get('sellAmount')?.touched &&
+            sellForm.get('sellAmount')?.hasError('exceedsValue')
+          ">
+
+          Sell amount cannot exceed the current
+          investment value.
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="sellDate">
+          Sell Date
+        </label>
+
+        <input
+          id="sellDate"
+          type="date"
+          formControlName="sellDate">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="sellDescription">
+          Description
+        </label>
+
+        <textarea
+          id="sellDescription"
+          formControlName="description"
+          placeholder="Optional description">
+        </textarea>
+
+      </div>
+
+
+      <div class="update-actions">
+
+        <button
+          type="submit"
+          class="save-btn"
+          [disabled]="sellForm.invalid">
+
+          Sell Investment
+
+        </button>
+
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="closeSellForm()">
+
+          Cancel
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+  <!-- INVESTMENT TABLE -->
+
+  <div class="table-container">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Name</th>
+
+          <th>Type</th>
+
+          <th>Invested</th>
+
+          <th>Current Value</th>
+
+          <th>Profit / Loss</th>
+
+          <th>Return</th>
+
+          <th>Date</th>
+
+          <th>Actions</th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody>
+
+        <ng-container
+          *ngIf="investments$ | async as investments"
+        >
+
+          <tr
+            *ngFor="let investment of investments"
+          >
+
+            <td>
+              {{ investment.name }}
+            </td>
+
+            <td>
+              {{ investment.investmentType }}
+            </td>
+
+            <td>
+              ₹{{ investment.investedAmount | number:'1.2-2' }}
+            </td>
+
+            <td>
+              ₹{{ investment.currentValue | number:'1.2-2' }}
+            </td>
+
+            <td>
+              ₹{{ investment.profitLoss | number:'1.2-2' }}
+            </td>
+
+            <td>
+              {{ investment.profitLossPercentage | number:'1.2-2' }}%
+            </td>
+
+            <td>
+              {{ investment.investmentDate | date:'dd MMM yyyy' }}
+            </td>
+
+            <td>
+
+             <td class="actions">
+
+  <button
+    type="button"
+    class="update-btn"
+    (click)="updateValue(
+      investment.id,
+      investment.currentValue
+    )">
+
+    Update Value
+
+  </button>
+
+  <button
+    type="button"
+    class="sell-btn"
+    (click)="sellInvestment(
+      investment.id,
+      investment.currentValue
+    )">
+
+    Sell
+
+  </button>
+
+
+
+             <button
+  type="button"
+  class="delete-btn"
+  (click)="deleteInvestment(investment.id)">
+  Cancel
+</button>
+
+            </td>
+
+          </tr>
+
+
+          <tr
+            *ngIf="investments.length === 0"
+          >
+
+            <td
+              colspan="8"
+              class="empty"
+            >
+              No investments found.
+            </td>
+
+          </tr>
+
+        </ng-container>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

@@ -1,0 +1,140 @@
+<div class="category-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Categories</h1>
+      <p>
+        Manage the categories used to organize your transactions.
+      </p>
+    </div>
+  </div>
+
+  <div class="category-content">
+
+    <section class="category-form-card">
+
+      <h2>Add Category</h2>
+
+      <form
+        [formGroup]="categoryForm"
+        (ngSubmit)="submit()">
+
+        <div class="form-group">
+
+          <label for="name">
+            Category Name
+          </label>
+
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="e.g. Food"
+            maxlength="50"
+          >
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="type">
+            Type
+          </label>
+
+          <select
+            id="type"
+            formControlName="type">
+
+            <option value="EXPENSE">
+              Expense
+            </option>
+
+            <option value="INCOME">
+              Income
+            </option>
+
+          </select>
+
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="loading$ | async">
+
+          + Add Category
+
+        </button>
+
+      </form>
+
+    </section>
+
+
+    <section class="category-list-card">
+
+      <h2>Your Categories</h2>
+
+      @if (error$ | async; as error) {
+
+        <div class="error">
+          {{ error }}
+        </div>
+
+      }
+
+      @if ((categories$ | async)?.length === 0) {
+
+        <div class="empty-state">
+          No categories found.
+        </div>
+
+      } @else {
+
+        <div class="category-list">
+
+          @for (
+            category of categories$ | async;
+            track category.id
+          ) {
+
+            <div class="category-row">
+
+              <div class="category-info">
+
+                <span class="category-name">
+                  {{ category.name }}
+                </span>
+
+                <span
+                  class="category-type"
+                  [class.income]="category.type === 'INCOME'"
+                  [class.expense]="category.type === 'EXPENSE'">
+
+                  {{ category.type }}
+
+                </span>
+
+              </div>
+
+              <button
+                type="button"
+                class="delete-button"
+                (click)="delete(category.id)">
+
+                🗑
+
+              </button>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  </div>
+
+</div>

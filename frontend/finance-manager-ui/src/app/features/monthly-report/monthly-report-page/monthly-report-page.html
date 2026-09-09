@@ -1,0 +1,226 @@
+<div class="monthly-report-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Monthly Report</h1>
+      <p>
+        Analyze your finances for the selected month.
+      </p>
+    </div>
+
+    <div class="month-selector">
+
+      <button
+        type="button"
+        (click)="previousMonth()">
+        ←
+      </button>
+
+      <strong>
+        {{ selectedMonth }}/{{ selectedYear }}
+      </strong>
+
+      <button
+        type="button"
+        (click)="nextMonth()">
+        →
+      </button>
+
+    </div>
+
+  </div>
+
+  @if (loading$ | async) {
+    <div class="loading">
+      Loading monthly report...
+    </div>
+  }
+
+  @if (error$ | async; as error) {
+    <div class="error">
+      {{ error }}
+    </div>
+  }
+
+  <div class="summary-grid">
+
+    <div class="summary-card income">
+      <span>Total Income</span>
+
+      <strong>
+        ₹{{ income$ | async | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div class="summary-card expense">
+      <span>Total Expenses</span>
+
+      <strong>
+        ₹{{ expenses$ | async | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div class="summary-card net">
+      <span>Net Cash Flow</span>
+
+      <strong>
+        ₹{{ netCashFlow$ | async | number:'1.0-2' }}
+      </strong>
+    </div>
+
+  </div>
+
+
+  <div class="report-grid">
+
+    <div class="report-card">
+
+      <h2>Budget Overview</h2>
+
+      <div class="report-row">
+        <span>Expense Budget</span>
+        <strong>
+          ₹{{ expenseBudget$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="report-row">
+        <span>Budget Spent</span>
+        <strong>
+          ₹{{ budgetSpent$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="report-row">
+        <span>Budget Remaining</span>
+        <strong>
+          ₹{{ budgetRemaining$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="report-card">
+
+      <h2>Savings & Investments</h2>
+
+      <div class="report-row">
+        <span>Savings Target</span>
+        <strong>
+          ₹{{ savingsTarget$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="report-row">
+        <span>Savings Amount</span>
+        <strong>
+          ₹{{ savingsAmount$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="report-row">
+        <span>Investment Target</span>
+        <strong>
+          ₹{{ investmentTarget$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="report-row">
+        <span>Investment Amount</span>
+        <strong>
+          ₹{{ investmentAmount$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="report-card">
+
+      <h2>Loans</h2>
+
+      <div class="report-row">
+        <span>Total Borrowed</span>
+        <strong>
+          ₹{{ totalBorrowed$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="report-row">
+        <span>Total Lent</span>
+        <strong>
+          ₹{{ totalLent$ | async | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="category-card">
+
+    <h2>Category Budget Report</h2>
+
+    @if (categories$ | async; as categories) {
+
+      @if (categories.length === 0) {
+
+        <div class="empty-state">
+          No category budget data available.
+        </div>
+
+      } @else {
+
+        <div class="category-list">
+
+          @for (
+            category of categories;
+            track category.categoryId
+          ) {
+
+            <div class="category-item">
+
+              <div>
+                <strong>
+                  {{ category.categoryName }}
+                </strong>
+
+                <p>
+                  Budget:
+                  ₹{{ category.budget | number:'1.0-2' }}
+
+                  &nbsp; | &nbsp;
+
+                  Spent:
+                  ₹{{ category.spent | number:'1.0-2' }}
+                </p>
+              </div>
+
+              <div class="category-right">
+
+                <strong>
+                  ₹{{ category.remaining | number:'1.0-2' }}
+                </strong>
+
+                <span>
+                  {{ category.percentageUsed | number:'1.0-2' }}%
+                </span>
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    }
+
+  </div>
+
+</div>

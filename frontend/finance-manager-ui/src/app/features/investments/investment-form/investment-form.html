@@ -1,0 +1,199 @@
+<div class="investment-form">
+
+  <div class="form-header">
+    <h2>Add Investment</h2>
+    <p>Create a new investment</p>
+  </div>
+
+  <form
+    [formGroup]="investmentForm"
+    (ngSubmit)="submit()"
+  >
+
+    <!-- ACCOUNT -->
+
+    <div class="form-group">
+
+      <label for="account">
+        Account
+      </label>
+
+      <select
+        id="account"
+        formControlName="accountId"
+      >
+
+        <option [ngValue]="0">
+          Select Account
+        </option>
+
+        <ng-container
+          *ngIf="accounts$ | async as accounts"
+        >
+
+          <option
+            *ngFor="let account of accounts"
+            [ngValue]="account.id"
+          >
+            {{ account.name }}
+          </option>
+
+        </ng-container>
+
+      </select>
+
+      <div
+        class="validation"
+        *ngIf="
+          investmentForm.get('accountId')?.touched &&
+          investmentForm.get('accountId')?.invalid
+        "
+      >
+        Please select an account.
+      </div>
+
+    </div>
+
+
+    <!-- NAME -->
+
+    <div class="form-group">
+
+      <label for="name">
+        Investment Name
+      </label>
+
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        placeholder="e.g. SBI Mutual Fund"
+      />
+
+      <div
+        class="validation"
+        *ngIf="
+          investmentForm.get('name')?.touched &&
+          investmentForm.get('name')?.invalid
+        "
+      >
+        Investment name is required.
+      </div>
+
+    </div>
+
+
+    <!-- TYPE -->
+
+    <div class="form-group">
+
+      <label for="investmentType">
+        Investment Type
+      </label>
+
+      <select
+        id="investmentType"
+        formControlName="investmentType"
+      >
+
+        <option
+          *ngFor="let type of investmentTypes"
+          [ngValue]="type"
+        >
+          {{ type }}
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- AMOUNT -->
+
+    <div class="form-group">
+
+      <label for="amount">
+        Investment Amount
+      </label>
+
+      <input
+        id="amount"
+        type="number"
+        formControlName="amount"
+        min="0.01"
+        step="0.01"
+        placeholder="Enter amount"
+      />
+
+      <div
+        class="validation"
+        *ngIf="
+          investmentForm.get('amount')?.touched &&
+          investmentForm.get('amount')?.invalid
+        "
+      >
+        Amount must be greater than zero.
+      </div>
+
+    </div>
+
+
+    <!-- DATE -->
+
+    <div class="form-group">
+
+      <label for="investmentDate">
+        Investment Date
+      </label>
+
+      <input
+        id="investmentDate"
+        type="date"
+        formControlName="investmentDate"
+      />
+
+    </div>
+
+
+    <!-- DESCRIPTION -->
+
+    <div class="form-group">
+
+      <label for="description">
+        Description
+      </label>
+
+      <textarea
+        id="description"
+        formControlName="description"
+        rows="3"
+        placeholder="Optional description"
+      ></textarea>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+
+    <div class="form-actions">
+
+     <button
+    type="button"
+    class="cancel-btn"
+    (click)="cancel()">
+    Cancel
+  </button>
+
+      <button
+        type="submit"
+        class="save-btn"
+        [disabled]="investmentForm.invalid"
+      >
+        Save Investment
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

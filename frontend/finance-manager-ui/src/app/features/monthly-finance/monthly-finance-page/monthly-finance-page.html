@@ -1,0 +1,67 @@
+<div class="monthly-finance-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Monthly Finance</h1>
+
+      <p>
+        Manage and review your monthly finances.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- Month Navigation -->
+
+  <div class="month-selector">
+
+    <button
+      type="button"
+      (click)="previousMonth()">
+
+      ←
+
+    </button>
+
+
+    <div class="selected-month">
+
+      <h2>
+        {{ getMonthName() }}
+        {{ selectedYear }}
+      </h2>
+
+    </div>
+
+
+    <button
+      type="button"
+      (click)="nextMonth()">
+
+      →
+
+    </button>
+
+  </div>
+
+
+  @if (loading$ | async) {
+
+    <div class="loading">
+      Loading monthly finance...
+    </div>
+
+  }
+
+
+  @if (error$ | async; as error) {
+
+    <div class="error">
+      {{ error }}
+    </div>
+
+  }
+
+</div>

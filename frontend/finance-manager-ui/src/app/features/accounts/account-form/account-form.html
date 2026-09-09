@@ -1,0 +1,137 @@
+<div class="form-container">
+
+  <h2>
+  {{ account ? 'Edit Account' : 'Add Account' }}
+</h2>
+
+  <form
+    [formGroup]="accountForm"
+    (ngSubmit)="submit()">
+
+    <div class="form-group">
+
+      <label for="name">
+        Account Name
+      </label>
+
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        placeholder="e.g. HDFC Bank">
+
+      @if (
+        accountForm.get('name')?.touched &&
+        accountForm.get('name')?.hasError('required')
+      ) {
+        <small>
+          Account name is required.
+        </small>
+      }
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="accountType">
+        Account Type
+      </label>
+
+      <select
+        id="accountType"
+        formControlName="accountType">
+
+        <option value="">
+          Select account type
+        </option>
+
+        @for (
+          type of accountTypes;
+          track type
+        ) {
+
+          <option [value]="type">
+            {{ type }}
+          </option>
+
+        }
+
+      </select>
+
+      @if (
+        accountForm.get('accountType')?.touched &&
+        accountForm.get('accountType')?.hasError('required')
+      ) {
+        <small>
+          Account type is required.
+        </small>
+      }
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="openingBalance">
+        Opening Balance
+      </label>
+
+      <input
+        id="openingBalance"
+        type="number"
+        formControlName="openingBalance"
+        min="0">
+
+    </div>
+
+
+    @if (isCreditCard) {
+
+      <div class="form-group">
+
+        <label for="creditLimit">
+          Credit Limit
+        </label>
+
+        <input
+          id="creditLimit"
+          type="number"
+          formControlName="creditLimit"
+          min="0.01"
+          placeholder="e.g. 50000">
+
+        @if (
+          accountForm.get('creditLimit')?.touched &&
+          accountForm.get('creditLimit')?.hasError('min')
+        ) {
+          <small>
+            Credit limit must be greater than zero.
+          </small>
+        }
+
+      </div>
+
+    }
+
+
+    @if (errorMessage) {
+
+      <div class="error">
+        {{ errorMessage }}
+      </div>
+
+    }
+
+
+    <button
+      type="submit"
+      [disabled]="isSubmitting">
+
+   {{ account ? 'Save Changes' : 'Create Account' }}
+
+    </button>
+
+  </form>
+
+</div>

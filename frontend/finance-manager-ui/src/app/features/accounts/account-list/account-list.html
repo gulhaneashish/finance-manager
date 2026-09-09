@@ -1,0 +1,356 @@
+<div class="accounts-page">
+
+  <!-- =========================
+       PAGE HEADER
+  ========================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Accounts</h1>
+
+      <p>
+        Manage your bank accounts, cash and investments.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="add-account-button"
+      (click)="openAddForm()">
+
+      + Add Account
+
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       LOADING
+  ========================== -->
+
+  @if (loading$ | async) {
+
+    <p class="loading-text">
+      Loading accounts...
+    </p>
+
+  }
+
+
+  <!-- =========================
+       ERROR
+  ========================== -->
+
+  @if (error$ | async; as error) {
+
+    <p class="error-text">
+      {{ error }}
+    </p>
+
+  }
+
+
+  <!-- =========================
+       ACCOUNTS
+  ========================== -->
+
+  @if (accounts$ | async; as accounts) {
+
+    @if (accounts.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          🏦
+        </div>
+
+        <h3>
+          No accounts found
+        </h3>
+
+        <p>
+          Add your first bank account or credit card.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <div class="accounts-grid">
+
+        @for (account of accounts; track account.id) {
+
+          <div
+            class="account-card"
+            [class.credit-card]="
+              account.accountType === 'CREDIT_CARD'
+            "
+          >
+
+            <!-- =========================
+                 CARD HEADER
+            ========================== -->
+
+            <div class="account-header">
+
+              <div class="account-title">
+
+                @if (account.accountType === 'CREDIT_CARD') {
+
+                  <span class="card-label">
+                    CREDIT CARD
+                  </span>
+
+                } @else {
+
+                  <span class="card-label">
+                    ACCOUNT
+                  </span>
+
+                }
+
+                <h2>
+                  {{ account.name }}
+                </h2>
+
+                <span class="account-type">
+                  {{ account.accountType }}
+                </span>
+
+              </div>
+
+
+              <span class="card-icon">
+
+                @if (account.accountType === 'CREDIT_CARD') {
+                  💳
+                } @else {
+                  🏦
+                }
+
+              </span>
+
+            </div>
+
+
+            <!-- =========================
+                 BALANCE
+            ========================== -->
+
+            
+             <div class="detail-item">
+
+                <!-- <span>
+                  Opening Balance
+                </span> -->
+
+                <strong>
+                  {{ account.isActive== true ? 'Active' : 'Inactive' }}
+                </strong>
+
+              </div>
+
+            <!-- =========================
+                 DETAILS
+            ========================== -->
+
+            <div class="account-details">
+
+            
+              <div class="account-balance">
+
+              ₹{{ account.currentBalance | number:'1.0-2' }}
+
+            </div>
+              @if (account.accountType === 'CREDIT_CARD') {
+
+                <div class="detail-item">
+
+                  <span>
+                    Credit Limit
+                  </span>
+
+                  <strong>
+                    ₹{{
+                      account.creditLimit ?? 0
+                      | number:'1.0-2'
+                    }}
+                  </strong>
+
+                </div>
+
+              }
+
+            </div>
+
+
+            <!-- =========================
+                 ACTIONS
+            ========================== -->
+
+            <div class="account-actions">
+
+              <button
+                type="button"
+                class="edit-button"
+                (click)="editAccount(account)">
+
+                Edit
+
+              </button>
+
+               <!-- <button
+                type="button"
+                class="edit-button"
+                (click)="editAccount(account)">
+
+                Add Deposit
+
+              </button> -->
+              <button
+                type="button"
+                class="delete-button"
+                (click)="deleteAccount(account.id)">
+
+                {{ account.isActive ? 'Deactivate' : 'Activate' }}
+
+              </button>
+
+
+              @if (account.accountType === 'CREDIT_CARD') {
+
+                <button
+                  type="button"
+                  class="purchase-button"
+                  (click)="openPurchaseForm(account.id)">
+
+                  Purchase
+
+                </button>
+
+
+                <button
+                  type="button"
+                  class="payment-button"
+                  (click)="openPaymentForm(account.id)">
+
+                  Payment
+
+                </button>
+
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  }
+
+</div>
+
+
+<!-- =========================
+     ACCOUNT ADD / EDIT MODAL
+========================== -->
+
+@if (showForm) {
+
+  <div class="form-overlay">
+
+    <div class="form-modal">
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeForm()">
+
+        ✕
+
+      </button>
+
+      <app-account-form
+        [account]="selectedAccount"
+        (formClosed)="closeForm()">
+      </app-account-form>
+
+    </div>
+
+  </div>
+
+}
+
+
+<!-- =========================
+     CREDIT CARD PURCHASE MODAL
+========================== -->
+
+@if (
+  showPurchaseForm &&
+  selectedCreditCardId !== null
+) {
+
+  <div class="form-overlay">
+
+    <div class="form-modal">
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closePurchaseForm()">
+
+        ✕
+
+      </button>
+
+      <app-credit-card-purchase-form
+        [accountId]="selectedCreditCardId"
+        (formClosed)="closePurchaseForm()">
+      </app-credit-card-purchase-form>
+
+    </div>
+
+  </div>
+
+}
+
+
+<!-- =========================
+     CREDIT CARD PAYMENT MODAL
+========================== -->
+
+@if (
+  showPaymentForm &&
+  selectedCreditCardId !== null
+) {
+
+  <div class="form-overlay">
+
+    <div class="form-modal">
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closePaymentForm()">
+
+        ✕
+
+      </button>
+
+      <app-credit-card-payment-form
+        [creditCardAccountId]="selectedCreditCardId"
+        (formClosed)="closePaymentForm()">
+      </app-credit-card-payment-form>
+
+    </div>
+
+  </div>
+
+}

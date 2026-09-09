@@ -1,0 +1,47 @@
+<div class="reports-page">
+
+
+
+  <!-- REPORT NAVIGATION -->
+
+  <div class="report-tabs">
+
+    <a
+      routerLink="expense"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }">
+
+      Expense Report
+
+    </a>
+
+
+    <a
+      routerLink="monthly"
+      routerLinkActive="active">
+
+      Monthly Report
+
+    </a>
+
+
+    <a
+      routerLink="net-worth"
+      routerLinkActive="active">
+
+      Net Worth
+
+    </a>
+
+  </div>
+
+
+  <!-- CHILD REPORT -->
+
+  <div class="report-content">
+
+    <router-outlet></router-outlet>
+
+  </div>
+
+</div>

@@ -1,0 +1,68 @@
+<aside class="sidebar">
+
+  <div class="logo">
+    <mat-icon>account_balance_wallet</mat-icon>
+    <span>Finance Manager</span>
+  </div>
+
+  <nav>
+
+    <a routerLink="/dashboard"
+       routerLinkActive="active">
+      <mat-icon>dashboard</mat-icon>
+      <span>Dashboard</span>
+    </a>
+
+    <a routerLink="/transactions"
+       routerLinkActive="active">
+      <mat-icon>receipt_long</mat-icon>
+      <span>Transactions</span>
+    </a>
+
+    <a routerLink="/accounts"
+       routerLinkActive="active">
+      <mat-icon>account_balance</mat-icon>
+      <span>Accounts</span>
+    </a>
+
+    <a routerLink="/loans"
+       routerLinkActive="active">
+      <mat-icon>handshake</mat-icon>
+      <span>Loans</span>
+    </a>
+
+    <a routerLink="/budgets"
+       routerLinkActive="active">
+      <mat-icon>savings</mat-icon>
+      <span>Budgets</span>
+    </a>
+    <a routerLink="/categories"
+       routerLinkActive="active">
+      <mat-icon>category</mat-icon>
+      <span>Categories</span>
+    </a>
+   <a routerLink="/investments"
+       routerLinkActive="active">
+      <mat-icon>trending_up</mat-icon>
+      <span>Investments</span>
+    </a>
+    <a routerLink="/reports"
+       routerLinkActive="active">
+      <mat-icon>bar_chart</mat-icon>
+      <span>Reports</span>
+    </a>
+
+  </nav>
+
+  <div class="sidebar-bottom">
+
+   <button
+  type="button"
+  (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+
+  </div>
+
+</aside>
