@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+
 builder.Services.AddExceptionHandler<
     GlobalExceptionHandler>();
 
@@ -33,7 +33,6 @@ builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<LoanService>();
-builder.Services.AddScoped<BudgetService>();
 builder.Services.AddScoped<MonthlyReportService>();
 builder.Services.AddScoped<NetWorthService>();
 builder.Services.AddScoped<CreditCardService>();
