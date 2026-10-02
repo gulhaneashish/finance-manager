@@ -18,14 +18,47 @@ if (!string.IsNullOrEmpty(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 }
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? new[] { "http://localhost:4200", "https://localhost:4200" };
+// Read CORS allowed origins from environment variable (comma or semicolon separated) or appsettings
+var envCors = Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS");
+string[] allowedOrigins;
+if (!string.IsNullOrWhiteSpace(envCors))
+{
+    allowedOrigins = envCors.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+}
+else
+{
+    allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+}
+
+// In local development, default to local Angular server if no origins specified
+if (builder.Environment.IsDevelopment() && allowedOrigins.Length == 0)
+{
+    allowedOrigins = new[] { "http://localhost:4200", "https://localhost:4200" };
+}
+
+// In production, strictly reject fail-open CORS (empty origins or wildcard)
+if (builder.Environment.IsProduction())
+{
+    if (allowedOrigins.Length == 0)
+    {
+        throw new InvalidOperationException(
+            "CRITICAL SECURITY CONFIGURATION ERROR: No CORS allowed origins configured for Production. " +
+            "Set the 'CORS_ALLOWED_ORIGINS' environment variable to your specific frontend URL(s). Fail-open CORS is strictly prohibited.");
+    }
+
+    if (allowedOrigins.Contains("*"))
+    {
+        throw new InvalidOperationException(
+            "CRITICAL SECURITY CONFIGURATION ERROR: Wildcard '*' CORS origin is not permitted in Production. " +
+            "Specify exact domains in 'CORS_ALLOWED_ORIGINS' (e.g. 'https://my-app.vercel.app').");
+    }
+}
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClient", policy =>
     {
-        if (allowedOrigins.Contains("*"))
+        if (builder.Environment.IsDevelopment() && allowedOrigins.Contains("*"))
         {
             policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
         }
@@ -34,7 +67,8 @@ builder.Services.AddCors(options =>
             policy
                 .WithOrigins(allowedOrigins)
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         }
     });
 });
@@ -85,10 +119,18 @@ builder.Services
         options.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter());
     });
+// Database connection string from environment (DATABASE_URL, CONNECTION_STRING, or ConnectionStrings__DefaultConnection)
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("CRITICAL CONFIGURATION ERROR: Database connection string is missing. Please set 'ConnectionStrings__DefaultConnection' or 'DATABASE_URL' in the environment.");
+}
+
 builder.Services.AddDbContext<FinanceDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -111,6 +153,36 @@ builder.Services.AddSwaggerGen(options =>
         });
 });
 
+// JWT Configuration from environment (JWT_KEY, JWT__KEY, or appsettings)
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? Environment.GetEnvironmentVariable("JWT__KEY")
+    ?? builder.Configuration["Jwt:Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    if (builder.Environment.IsProduction())
+    {
+        throw new InvalidOperationException("CRITICAL SECURITY ERROR: 'JWT_KEY' (or 'Jwt:Key') environment variable is mandatory in production.");
+    }
+    jwtKey = "LOCAL_DEV_FALLBACK_KEY_AT_LEAST_32_CHARS_LONG_123456789";
+}
+
+if (builder.Environment.IsProduction())
+{
+    if (jwtKey.Length < 32 || jwtKey.Contains("FALLBACK") || jwtKey.Contains("DEFAULT_SECRET") || jwtKey.Contains("CHANGE_THIS"))
+    {
+        throw new InvalidOperationException("CRITICAL SECURITY ERROR: In production, 'JWT_KEY' must be a strong, random secret of at least 32 characters (256 bits). Default/fallback keys are rejected.");
+    }
+}
+
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+    ?? builder.Configuration["Jwt:Issuer"]
+    ?? "FinanceManager.API";
+
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+    ?? builder.Configuration["Jwt:Audience"]
+    ?? "FinanceManager.Client";
+
 builder.Services.AddAuthentication(
     JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -123,18 +195,9 @@ builder.Services.AddAuthentication(
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
                 ClockSkew = TimeSpan.Zero,
-
-                ValidIssuer =
-                    builder.Configuration["Jwt:Issuer"] ?? "FinanceManager.API",
-
-                ValidAudience =
-                    builder.Configuration["Jwt:Audience"] ?? "FinanceManager.Client",
-
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            builder.Configuration["Jwt:Key"]
-                            ?? "THIS_IS_A_FALLBACK_DEFAULT_SECRET_KEY_FOR_JWT_SIGNING_123456789"))
+                ValidIssuer = jwtIssuer,
+                ValidAudience = jwtAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
             };
     });
 
@@ -191,42 +254,65 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
     }
 
-    // 2. Ensure dedicated Administrator account exists
-    const string adminEmail = "admin@financemanager.com";
-    var existingAdmin = db.Users.FirstOrDefault(u => u.Email.ToLower() == adminEmail.ToLower());
-    if (existingAdmin == null)
+    // 2. Ensure dedicated Administrator account exists (configured via environment variables)
+    var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL")
+        ?? builder.Configuration["Admin:Email"];
+    var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD")
+        ?? builder.Configuration["Admin:Password"];
+
+    // In local development only, fallback to dev credentials if not specified
+    if (string.IsNullOrWhiteSpace(adminEmail) && builder.Environment.IsDevelopment())
     {
-        var dedicatedAdmin = new FinanceManager.API.Models.User
-        {
-            Name = "System Administrator",
-            Email = adminEmail,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
-            Role = "Admin",
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
+        adminEmail = "admin@financemanager.com";
+        adminPassword = "Admin@123";
+    }
 
-        db.Users.Add(dedicatedAdmin);
-        db.SaveChanges();
-
-        db.AuditLogs.Add(new FinanceManager.API.Models.AuditLog
+    if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
+    {
+        var existingAdmin = db.Users.FirstOrDefault(u => u.Email.ToLower() == adminEmail.ToLower());
+        if (existingAdmin == null)
         {
-            UserId = dedicatedAdmin.Id,
-            UserEmail = dedicatedAdmin.Email,
-            Action = "SYSTEM_INIT",
-            Details = $"Dedicated System Administrator profile initialized ({adminEmail}).",
-            Timestamp = DateTime.UtcNow
-        });
-        db.SaveChanges();
+            var adminName = Environment.GetEnvironmentVariable("ADMIN_NAME")
+                ?? builder.Configuration["Admin:Name"]
+                ?? "System Administrator";
+
+            var dedicatedAdmin = new FinanceManager.API.Models.User
+            {
+                Name = adminName,
+                Email = adminEmail,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                Role = "Admin",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            db.Users.Add(dedicatedAdmin);
+            db.SaveChanges();
+
+            db.AuditLogs.Add(new FinanceManager.API.Models.AuditLog
+            {
+                UserId = dedicatedAdmin.Id,
+                UserEmail = dedicatedAdmin.Email,
+                Action = "SYSTEM_INIT",
+                Details = $"Dedicated System Administrator profile initialized ({adminEmail}).",
+                Timestamp = DateTime.UtcNow
+            });
+            db.SaveChanges();
+            logger.LogInformation("Dedicated Administrator account initialized from environment configuration ({AdminEmail}).", adminEmail);
+        }
+        else
+        {
+            if (existingAdmin.Role != "Admin" || !existingAdmin.IsActive)
+            {
+                existingAdmin.Role = "Admin";
+                existingAdmin.IsActive = true;
+                db.SaveChanges();
+            }
+        }
     }
     else
     {
-        if (existingAdmin.Role != "Admin" || !existingAdmin.IsActive)
-        {
-            existingAdmin.Role = "Admin";
-            existingAdmin.IsActive = true;
-            db.SaveChanges();
-        }
+        logger.LogInformation("ADMIN_EMAIL or ADMIN_PASSWORD not configured. Skipping default administrator seeding.");
     }
     }
     catch (Exception ex)
@@ -237,8 +323,18 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors("AngularClient");
 app.UseExceptionHandler();
-app.UseSwagger();
-app.UseSwaggerUI();
+
+// Enable Swagger in Development, or if explicitly enabled by ENABLE_SWAGGER environment variable
+var enableSwagger = app.Environment.IsDevelopment()
+    || string.Equals(Environment.GetEnvironmentVariable("ENABLE_SWAGGER"), "true", StringComparison.OrdinalIgnoreCase)
+    || app.Configuration.GetValue<bool>("EnableSwagger");
+
+if (enableSwagger)
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

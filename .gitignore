@@ -21,6 +21,10 @@ backend/**/obj/
 # Environment / secrets
 .env
 .env.*
+*.env
+**/.env
+**/.env.*
+**/appsettings.Development.json
 appsettings.Development.json
 
 # OS

@@ -200,9 +200,42 @@ public class AuthService : IAuthService
         return true;
     }
 
+    private string GetJwtKey()
+    {
+        var key = Environment.GetEnvironmentVariable("JWT_KEY")
+            ?? Environment.GetEnvironmentVariable("JWT__KEY")
+            ?? _configuration["Jwt:Key"];
+
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new InvalidOperationException("CRITICAL: JWT Secret Key is not configured in the application environment.");
+        }
+        return key;
+    }
+
+    private string GetJwtIssuer()
+    {
+        return Environment.GetEnvironmentVariable("JWT_ISSUER")
+            ?? _configuration["Jwt:Issuer"]
+            ?? "FinanceManager.API";
+    }
+
+    private string GetJwtAudience()
+    {
+        return Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+            ?? _configuration["Jwt:Audience"]
+            ?? "FinanceManager.Client";
+    }
+
     private string GenerateToken(Models.User user)
     {
-        var key = _configuration["Jwt:Key"]!;
+        var key = GetJwtKey();
+        var issuer = GetJwtIssuer();
+        var audience = GetJwtAudience();
+
+        var expiryConfig = Environment.GetEnvironmentVariable("JWT_EXPIRATION_MINUTES")
+            ?? _configuration["Jwt:ExpirationMinutes"];
+        var expiryMinutes = double.TryParse(expiryConfig, out var parsed) ? parsed : 60.0;
 
         var role = string.IsNullOrWhiteSpace(user.Role) ? "User" : user.Role;
         var claims = new[]
@@ -221,11 +254,10 @@ public class AuthService : IAuthService
             SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(
-                double.Parse(_configuration["Jwt:ExpirationMinutes"]!)),
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -241,7 +273,9 @@ public class AuthService : IAuthService
 
     private int GetRefreshTokenExpirationDays()
     {
-        return int.TryParse(_configuration["Jwt:RefreshTokenExpirationDays"], out var days) ? days : 7;
+        var daysConfig = Environment.GetEnvironmentVariable("JWT_REFRESH_EXPIRATION_DAYS")
+            ?? _configuration["Jwt:RefreshTokenExpirationDays"];
+        return int.TryParse(daysConfig, out var days) ? days : 7;
     }
 
     private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
@@ -249,12 +283,12 @@ public class AuthService : IAuthService
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
-            ValidAudience = _configuration["Jwt:Audience"],
+            ValidAudience = GetJwtAudience(),
             ValidateIssuer = true,
-            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidIssuer = GetJwtIssuer(),
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)),
+                Encoding.UTF8.GetBytes(GetJwtKey())),
             ValidateLifetime = false // Keep false so we can extract claims from expired JWT
         };
 
