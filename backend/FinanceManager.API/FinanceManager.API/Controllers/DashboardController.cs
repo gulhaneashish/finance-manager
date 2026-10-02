@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using FinanceManager.API.Services;
+using System.Security.Claims;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,24 +10,30 @@ namespace FinanceManager.API.Controllers;
 [Route("api/[controller]")]
 public class DashboardController : ControllerBase
 {
-    private readonly DashboardService _dashboardService;
+    private readonly IDashboardService _dashboardService;
 
     public DashboardController(
-        DashboardService dashboardService)
+        IDashboardService dashboardService)
     {
         _dashboardService = dashboardService;
     }
 
     [HttpGet("summary")]
     public async Task<IActionResult> GetSummary(
-        int year,
-        int month)
+        [FromQuery] string? period = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] int? year = null,
+        [FromQuery] int? month = null)
     {
         var userId = GetUserId();
 
         var summary =
             await _dashboardService.GetSummaryAsync(
                 userId,
+                period,
+                startDate,
+                endDate,
                 year,
                 month);
 
@@ -44,23 +50,21 @@ public class DashboardController : ControllerBase
 
     [HttpGet("category-spending")]
     public async Task<IActionResult> GetCategorySpending(
-    int year,
-    int month)
+        [FromQuery] string? period = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] int? year = null,
+        [FromQuery] int? month = null)
     {
         var userId = GetUserId();
-
-        if (month < 1 || month > 12)
-        {
-            return BadRequest(new
-            {
-                message = "Invalid month."
-            });
-        }
 
         var result =
             await _dashboardService
                 .GetCategorySpendingAsync(
                     userId,
+                    period,
+                    startDate,
+                    endDate,
                     year,
                     month);
 
@@ -106,23 +110,21 @@ public class DashboardController : ControllerBase
 
     [HttpGet("savings-investments")]
     public async Task<IActionResult> GetSavingsInvestments(
-    int year,
-    int month)
+        [FromQuery] string? period = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] int? year = null,
+        [FromQuery] int? month = null)
     {
         var userId = GetUserId();
-
-        if (month < 1 || month > 12)
-        {
-            return BadRequest(new
-            {
-                message = "Invalid month."
-            });
-        }
 
         var result =
             await _dashboardService
                 .GetSavingsInvestmentSummaryAsync(
                     userId,
+                    period,
+                    startDate,
+                    endDate,
                     year,
                     month);
 

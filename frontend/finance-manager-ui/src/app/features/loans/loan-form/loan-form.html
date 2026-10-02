@@ -8,160 +8,128 @@
     [formGroup]="loanForm"
     (ngSubmit)="submit()">
 
-    <div class="form-group">
-
-      <label for="personName">
-        Person Name
-      </label>
-
-      <input
-        id="personName"
-        type="text"
-        formControlName="personName"
-        placeholder="e.g. Rahul">
-
-      @if (
-        loanForm.controls.personName.touched &&
-        loanForm.controls.personName.invalid
-      ) {
-        <small>
-          Person name is required.
-        </small>
-      }
-
-    </div>
-
-
-    <!-- ===================================================== -->
-    <!-- LOAN TYPE -->
-    <!-- ===================================================== -->
-
-    @if (!loan) {
-
-      <div class="form-group">
-
-        <label for="type">
-          Loan Type
-        </label>
-
-        <select
-          id="type"
-          formControlName="type">
-
-          <option [ngValue]="LoanType.Borrowed">
-            Borrowed
-          </option>
-
-          <option [ngValue]="LoanType.Lent">
-            Lent
-          </option>
-
-        </select>
-
-      </div>
-
-    } @else {
-
-      <div class="form-group">
-
-        <label for="loanType">
-          Loan Type
-        </label>
-
-        <input
-          id="loanType"
-          type="text"
-          [value]="
-            loan.type === LoanType.Borrowed
-              ? 'Borrowed'
-              : 'Lent'
-          "
-          disabled>
-
-        <small>
-          Loan type cannot be changed after creation.
-        </small>
-
-      </div>
-
-    }
-
-
-    <!-- ===================================================== -->
-    <!-- ORIGINAL AMOUNT -->
-    <!-- ===================================================== -->
-
-    <div class="form-group">
-
-      <label for="amount">
-        Original Amount
-      </label>
-
-      <input
-        id="amount"
-        type="number"
-        min="0.01"
-        formControlName="originalAmount">
-
-    </div>
-
-
-    <!-- ===================================================== -->
-    <!-- ACCOUNT -->
-    <!-- ===================================================== -->
-
-    <div class="form-group">
-
-      <label for="account">
-        Account
-      </label>
-
-      <select
-        id="account"
-        formControlName="accountId">
-
-        <option [ngValue]="0">
-          Select Account
-        </option>
-
-        @for (
-          account of Accounts$ | async;
-          track account.id
-        ) {
-
-          <option [ngValue]="account.id">
-
-            {{ account.name }}
-            — ₹{{ account.currentBalance | number:'1.0-2' }}
-
-          </option>
-
-        }
-
-      </select>
-
-      @if (
-        loanForm.controls.accountId.touched &&
-        loanForm.controls.accountId.invalid
-      ) {
-
-        <small>
-          Please select an account.
-        </small>
-
-      }
-
-    </div>
-
-
-    <!-- ===================================================== -->
-    <!-- DATES -->
-    <!-- ===================================================== -->
-
+    <!-- ROW 1: PERSON NAME + LOAN TYPE -->
     <div class="form-row">
 
       <div class="form-group">
+        <label for="personName">
+          Person Name
+        </label>
 
+        <input
+          id="personName"
+          type="text"
+          formControlName="personName"
+          placeholder="e.g. Rahul">
+
+        @if (
+          loanForm.controls.personName.touched &&
+          loanForm.controls.personName.invalid
+        ) {
+          <small>
+            Person name is required.
+          </small>
+        }
+      </div>
+
+      <!-- LOAN TYPE -->
+      @if (!loan) {
+        <div class="form-group">
+          <label for="type">
+            Loan Type
+          </label>
+
+          <select
+            id="type"
+            formControlName="type">
+            <option [ngValue]="LoanType.Borrowed">
+              Borrowed
+            </option>
+            <option [ngValue]="LoanType.Lent">
+              Lent
+            </option>
+          </select>
+        </div>
+      } @else {
+        <div class="form-group">
+          <label for="loanType">
+            Loan Type
+          </label>
+
+          <input
+            id="loanType"
+            type="text"
+            [value]="
+              loan.type === LoanType.Borrowed
+                ? 'Borrowed'
+                : 'Lent'
+            "
+            disabled>
+
+          <small>
+            Cannot be changed.
+          </small>
+        </div>
+      }
+
+    </div>
+
+
+    <!-- ROW 2: ORIGINAL AMOUNT + ACCOUNT -->
+    <div class="form-row">
+
+      <div class="form-group">
+        <label for="amount">
+          Original Amount
+        </label>
+
+        <input
+          id="amount"
+          type="number"
+          min="0.01"
+          placeholder="0.00"
+          formControlName="originalAmount">
+      </div>
+
+      <div class="form-group">
+        <label for="account">
+          Account
+        </label>
+
+        <select
+          id="account"
+          formControlName="accountId">
+          <option [ngValue]="0">
+            Select Account
+          </option>
+
+          @for (
+            account of Accounts$ | async;
+            track account.id
+          ) {
+            <option [ngValue]="account.id">
+              {{ account.name }} (₹{{ account.currentBalance | number:'1.0-0' }})
+            </option>
+          }
+        </select>
+
+        @if (
+          loanForm.controls.accountId.touched &&
+          loanForm.controls.accountId.invalid
+        ) {
+          <small>
+            Please select an account.
+          </small>
+        }
+      </div>
+
+    </div>
+
+
+    <!-- ROW 3: DATES -->
+    <div class="form-row">
+
+      <div class="form-group">
         <label for="loanDate">
           Loan Date
         </label>
@@ -170,57 +138,53 @@
           id="loanDate"
           type="date"
           formControlName="loanDate">
-
       </div>
 
-
       <div class="form-group">
-
         <label for="dueDate">
-          Due Date
+          Due Date (Optional)
         </label>
 
         <input
           id="dueDate"
           type="date"
           formControlName="dueDate">
-
       </div>
 
     </div>
 
 
-    <!-- ===================================================== -->
-    <!-- NOTES -->
-    <!-- ===================================================== -->
-
+    <!-- ROW 4: NOTES -->
     <div class="form-group">
-
       <label for="notes">
-        Notes
+        Notes (Optional)
       </label>
 
       <textarea
         id="notes"
         formControlName="notes"
-        rows="3"
-        placeholder="Optional notes">
+        rows="2"
+        placeholder="Add any additional details...">
       </textarea>
-
     </div>
 
 
-    <!-- ===================================================== -->
-    <!-- SUBMIT -->
-    <!-- ===================================================== -->
+    <!-- ACTIONS -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="cancel-btn"
+        (click)="close()">
+        Cancel
+      </button>
 
-    <button
-      type="submit"
-      [disabled]="loading$ | async">
-
-      {{ loan ? 'Save Changes' : 'Create Loan' }}
-
-    </button>
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="loading$ | async">
+        {{ loan ? 'Save Changes' : 'Create Loan' }}
+      </button>
+    </div>
 
   </form>
 

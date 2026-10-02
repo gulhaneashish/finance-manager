@@ -10,10 +10,11 @@ import { Store } from '@ngrx/store';
 import {
   FormBuilder,
   Validators,
-  ReactiveFormsModule
+  ReactiveFormsModule,
 } from '@angular/forms';
 
 import { map } from 'rxjs';
+import { InvestmentType } from '../../../core/models/investment.model';
 
 import * as InvestmentActions
   from '../../../store/investment/investment.actions';
@@ -33,13 +34,15 @@ import {
 import {
   loadActiveAccounts
 } from '../../../store/accounts/accounts.actions';
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-investment-list',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatIconModule
   ],
   templateUrl: './investment-list.html',
   styleUrl: './investment-list.css'
@@ -71,6 +74,10 @@ export class InvestmentList implements OnInit {
       selectInvestmentOperationSuccess
     );
 
+  showAddForm = false;
+
+  investmentTypes = Object.values(InvestmentType);
+
   showUpdateForm = false;
 
   selectedInvestmentId:
@@ -88,10 +95,51 @@ export class InvestmentList implements OnInit {
     map(accounts =>
       accounts.filter(
         account =>
+          account.isActive &&
           account.accountType !== 'CREDIT_CARD'
       )
     )
   );
+
+  addForm = this.fb.group({
+    accountId: [
+      0,
+      [
+        Validators.required,
+        Validators.min(1)
+      ]
+    ],
+
+    name: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(2)
+      ]
+    ],
+
+    investmentType: [
+      InvestmentType.MutualFund,
+      Validators.required
+    ],
+
+    amount: [
+      0,
+      [
+        Validators.required,
+        Validators.min(0.01)
+      ]
+    ],
+
+    investmentDate: [
+      new Date()
+        .toISOString()
+        .substring(0, 10),
+      Validators.required
+    ],
+
+    description: ['']
+  });
 
   updateForm = this.fb.group({
 
@@ -155,9 +203,44 @@ export class InvestmentList implements OnInit {
   }
 
   addInvestment(): void {
-    this.router.navigate([
-      '/investments/add'
-    ]);
+    this.showAddForm = true;
+    this.addForm.reset({
+      accountId: 0,
+      name: '',
+      investmentType: InvestmentType.MutualFund,
+      amount: 0,
+      investmentDate: new Date()
+        .toISOString()
+        .substring(0, 10),
+      description: ''
+    });
+  }
+
+  closeAddForm(): void {
+    this.showAddForm = false;
+    this.addForm.reset();
+  }
+
+  submitAdd(): void {
+    if (this.addForm.invalid) {
+      this.addForm.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.addForm.getRawValue();
+
+    this.store.dispatch(
+      InvestmentActions.createInvestment({
+        accountId: formValue.accountId!,
+        name: formValue.name!,
+        investmentType: formValue.investmentType!,
+        amount: formValue.amount!,
+        investmentDate: formValue.investmentDate!,
+        description: formValue.description || undefined
+      })
+    );
+
+    this.closeAddForm();
   }
 
   updateValue(

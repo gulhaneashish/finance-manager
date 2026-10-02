@@ -1,117 +1,101 @@
-<div class="transaction-form">
-
-  <h2>Add Transaction</h2>
-
-  <form
-    [formGroup]="transactionForm"
-    (ngSubmit)="submit()">
-
-    <!-- Account -->
-    <label for="account">
-      Account
-    </label>
-
-    <select
-      id="account"
-      formControlName="accountId">
-
-      <option [ngValue]="0">
-        Select Account
-      </option>
-
-      @for (account of transactionAccounts$ | async; track account.id) {
-        <option [ngValue]="account.id">
-          {{ account.name }} — ₹{{ account.currentBalance | number:'1.0-2' }}
-        </option>
+<div class="transaction-form-body">
+  <form [formGroup]="transactionForm" (ngSubmit)="submit()">
+    <!-- Account Selection -->
+    <div class="form-field full-width">
+      <label for="account">
+        Select Account <span class="required">*</span>
+      </label>
+      <select id="account" formControlName="accountId">
+        <option [ngValue]="0">-- Select an account --</option>
+        @for (account of transactionAccounts$ | async; track account.id) {
+          <option [ngValue]="account.id">
+            {{ account.name }} (₹{{ account.currentBalance | number:'1.0-2' }})
+          </option>
+        }
+      </select>
+      @if (transactionForm.get('accountId')?.touched && transactionForm.get('accountId')?.invalid) {
+        <small class="error-text">Please choose an active account.</small>
       }
-
-    </select>
-
+    </div>
 
     <!-- Type -->
-    <label for="type">
-      Type
-    </label>
-
-    <select
-      id="type"
-      formControlName="type">
-
-      <option [ngValue]="TransactionType.Income">
-        Income
-      </option>
-
-      <option [ngValue]="TransactionType.Expense">
-        Expense
-      </option>
-
-    </select>
-
+    <div class="form-field">
+      <label for="type">
+        Type <span class="required">*</span>
+      </label>
+      <select id="type" formControlName="type">
+        <option [ngValue]="TransactionType.Expense">🛒 Expense</option>
+        <option [ngValue]="TransactionType.Income">💰 Income</option>
+      </select>
+    </div>
 
     <!-- Amount -->
-    <label for="amount">
-      Amount
-    </label>
-
-    <input
-      id="amount"
-      type="number"
-      formControlName="amount"
-      min="0.01"
-      step="0.01">
-
+    <div class="form-field">
+      <label for="amount">
+        Amount (₹) <span class="required">*</span>
+      </label>
+      <input
+        id="amount"
+        type="number"
+        formControlName="amount"
+        min="0.01"
+        step="0.01"
+        placeholder="0.00"
+      />
+      @if (transactionForm.get('amount')?.touched && transactionForm.get('amount')?.invalid) {
+        <small class="error-text">Amount must be greater than zero.</small>
+      }
+    </div>
 
     <!-- Category -->
-    <label for="category">
-      Category
-    </label>
-
-    <select
-      id="category"
-      formControlName="categoryId">
-
-      <option [ngValue]="null">
-        Select Category
-      </option>
-
-      @for (category of categories$ | async; track category.id) {
-        <option [ngValue]="category.id">
-          {{ category.name }}
-        </option>
-      }
-
-    </select>
-
-
-    <!-- Description -->
-    <label for="description">
-      Description
-    </label>
-
-    <input
-      id="description"
-      type="text"
-      formControlName="description"
-      maxlength="250">
-
+    <div class="form-field">
+      <label for="category">Category</label>
+      <select id="category" formControlName="categoryId">
+        <option [ngValue]="null">-- Select Category --</option>
+        @for (category of categories$ | async; track category.id) {
+          <option [ngValue]="category.id">
+            {{ category.name }}
+          </option>
+        }
+      </select>
+    </div>
 
     <!-- Transaction Date -->
-    <label for="transactionDate">
-      Transaction Date
-    </label>
+    <div class="form-field">
+      <label for="transactionDate">
+        Date <span class="required">*</span>
+      </label>
+      <input
+        id="transactionDate"
+        type="date"
+        formControlName="transactionDate"
+      />
+    </div>
 
-    <input
-      id="transactionDate"
-      type="date"
-      formControlName="transactionDate">
+    <!-- Description -->
+    <div class="form-field full-width">
+      <label for="description">Description (Optional)</label>
+      <input
+        id="description"
+        type="text"
+        formControlName="description"
+        maxlength="250"
+        placeholder="e.g. Grocery shopping, Client payment"
+      />
+    </div>
 
-
-    <!-- Submit -->
-    <button
-      type="submit">
-      Add Transaction
-    </button>
-
+    <!-- Actions Footer -->
+    <div class="dialog-actions-footer">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="transactionForm.invalid"
+      >
+        Add Transaction
+      </button>
+    </div>
   </form>
-
 </div>

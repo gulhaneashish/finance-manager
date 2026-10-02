@@ -1,5 +1,7 @@
 import {
   Component,
+  EventEmitter,
+  Output,
   inject,
   OnInit
 } from '@angular/core';
@@ -28,17 +30,22 @@ import {
 } from '../../../store/transactions/transaction.actions';
 import { TransactionPurpose } from '../../../core/models/transaction.model';
 
+import { CommonModule, DecimalPipe } from '@angular/common';
+
 @Component({
   selector: 'app-transfer-form',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
-    AsyncPipe
+    AsyncPipe,
+    DecimalPipe
   ],
   templateUrl: './transfer-form.html',
   styleUrl: './transfer-form.css'
 })
 export class TransferForm implements OnInit {
+  @Output() formClosed = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
   private store = inject(Store);
@@ -147,5 +154,11 @@ ngOnInit(): void {
         }
       })
     );
+
+    this.formClosed.emit();
+  }
+
+  cancel(): void {
+    this.formClosed.emit();
   }
 }

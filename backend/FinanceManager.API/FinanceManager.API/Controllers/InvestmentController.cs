@@ -1,5 +1,5 @@
-﻿using FinanceManager.API.DTOs;
-using FinanceManager.API.Services;
+using FinanceManager.API.DTOs;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -11,9 +11,9 @@ namespace FinanceManager.API.Controllers;
 [Authorize]
 public class InvestmentController : ControllerBase
 {
-    private readonly InvestmentService _investmentService;
+    private readonly IInvestmentService _investmentService;
 
-    public InvestmentController(InvestmentService investmentService)
+    public InvestmentController(IInvestmentService investmentService)
     {
         _investmentService = investmentService;
     }

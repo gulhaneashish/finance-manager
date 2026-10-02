@@ -5,7 +5,8 @@ import {
   CategorySpending,
   MonthlyCashFlow,
   AccountSummary,
-  SavingsInvestmentSummary
+  SavingsInvestmentSummary,
+  DashboardFilter
 } from '../../core/models/dashboard.model';
 import { LoanDebtSummary } from '../../core/models/loan-debt.model';
 
@@ -17,8 +18,9 @@ import { LoanDebtSummary } from '../../core/models/loan-debt.model';
 export const loadDashboard = createAction(
   '[Dashboard] Load Dashboard',
   props<{
-    year: number;
-    month: number;
+    filter?: DashboardFilter;
+    year?: number;
+    month?: number;
   }>()
 );
 
@@ -44,8 +46,9 @@ export const loadDashboardFailure = createAction(
 export const loadCategorySpending = createAction(
   '[Dashboard] Load Category Spending',
   props<{
-    year: number;
-    month: number;
+    filter?: DashboardFilter;
+    year?: number;
+    month?: number;
   }>()
 );
 
@@ -124,8 +127,9 @@ export const loadSavingsInvestments =
   createAction(
     '[Dashboard] Load Savings Investments',
     props<{
-      year: number;
-      month: number;
+      filter?: DashboardFilter;
+      year?: number;
+      month?: number;
     }>()
   );
 

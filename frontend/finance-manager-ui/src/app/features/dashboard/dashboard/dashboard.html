@@ -6,41 +6,117 @@
   <div class="dashboard-header">
 
     <div class="header-left">
-      <h1>Financial Overview</h1>
+      <div class="title-with-badge">
+        <h1>Financial Overview</h1>
+        @if (dashboard$ | async; as dashboard) {
+          <span class="active-range-pill">
+            <span class="pulse-dot"></span>
+            {{ dashboard.periodLabel || (dashboard.month + '/' + dashboard.year) }}
+          </span>
+        }
+      </div>
 
       <p>
-        Here's how your finances are looking.
+        Real-time financial performance and budget analytics
       </p>
     </div>
 
     <div class="header-actions">
 
-      <div class="month-display">
-        <mat-icon>calendar_month</mat-icon>
+      <!-- Modern Segmented Pill Bar -->
+      <div class="segmented-control" role="tablist" aria-label="Filter period">
+        <button
+          type="button"
+          class="segmented-btn"
+          [class.active]="selectedPeriod === 'today'"
+          (click)="setPeriod('today')"
+          id="period-today">
+          <span>Today</span>
+        </button>
 
-        <span>
-          @if (dashboard$ | async; as dashboard) {
-            {{ dashboard.month }}/{{ dashboard.year }}
-          } @else {
-            Current Month
-          }
-        </span>
+        <button
+          type="button"
+          class="segmented-btn"
+          [class.active]="selectedPeriod === 'this_week'"
+          (click)="setPeriod('this_week')"
+          id="period-this-week">
+          <span>This Week</span>
+        </button>
+
+        <button
+          type="button"
+          class="segmented-btn"
+          [class.active]="selectedPeriod === 'this_month'"
+          (click)="setPeriod('this_month')"
+          id="period-this-month">
+          <span>This Month</span>
+        </button>
+
+        <button
+          type="button"
+          class="segmented-btn"
+          [class.active]="selectedPeriod === 'this_year'"
+          (click)="setPeriod('this_year')"
+          id="period-this-year">
+          <span>This Year</span>
+        </button>
+
+        <button
+          type="button"
+          class="segmented-btn custom-btn"
+          [class.active]="selectedPeriod === 'custom'"
+          (click)="setPeriod('custom')"
+          id="period-custom">
+          <mat-icon>tune</mat-icon>
+          <span>Custom</span>
+        </button>
       </div>
-
-      <!-- <button
-        mat-raised-button
-        color="primary"
-        class="add-transaction-button">
-
-        <mat-icon>add</mat-icon>
-
-        Add Transaction
-
-      </button> -->
 
     </div>
 
   </div>
+
+  <!-- Custom Range Drawer (Only when Custom is selected) -->
+  @if (selectedPeriod === 'custom') {
+    <div class="custom-range-bar animate-slide-down">
+      <div class="custom-range-content">
+        <div class="custom-field">
+          <label for="custom-from-date">From</label>
+          <div class="custom-input-wrap">
+            <mat-icon>calendar_today</mat-icon>
+            <input
+              id="custom-from-date"
+              type="date"
+              [(ngModel)]="customStartDate" />
+          </div>
+        </div>
+
+        <div class="custom-range-arrow">
+          <mat-icon>arrow_forward</mat-icon>
+        </div>
+
+        <div class="custom-field">
+          <label for="custom-to-date">To</label>
+          <div class="custom-input-wrap">
+            <mat-icon>event</mat-icon>
+            <input
+              id="custom-to-date"
+              type="date"
+              [(ngModel)]="customEndDate" />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="custom-apply-btn"
+          (click)="applyCustomRange()"
+          id="btn-apply-custom">
+          <mat-icon>check</mat-icon>
+          <span>Apply</span>
+        </button>
+      </div>
+    </div>
+  }
 
 
   <!-- =====================================================
@@ -48,10 +124,8 @@
   ====================================================== -->
   @if (loading$ | async) {
 
-    <mat-progress-bar
-      class="dashboard-loading"
-      mode="indeterminate">
-    </mat-progress-bar>
+  <mat-progress-bar class="dashboard-loading" mode="indeterminate">
+  </mat-progress-bar>
 
   }
 
@@ -61,19 +135,19 @@
   ====================================================== -->
   @if (error$ | async; as error) {
 
-    <mat-card class="error-card">
+  <mat-card class="error-card">
 
-      <mat-card-content>
+    <mat-card-content>
 
-        <mat-icon>error_outline</mat-icon>
+      <mat-icon>error_outline</mat-icon>
 
-        <span>
-          {{ error }}
-        </span>
+      <span>
+        {{ error }}
+      </span>
 
-      </mat-card-content>
+    </mat-card-content>
 
-    </mat-card>
+  </mat-card>
 
   }
 
@@ -84,155 +158,155 @@
   @if (dashboard$ | async; as dashboard) {
 
 
-    <!-- ===================================================
+  <!-- ===================================================
          SUMMARY CARDS
     ==================================================== -->
-    <div class="summary-grid">
+  <div class="summary-grid">
 
 
-      <!-- Total Balance -->
-      <mat-card class="summary-card balance-card">
+    <!-- Total Balance -->
+    <mat-card class="summary-card balance-card">
 
-        <mat-card-content>
+      <mat-card-content>
 
-          <div class="summary-icon blue-icon">
+        <div class="summary-icon blue-icon">
 
-            <mat-icon>
-              account_balance
-            </mat-icon>
+          <mat-icon>
+            account_balance
+          </mat-icon>
 
-          </div>
+        </div>
 
-          <div class="summary-content">
+        <div class="summary-content">
 
-            <span class="summary-label">
-              Total Balance
-            </span>
+          <span class="summary-label">
+            Total Balance
+          </span>
 
-            <h2>
-              ₹{{ dashboard.totalBalance | number:'1.0-2' }}
-            </h2>
+          <h2>
+            ₹{{ dashboard.totalBalance | number:'1.0-2' }}
+          </h2>
 
-            <span class="summary-description">
-              Current available balance
-            </span>
+          <span class="summary-description">
+            Current available balance
+          </span>
 
-          </div>
+        </div>
 
-        </mat-card-content>
+      </mat-card-content>
 
-      </mat-card>
-
-
-      <!-- Income -->
-      <mat-card class="summary-card income-card">
-
-        <mat-card-content>
-
-          <div class="summary-icon green-icon">
-
-            <mat-icon>
-              trending_up
-            </mat-icon>
-
-          </div>
-
-          <div class="summary-content">
-
-            <span class="summary-label">
-              Total Income
-            </span>
-
-            <h2>
-              ₹{{ dashboard.totalIncome | number:'1.0-2' }}
-            </h2>
-
-            <span class="summary-description">
-              This month
-            </span>
-
-          </div>
-
-        </mat-card-content>
-
-      </mat-card>
+    </mat-card>
 
 
-      <!-- Expenses -->
-      <mat-card class="summary-card expense-card">
+    <!-- Income -->
+    <mat-card class="summary-card income-card">
 
-        <mat-card-content>
+      <mat-card-content>
 
-          <div class="summary-icon red-icon">
+        <div class="summary-icon green-icon">
 
-            <mat-icon>
-              trending_down
-            </mat-icon>
+          <mat-icon>
+            trending_up
+          </mat-icon>
 
-          </div>
+        </div>
 
-          <div class="summary-content">
+        <div class="summary-content">
 
-            <span class="summary-label">
-              Total Expenses
-            </span>
+          <span class="summary-label">
+            Total Income
+          </span>
 
-            <h2>
-              ₹{{ dashboard.totalExpenses | number:'1.0-2' }}
-            </h2>
+          <h2>
+            ₹{{ dashboard.totalIncome | number:'1.0-2' }}
+          </h2>
 
-            <span class="summary-description">
-              This month
-            </span>
+          <span class="summary-description">
+            {{ dashboard.periodLabel || 'This period' }}
+          </span>
 
-          </div>
+        </div>
 
-        </mat-card-content>
+      </mat-card-content>
 
-      </mat-card>
-
-
-      <!-- Budget Remaining -->
-      <mat-card class="summary-card budget-card">
-
-        <mat-card-content>
-
-          <div class="summary-icon purple-icon">
-
-            <mat-icon>
-              savings
-            </mat-icon>
-
-          </div>
-
-          <div class="summary-content">
-
-            <span class="summary-label">
-              Budget Remaining
-            </span>
-
-            <h2>
-              ₹{{ dashboard.budgetRemaining | number:'1.0-2' }}
-            </h2>
-
-            <span class="summary-description">
-              Available budget
-            </span>
-
-          </div>
-
-        </mat-card-content>
-
-      </mat-card>
-
-    </div>
+    </mat-card>
 
 
-<mat-card class="net-worth-card">
+    <!-- Expenses -->
+    <mat-card class="summary-card expense-card">
 
-  <mat-card-content>
+      <mat-card-content>
 
-    @if (netWorth$ | async; as netWorth) {
+        <div class="summary-icon red-icon">
+
+          <mat-icon>
+            trending_down
+          </mat-icon>
+
+        </div>
+
+        <div class="summary-content">
+
+          <span class="summary-label">
+            Total Expenses
+          </span>
+
+          <h2>
+            ₹{{ dashboard.totalExpenses | number:'1.0-2' }}
+          </h2>
+
+          <span class="summary-description">
+            {{ dashboard.periodLabel || 'This period' }}
+          </span>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+
+    <!-- Budget Remaining -->
+    <mat-card class="summary-card budget-card">
+
+      <mat-card-content>
+
+        <div class="summary-icon purple-icon">
+
+          <mat-icon>
+            savings
+          </mat-icon>
+
+        </div>
+
+        <div class="summary-content">
+
+          <span class="summary-label">
+            Budget Remaining
+          </span>
+
+          <h2>
+            ₹{{ dashboard.budgetRemaining | number:'1.0-2' }}
+          </h2>
+
+          <span class="summary-description">
+            Available budget
+          </span>
+
+        </div>
+
+      </mat-card-content>
+
+    </mat-card>
+
+  </div>
+
+
+  <mat-card class="net-worth-card">
+
+    <mat-card-content>
+
+      @if (netWorth$ | async; as netWorth) {
 
       <div class="net-worth-header">
 
@@ -301,12 +375,12 @@
 
       </div>
 
-    }
+      }
 
-  </mat-card-content>
+    </mat-card-content>
 
-</mat-card>
-@if (netWorth$ | async; as netWorth) {
+  </mat-card>
+  @if (netWorth$ | async; as netWorth) {
 
   <div class="current-investment-value">
 
@@ -317,334 +391,322 @@
 
   </div>
 
-}
-    <!-- ===================================================
+  }
+  <!-- ===================================================
          BUDGET + FINANCIAL TARGETS
     ==================================================== -->
-    <div class="two-column-grid">
+  <div class="two-column-grid">
 
 
-      <!-- Monthly Budget -->
-      <mat-card class="section-card">
+    <!-- Monthly Budget -->
+    <mat-card class="section-card">
 
-        <mat-card-header>
+      <mat-card-header>
 
-          <div class="section-title">
+        <div class="section-title">
 
-            <div class="section-icon blue-section-icon">
-              <mat-icon>
-                pie_chart
-              </mat-icon>
-            </div>
-
-            <div>
-              <mat-card-title>
-                Monthly Budget
-              </mat-card-title>
-
-              <mat-card-subtitle>
-                Your spending progress
-              </mat-card-subtitle>
-            </div>
-
-          </div>
-
-          <button
-            mat-icon-button
-            class="more-button">
-
+          <div class="section-icon blue-section-icon">
             <mat-icon>
-              more_horiz
+              pie_chart
             </mat-icon>
+          </div>
 
-          </button>
+          <div>
+            <mat-card-title>
+              Monthly Budget
+            </mat-card-title>
 
-        </mat-card-header>
+            <mat-card-subtitle>
+              Your spending progress
+            </mat-card-subtitle>
+          </div>
 
+        </div>
 
-        <mat-card-content>
+        <button mat-icon-button class="more-button">
 
-          <div class="budget-values">
+          <mat-icon>
+            more_horiz
+          </mat-icon>
 
-            <div class="budget-value">
+        </button>
 
-              <span>
-                Budget
-              </span>
-
-              <strong>
-                ₹{{ dashboard.expenseBudget | number:'1.0-2' }}
-              </strong>
-
-            </div>
-
-
-            <div class="budget-value">
-
-              <span>
-                Spent
-              </span>
-
-              <strong>
-                ₹{{ dashboard.budgetSpent | number:'1.0-2' }}
-              </strong>
-
-            </div>
+      </mat-card-header>
 
 
-            <div class="budget-value remaining">
+      <mat-card-content>
 
-              <span>
-                Remaining
-              </span>
+        <div class="budget-values">
 
-              <strong>
-                ₹{{ dashboard.budgetRemaining | number:'1.0-2' }}
-              </strong>
+          <div class="budget-value">
 
-            </div>
+            <span>
+              Budget
+            </span>
+
+            <strong>
+              ₹{{ dashboard.expenseBudget | number:'1.0-2' }}
+            </strong>
 
           </div>
 
 
-          <div class="progress-wrapper">
+          <div class="budget-value">
 
-            <mat-progress-bar
-              mode="determinate"
-            [value]="
+            <span>
+              Spent
+            </span>
+
+            <strong>
+              ₹{{ dashboard.budgetSpent | number:'1.0-2' }}
+            </strong>
+
+          </div>
+
+
+          <div class="budget-value remaining">
+
+            <span>
+              Remaining
+            </span>
+
+            <strong>
+              ₹{{ dashboard.budgetRemaining | number:'1.0-2' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="progress-wrapper">
+
+          <mat-progress-bar mode="determinate" [value]="
   calculateBudgetPercentage(
     dashboard.budgetSpent,
     dashboard.expenseBudget
   )
 ">
-            </mat-progress-bar>
+          </mat-progress-bar>
 
-            <strong>
-              {{
-                dashboard.expenseBudget > 0
-                  ? (
-                      dashboard.budgetSpent /
-                      dashboard.expenseBudget *
-                      100
-                    ).toFixed(0)
-                  : 0
-              }}%
-            </strong>
-
-          </div>
-
-
-          <p class="progress-description">
-
+          <strong>
             {{
-              dashboard.expenseBudget > 0
-                ? (
-                    dashboard.budgetSpent /
-                    dashboard.expenseBudget *
-                    100
-                  ).toFixed(0)
-                : 0
+            dashboard.expenseBudget > 0
+            ? (
+            dashboard.budgetSpent /
+            dashboard.expenseBudget *
+            100
+            ).toFixed(0)
+            : 0
             }}%
-            of monthly budget used
-
-          </p>
-
-        </mat-card-content>
-
-      </mat-card>
-
-
-
-      <!-- Financial Targets -->
-     <mat-card class="section-card">
-
-  <mat-card-header>
-
-    <div class="section-title">
-
-      <div class="section-icon purple-section-icon">
-        <mat-icon>track_changes</mat-icon>
-      </div>
-
-      <div>
-        <mat-card-title>
-          Financial Targets
-        </mat-card-title>
-
-        <mat-card-subtitle>
-          Savings and investment goals
-        </mat-card-subtitle>
-      </div>
-
-    </div>
-
-    <button
-      mat-icon-button
-      class="more-button">
-
-      <mat-icon>more_horiz</mat-icon>
-
-    </button>
-
-  </mat-card-header>
-
-
-  <mat-card-content>
-
-    @if (savingsInvestments$ | async; as data) {
-
-      <!-- Savings -->
-
-      <div class="target-item">
-
-        <div class="target-heading">
-
-          <div>
-            <strong>
-              Savings Target
-            </strong>
-
-            <span>
-              Saved: ₹{{ data.actualSavings | number:'1.0-2' }}
-            </span>
-          </div>
-
-          <div class="target-amount">
-
-            ₹{{ data.savingsTarget | number:'1.0-2' }}
-
-          </div>
-
-        </div>
-
-
-        <mat-progress-bar
-          mode="determinate"
-          [value]="data.savingsProgress">
-        </mat-progress-bar>
-
-
-        <div class="target-progress">
-
-          <span>
-            {{ data.savingsProgress | number:'1.0-0' }}% completed
-          </span>
-
-          <strong>
-            ₹{{ data.actualSavings | number:'1.0-2' }}
           </strong>
 
         </div>
 
-      </div>
+
+        <p class="progress-description">
+
+          {{
+          dashboard.expenseBudget > 0
+          ? (
+          dashboard.budgetSpent /
+          dashboard.expenseBudget *
+          100
+          ).toFixed(0)
+          : 0
+          }}%
+          of monthly budget used
+
+        </p>
+
+      </mat-card-content>
+
+    </mat-card>
 
 
-      <!-- Investment -->
 
-      <div class="target-item">
+    <!-- Financial Targets -->
+    <mat-card class="section-card">
 
-        <div class="target-heading">
+      <mat-card-header>
+
+        <div class="section-title">
+
+          <div class="section-icon purple-section-icon">
+            <mat-icon>track_changes</mat-icon>
+          </div>
 
           <div>
-            <strong>
-              Investment Target
-            </strong>
+            <mat-card-title>
+              Financial Targets
+            </mat-card-title>
+
+            <mat-card-subtitle>
+              Savings and investment goals
+            </mat-card-subtitle>
+          </div>
+
+        </div>
+
+        <button mat-icon-button class="more-button">
+
+          <mat-icon>more_horiz</mat-icon>
+
+        </button>
+
+      </mat-card-header>
+
+
+      <mat-card-content>
+
+        @if (savingsInvestments$ | async; as data) {
+
+        <!-- Savings -->
+
+        <div class="target-item">
+
+          <div class="target-heading">
+
+            <div>
+              <strong>
+                Savings Target
+              </strong>
+
+              <span>
+                Saved: ₹{{ data.actualSavings | number:'1.0-2' }}
+              </span>
+            </div>
+
+            <div class="target-amount">
+
+              ₹{{ data.savingsTarget | number:'1.0-2' }}
+
+            </div>
+
+          </div>
+
+
+          <mat-progress-bar mode="determinate" [value]="data.savingsProgress">
+          </mat-progress-bar>
+
+
+          <div class="target-progress">
 
             <span>
-              Invested: ₹{{ data.actualInvestment | number:'1.0-2' }}
+              {{ data.savingsProgress | number:'1.0-0' }}% completed
             </span>
-          </div>
 
-          <div class="target-amount">
-
-            ₹{{ data.investmentTarget | number:'1.0-2' }}
+            <strong>
+              ₹{{ data.actualSavings | number:'1.0-2' }}
+            </strong>
 
           </div>
 
         </div>
 
 
-        <mat-progress-bar
-          mode="determinate"
-          [value]="data.investmentProgress">
-        </mat-progress-bar>
+        <!-- Investment -->
+
+        <div class="target-item">
+
+          <div class="target-heading">
+
+            <div>
+              <strong>
+                Investment Target
+              </strong>
+
+              <span>
+                Invested: ₹{{ data.actualInvestment | number:'1.0-2' }}
+              </span>
+            </div>
+
+            <div class="target-amount">
+
+              ₹{{ data.investmentTarget | number:'1.0-2' }}
+
+            </div>
+
+          </div>
 
 
-        <div class="target-progress">
+          <mat-progress-bar mode="determinate" [value]="data.investmentProgress">
+          </mat-progress-bar>
 
-          <span>
-            {{ data.investmentProgress | number:'1.0-0' }}% completed
-          </span>
 
-          <strong>
-            ₹{{ data.actualInvestment | number:'1.0-2' }}
-          </strong>
+          <div class="target-progress">
+
+            <span>
+              {{ data.investmentProgress | number:'1.0-0' }}% completed
+            </span>
+
+            <strong>
+              ₹{{ data.actualInvestment | number:'1.0-2' }}
+            </strong>
+
+          </div>
 
         </div>
 
-      </div>
+        }
 
-    }
+      </mat-card-content>
 
-  </mat-card-content>
+    </mat-card>
 
-</mat-card>
-
-    </div>
+  </div>
 
 
 
-    <!-- ===================================================
+  <!-- ===================================================
          CATEGORY SPENDING + MONTHLY CASH FLOW
     ==================================================== -->
-    <div class="two-column-grid">
+  <div class="two-column-grid">
 
 
-      <!-- Category Spending -->
-     <!-- ===================================================
+    <!-- Category Spending -->
+    <!-- ===================================================
      CATEGORY SPENDING
 ==================================================== -->
 
-<mat-card class="section-card category-card">
+    <mat-card class="section-card category-card">
 
-  <mat-card-header>
+      <mat-card-header>
 
-    <div class="section-title">
+        <div class="section-title">
 
-      <div class="section-icon blue-section-icon">
-        <mat-icon>pie_chart</mat-icon>
-      </div>
+          <div class="section-icon blue-section-icon">
+            <mat-icon>pie_chart</mat-icon>
+          </div>
 
-      <div>
+          <div>
 
-        <mat-card-title>
-          Category Spending
-        </mat-card-title>
+            <mat-card-title>
+              Category Spending
+            </mat-card-title>
 
-        <mat-card-subtitle>
-          Where your money is going
-        </mat-card-subtitle>
+            <mat-card-subtitle>
+              Where your money is going
+            </mat-card-subtitle>
 
-      </div>
+          </div>
 
-    </div>
+        </div>
 
-    <button
-      mat-icon-button
-      class="more-button">
+        <button mat-icon-button class="more-button">
 
-      <mat-icon>more_horiz</mat-icon>
+          <mat-icon>more_horiz</mat-icon>
 
-    </button>
+        </button>
 
-  </mat-card-header>
+      </mat-card-header>
 
 
-  <mat-card-content>
+      <mat-card-content>
 
-    @if (categorySpending$ | async; as categories) {
+        @if (categorySpending$ | async; as categories) {
 
-      @if (categories.length === 0) {
+        @if (categories.length === 0) {
 
         <div class="category-empty">
 
@@ -662,7 +724,7 @@
 
         </div>
 
-      } @else {
+        } @else {
 
         <div class="category-chart-layout">
 
@@ -672,11 +734,7 @@
 
           <div class="doughnut-wrapper">
 
-            <canvas
-              baseChart
-              [type]="doughnutChartType"
-              [data]="doughnutChartData"
-              [options]="doughnutChartOptions">
+            <canvas baseChart [type]="doughnutChartType" [data]="doughnutChartData" [options]="doughnutChartOptions">
             </canvas>
 
             <!-- CENTER TOTAL -->
@@ -703,44 +761,42 @@
           <div class="category-legend">
 
             @for (
-              category of categories;
-              track category.categoryId
+            category of categories;
+            track category.categoryId
             ) {
 
-              <div class="category-legend-row">
+            <div class="category-legend-row">
 
-                <div class="category-name">
+              <div class="category-name">
 
-                  <span
-                    class="legend-dot"
-                    [style.background]="
+                <span class="legend-dot" [style.background]="
                       getCategoryColor($index)
                     ">
-                  </span>
+                </span>
 
-                  <span>
-                    {{ category.categoryName }}
-                  </span>
-
-                </div>
-
-
-                <div class="category-values">
-
-                  <strong>
-                    ₹{{ category.amount | number:'1.0-2' }}
-                  </strong>
-
-                  <span>
-                    {{ getCategoryPercentage(
-                      category.amount,
-                      categories
-                    ) }}%
-                  </span>
-
-                </div>
+                <span>
+                  {{ category.categoryName }}
+                </span>
 
               </div>
+
+
+              <div class="category-values">
+
+                <strong>
+                  ₹{{ category.amount | number:'1.0-2' }}
+                </strong>
+
+                <span>
+                  {{ getCategoryPercentage(
+                  category.amount,
+                  categories
+                  ) }}%
+                </span>
+
+              </div>
+
+            </div>
 
             }
 
@@ -748,92 +804,90 @@
 
         </div>
 
-      }
+        }
 
-    }
+        }
 
-  </mat-card-content>
-
-
-  <!-- FOOTER -->
-
-  <div class="section-footer">
-    View full report
-  </div>
-
-</mat-card>
+      </mat-card-content>
 
 
+      <!-- FOOTER -->
 
-      <!-- Monthly Cash Flow -->
-      <!-- ===================================================
+      <div class="section-footer">
+        View full report
+      </div>
+
+    </mat-card>
+
+
+
+    <!-- Monthly Cash Flow -->
+    <!-- ===================================================
      MONTHLY CASH FLOW
 ==================================================== -->
 
-<mat-card class="section-card cash-flow-card">
+    <mat-card class="section-card cash-flow-card">
 
-  <mat-card-header>
+      <mat-card-header>
 
-    <div class="section-title">
+        <div class="section-title">
 
-      <div class="section-icon blue-section-icon">
-        <mat-icon>bar_chart</mat-icon>
-      </div>
+          <div class="section-icon blue-section-icon">
+            <mat-icon>bar_chart</mat-icon>
+          </div>
 
-      <div>
+          <div>
 
-        <mat-card-title>
-          Monthly Cash Flow
-        </mat-card-title>
+            <mat-card-title>
+              Monthly Cash Flow
+            </mat-card-title>
 
-        <mat-card-subtitle>
-          Income vs expenses
-        </mat-card-subtitle>
+            <mat-card-subtitle>
+              Income vs expenses
+            </mat-card-subtitle>
 
-      </div>
-
-    </div>
-
-    <button
-      mat-icon-button
-      class="more-button">
-
-      <mat-icon>
-        more_horiz
-      </mat-icon>
-
-    </button>
-
-  </mat-card-header>
-
-
-  <mat-card-content class="cash-flow-content">
-
-    @if (monthlyCashFlow$ | async; as cashFlow) {
-
-      <div class="cash-flow-table">
-
-        <!-- HEADER -->
-
-        <div class="cash-flow-header">
-
-          <span>Month</span>
-
-          <span>Income</span>
-
-          <span>Expenses</span>
-
-          <span>Net Cash Flow</span>
+          </div>
 
         </div>
 
+        <button mat-icon-button class="more-button">
 
-        <!-- LAST 6 MONTHS -->
+          <mat-icon>
+            more_horiz
+          </mat-icon>
 
-        @for (
+        </button>
+
+      </mat-card-header>
+
+
+      <mat-card-content class="cash-flow-content">
+
+        @if (monthlyCashFlow$ | async; as cashFlow) {
+
+        <div class="cash-flow-table">
+
+          <!-- HEADER -->
+
+          <div class="cash-flow-header">
+
+            <span>Month</span>
+
+            <span>Income</span>
+
+            <span>Expenses</span>
+
+            <span>Net Cash Flow</span>
+
+          </div>
+
+
+          <!-- LAST 6 MONTHS -->
+
+          @for (
           item of getLastSixMonths(cashFlow);
           track item.year + '-' + item.month
-        ) {
+          ) {
 
           <div class="cash-flow-row">
 
@@ -858,11 +912,9 @@
             </span>
 
 
-            <strong
-              [class.positive]="
+            <strong [class.positive]="
                 item.netCashFlow >= 0
-              "
-              [class.negative]="
+              " [class.negative]="
                 item.netCashFlow < 0
               ">
 
@@ -872,33 +924,33 @@
 
           </div>
 
+          }
+
+        </div>
+
         }
 
+      </mat-card-content>
+
+
+      <div class="section-footer">
+        View all months
       </div>
 
-    }
+    </mat-card>
 
-  </mat-card-content>
-
-
-  <div class="section-footer">
-    View all months
   </div>
 
-</mat-card>
-
-    </div>
 
 
-
-    <!-- ===================================================
+  <!-- ===================================================
          LOANS & DEBT
     ==================================================== -->
-    <!-- ===================================================
+  <!-- ===================================================
      LOANS & DEBT
 ==================================================== -->
 
-@if (loanDebt$ | async; as loanDebt) {
+  @if (loanDebt$ | async; as loanDebt) {
 
   <mat-card class="full-width-card loans-card">
 
@@ -928,10 +980,7 @@
 
       </div>
 
-      <button
-        mat-icon-button
-        class="more-button"
-        type="button">
+      <button mat-icon-button class="more-button" type="button">
 
         <mat-icon>
           more_horiz
@@ -1036,9 +1085,7 @@
 
         </div>
 
-        <strong
-          [class.positive]="loanDebt.netDebt <= 0"
-          [class.negative]="loanDebt.netDebt > 0">
+        <strong [class.positive]="loanDebt.netDebt <= 0" [class.negative]="loanDebt.netDebt > 0">
 
           ₹{{ loanDebt.netDebt | number:'1.0-2' }}
 
@@ -1051,139 +1098,139 @@
 
       @if (loanDebt.loans.length > 0) {
 
-        <div class="loan-list">
+      <div class="loan-list">
 
-          <!-- Table Header -->
+        <!-- Table Header -->
 
-          <div class="loan-table-header">
+        <div class="loan-table-header">
 
-            <span>
-              Name
-            </span>
+          <span>
+            Name
+          </span>
 
-            <span>
-              Type
-            </span>
+          <span>
+            Type
+          </span>
 
-            <span>
-              Remaining
-            </span>
+          <span>
+            Remaining
+          </span>
 
-            <span>
-              Status
-            </span>
+          <span>
+            Status
+          </span>
+
+        </div>
+
+
+        <!-- Loan Rows -->
+
+        @for (
+        loan of loanDebt.loans.slice(0, 3);
+        track loan.loanId
+        ) {
+
+        <div class="dashboard-loan-item">
+
+          <!-- Person -->
+
+          <div class="loan-info">
+
+            <strong>
+              {{ loan.personName }}
+            </strong>
 
           </div>
 
 
-          <!-- Loan Rows -->
+          <!-- Type -->
 
-          @for (
-            loan of loanDebt.loans.slice(0, 3);
-            track loan.loanId
-          ) {
+          <div class="loan-type">
 
-            <div class="dashboard-loan-item">
+            @if (loan.type === LoanType.Borrowed) {
 
-              <!-- Person -->
+            <span class="borrowed">
+              Borrowed
+            </span>
 
-              <div class="loan-info">
+            } @else if (loan.type === LoanType.Lent) {
 
-                <strong>
-                  {{ loan.personName }}
-                </strong>
+            <span class="lent">
+              Lent
+            </span>
 
-              </div>
+            } @else {
 
+            <span>
+              Unknown
+            </span>
 
-              <!-- Type -->
+            }
 
-              <div class="loan-type">
-
-                @if (loan.type === LoanType.Borrowed) {
-
-                  <span class="borrowed">
-                    Borrowed
-                  </span>
-
-                } @else if (loan.type === LoanType.Lent) {
-
-                  <span class="lent">
-                    Lent
-                  </span>
-
-                } @else {
-
-                  <span>
-                    Unknown
-                  </span>
-
-                }
-
-              </div>
+          </div>
 
 
-              <!-- Remaining -->
+          <!-- Remaining -->
 
-              <div class="loan-remaining">
+          <div class="loan-remaining">
 
-                <strong>
-                  ₹{{ loan.remainingAmount | number:'1.0-2' }}
-                </strong>
+            <strong>
+              ₹{{ loan.remainingAmount | number:'1.0-2' }}
+            </strong>
 
-                <!-- <span>
+            <!-- <span>
                   remaining
                 </span> -->
 
-              </div>
+          </div>
 
 
-              <!-- Status -->
+          <!-- Status -->
 
-              <div class="loan-status">
+          <div class="loan-status">
 
-                @if (loan.isOverdue) {
+            @if (loan.isOverdue) {
 
-                  <span class="overdue">
-                    Overdue
-                  </span>
+            <span class="overdue">
+              Overdue
+            </span>
 
-                } @else {
+            } @else {
 
-                  <span class="on-track">
-                    On Track
-                  </span>
+            <span class="on-track">
+              On Track
+            </span>
 
-                }
+            }
 
-              </div>
-
-            </div>
-
-          }
+          </div>
 
         </div>
+
+        }
+
+      </div>
 
 
       } @else {
 
-        <!-- ================= EMPTY STATE ================= -->
+      <!-- ================= EMPTY STATE ================= -->
 
-        <div class="no-loans">
+      <div class="no-loans">
 
-          <mat-icon>
-            account_balance
-          </mat-icon>
+        <mat-icon>
+          account_balance
+        </mat-icon>
 
-          <strong>
-            No active loans
-          </strong>
+        <strong>
+          No active loans
+        </strong>
 
-          <span>
-            Your active loans and debts will appear here.
-          </span>
+        <span>
+          Your active loans and debts will appear here.
+        </span>
 
-        </div>
+      </div>
 
       }
 
@@ -1200,147 +1247,144 @@
 
   </mat-card>
 
-}
+  }
 
 
-    <!-- ===================================================
+  <!-- ===================================================
          ACCOUNTS + SAVINGS / INVESTMENTS
     ==================================================== -->
   <!-- ===================================================
      ACCOUNTS + SAVINGS / INVESTMENTS
 =================================================== -->
 
-<div class="dashboard-bottom-grid">
+  <div class="dashboard-bottom-grid">
 
-  <!-- =================================================
+    <!-- =================================================
        ACCOUNTS
   ================================================== -->
 
-  <mat-card class="section-card accounts-card">
+    <mat-card class="section-card accounts-card">
 
-    <mat-card-header>
+      <mat-card-header>
 
-      <div class="section-title">
+        <div class="section-title">
 
-        <div class="section-icon blue-section-icon">
-          <mat-icon>account_balance</mat-icon>
+          <div class="section-icon blue-section-icon">
+            <mat-icon>account_balance</mat-icon>
+          </div>
+
+          <div>
+            <mat-card-title>
+              Accounts
+            </mat-card-title>
+
+            <mat-card-subtitle>
+              Your bank and credit accounts
+            </mat-card-subtitle>
+          </div>
+
         </div>
 
-        <div>
-          <mat-card-title>
-            Accounts
-          </mat-card-title>
+        <button mat-icon-button class="more-button" type="button">
 
-          <mat-card-subtitle>
-            Your bank and credit accounts
-          </mat-card-subtitle>
-        </div>
+          <mat-icon>
+            more_horiz
+          </mat-icon>
 
-      </div>
+        </button>
 
-      <button
-        mat-icon-button
-        class="more-button"
-        type="button">
-
-        <mat-icon>
-          more_horiz
-        </mat-icon>
-
-      </button>
-
-    </mat-card-header>
+      </mat-card-header>
 
 
-    <mat-card-content class="accounts-content">
+      <mat-card-content class="accounts-content">
 
-      @if (accounts$ | async; as accounts) {
+        @if (accounts$ | async; as accounts) {
 
         @if (accounts.length === 0) {
 
-          <div class="compact-empty">
+        <div class="compact-empty">
 
-            <mat-icon>
-              account_balance
-            </mat-icon>
+          <mat-icon>
+            account_balance
+          </mat-icon>
 
-            <span>
-              No accounts available.
-            </span>
+          <span>
+            No accounts available.
+          </span>
 
-          </div>
+        </div>
 
         } @else {
 
-          <!-- Only first 3 accounts -->
+        <!-- Only first 3 accounts -->
 
-          <div class="accounts-horizontal">
+        <div class="accounts-horizontal">
 
-            @for (
-              account of accounts.slice(0, 3);
-              track account.accountId
-            ) {
+          @for (
+          account of accounts.slice(0, 3);
+          track account.accountId
+          ) {
 
-              <div class="account-mini-card">
+          <div class="account-mini-card">
 
-                <div class="account-mini-header">
+            <div class="account-mini-header">
 
-                  <div class="account-mini-icon">
+              <div class="account-mini-icon">
 
-                    <mat-icon>
-                      {{
-                        account.accountType === 'CREDIT_CARD'
-                          ? 'credit_card'
-                          : 'account_balance'
-                      }}
-                    </mat-icon>
-
-                  </div>
-
-                  <span class="account-type">
-                    {{ account.accountType }}
-                  </span>
-
-                </div>
-
-
-                <div class="account-mini-name">
-
-                  {{ account.name }}
-
-                </div>
-
-
-                <div class="account-mini-balance">
-
-                  ₹{{ account.balance | number:'1.0-2' }}
-
-                </div>
-
-
-                @if (
+                <mat-icon>
+                  {{
                   account.accountType === 'CREDIT_CARD'
-                ) {
-
-                  <div class="account-available">
-
-                    Available:
-                    ₹{{
-                      account.availableCredit
-                      | number:'1.0-2'
-                    }}
-
-                  </div>
-
-                }
+                  ? 'credit_card'
+                  : 'account_balance'
+                  }}
+                </mat-icon>
 
               </div>
+
+              <span class="account-type">
+                {{ account.accountType }}
+              </span>
+
+            </div>
+
+
+            <div class="account-mini-name">
+
+              {{ account.name }}
+
+            </div>
+
+
+            <div class="account-mini-balance">
+
+              ₹{{ account.balance | number:'1.0-2' }}
+
+            </div>
+
+
+            @if (
+            account.accountType === 'CREDIT_CARD'
+            ) {
+
+            <div class="account-available">
+
+              Available:
+              ₹{{
+              account.availableCredit
+              | number:'1.0-2'
+              }}
+
+            </div>
 
             }
 
           </div>
 
-          <!-- @if (accounts.length > 3) {
+          }
+
+        </div>
+
+        <!-- @if (accounts.length > 3) {
 
             <div class="more-accounts">
 
@@ -1352,64 +1396,61 @@
 
         }
 
-      }
+        }
 
-    </mat-card-content>
-<div class="section-footer">
+      </mat-card-content>
+      <div class="section-footer">
 
-      View all Accounts
+        View all Accounts
 
-    </div>
-  </mat-card>
+      </div>
+    </mat-card>
 
 
 
-  <!-- =================================================
+    <!-- =================================================
        SAVINGS & INVESTMENTS
   ================================================== -->
 
-  <mat-card class="section-card savings-card">
+    <mat-card class="section-card savings-card">
 
-    <mat-card-header>
+      <mat-card-header>
 
-      <div class="section-title">
+        <div class="section-title">
 
-        <div class="section-icon purple-section-icon">
-          <mat-icon>savings</mat-icon>
+          <div class="section-icon purple-section-icon">
+            <mat-icon>savings</mat-icon>
+          </div>
+
+          <div>
+
+            <mat-card-title>
+              Savings & Investments
+            </mat-card-title>
+
+            <mat-card-subtitle>
+              Track your financial goals
+            </mat-card-subtitle>
+
+          </div>
+
         </div>
+        <button mat-icon-button class="more-button" type="button">
 
-        <div>
+          <mat-icon>
+            more_horiz
+          </mat-icon>
 
-          <mat-card-title>
-            Savings & Investments
-          </mat-card-title>
-
-          <mat-card-subtitle>
-            Track your financial goals
-          </mat-card-subtitle>
-
-        </div>
-        
-      </div>
-      <button
-        mat-icon-button
-        class="more-button"
-        type="button">
-
-        <mat-icon>
-          more_horiz
-        </mat-icon>
-
-      </button>
-    </mat-card-header>
+        </button>
+      </mat-card-header>
 
 
-    <mat-card-content>
+      <mat-card-content>
 
-      @if (
+        @if (
         savingsInvestments$ | async;
         as data
-      ) {
+        ) {
 
         <!-- Two Parts -->
 
@@ -1461,9 +1502,7 @@
             </div>
 
 
-            <mat-progress-bar
-              mode="determinate"
-              [value]="
+            <mat-progress-bar mode="determinate" [value]="
                 data.savingsProgress > 100
                   ? 100
                   : data.savingsProgress
@@ -1533,9 +1572,7 @@
             </div>
 
 
-            <mat-progress-bar
-              mode="determinate"
-              [value]="
+            <mat-progress-bar mode="determinate" [value]="
                 data.investmentProgress > 100
                   ? 100
                   : data.investmentProgress
@@ -1559,23 +1596,23 @@
 
         </div>
 
-      }
+        }
 
-    </mat-card-content>
-    <div class="section-footer">
+      </mat-card-content>
+      <div class="section-footer">
 
-      View all Savings & Investments
+        View all Savings & Investments
 
-    </div>
-  </mat-card>
+      </div>
+    </mat-card>
 
-</div>
+  </div>
 
 
-    <!-- ===================================================
+  <!-- ===================================================
          FINANCIAL TIP
     ==================================================== -->
-    <!-- <div class="financial-tip">
+  <!-- <div class="financial-tip">
 
       <div class="tip-icon">
 

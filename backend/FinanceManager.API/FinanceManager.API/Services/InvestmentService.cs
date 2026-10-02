@@ -1,17 +1,27 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class InvestmentService
+public class InvestmentService : IInvestmentService
 {
-    private readonly FinanceDbContext _context;
-    private readonly AccountBalanceService _accountBalanceService;
-    public InvestmentService(FinanceDbContext context, AccountBalanceService accountBalanceService)
+    private readonly IInvestmentRepository _investmentRepository;
+    private readonly IAccountRepository _accountRepository;
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly IAccountBalanceService _accountBalanceService;
+
+    public InvestmentService(
+        IInvestmentRepository investmentRepository,
+        IAccountRepository accountRepository,
+        ITransactionRepository transactionRepository,
+        IAccountBalanceService accountBalanceService)
     {
-        _context = context;
+        _investmentRepository = investmentRepository;
+        _accountRepository = accountRepository;
+        _transactionRepository = transactionRepository;
         _accountBalanceService = accountBalanceService;
     }
 
@@ -31,11 +41,10 @@ public class InvestmentService
                 "Investment name is required.");
         }
 
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == dto.AccountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == dto.AccountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (account == null)
         {
@@ -60,7 +69,7 @@ public class InvestmentService
         }
 
         await using var transaction =
-            await _context.Database.BeginTransactionAsync();
+            await _investmentRepository.BeginTransactionAsync();
 
         try
         {
@@ -75,15 +84,12 @@ public class InvestmentService
                 Type = TransactionType.Expense,
                 Purpose = TransactionPurpose.Investment,
                 TransactionDate = dto.InvestmentDate,
-                Description =
-        dto.Description ??
-        $"Investment in {dto.Name}",
+                Description = dto.Description ?? $"Investment in {dto.Name}",
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Transactions.Add(transactionRecord);
-
-            await _context.SaveChangesAsync();
+            await _transactionRepository.AddAsync(transactionRecord);
+            await _transactionRepository.SaveChangesAsync();
 
             var investment = new Investment
             {
@@ -98,9 +104,8 @@ public class InvestmentService
                 TransactionId = transactionRecord.Id
             };
 
-            _context.Investments.Add(investment);
-
-            await _context.SaveChangesAsync();
+            await _investmentRepository.AddAsync(investment);
+            await _investmentRepository.SaveChangesAsync();
 
             await transaction.CommitAsync();
         }
@@ -110,10 +115,11 @@ public class InvestmentService
             throw;
         }
     }
+
     public async Task<List<InvestmentDto>> GetInvestmentsAsync(
-    int userId)
+        int userId)
     {
-        var investments = await _context.Investments
+        var investments = await _investmentRepository.Query()
             .Where(i =>
                 i.UserId == userId &&
                 i.IsActive)
@@ -146,9 +152,9 @@ public class InvestmentService
     }
 
     public async Task<InvestmentSummaryDto> GetSummaryAsync(
-    int userId)
+        int userId)
     {
-        var investments = await _context.Investments
+        var investments = await _investmentRepository.Query()
             .Where(i =>
                 i.UserId == userId &&
                 i.IsActive)
@@ -173,16 +179,15 @@ public class InvestmentService
             TotalInvestedAmount = totalInvested,
             TotalCurrentValue = totalCurrentValue,
             TotalProfitLoss = totalProfitLoss,
-            TotalProfitLossPercentage =
-                totalProfitLossPercentage,
+            TotalProfitLossPercentage = totalProfitLossPercentage,
             InvestmentCount = investments.Count
         };
     }
 
     public async Task UpdateCurrentValueAsync(
-    int investmentId,
-    int userId,
-    InvestmentUpdateDto dto)
+        int investmentId,
+        int userId,
+        InvestmentUpdateDto dto)
     {
         if (dto.CurrentValue < 0)
         {
@@ -190,11 +195,10 @@ public class InvestmentService
                 "Current value cannot be negative.");
         }
 
-        var investment = await _context.Investments
-            .FirstOrDefaultAsync(i =>
-                i.Id == investmentId &&
-                i.UserId == userId &&
-                i.IsActive);
+        var investment = await _investmentRepository.FirstOrDefaultAsync(i =>
+            i.Id == investmentId &&
+            i.UserId == userId &&
+            i.IsActive);
 
         if (investment == null)
         {
@@ -204,47 +208,39 @@ public class InvestmentService
 
         investment.CurrentValue = dto.CurrentValue;
 
-        await _context.SaveChangesAsync();
+        await _investmentRepository.SaveChangesAsync();
     }
 
     public async Task<string> DeleteInvestmentAsync(
-     int userId,
-     int investmentId)
+        int userId,
+        int investmentId)
     {
-        var investment = await _context.Investments
-            .FirstOrDefaultAsync(i =>
-                i.Id == investmentId &&
-                i.UserId == userId &&
-                i.IsActive);
+        var investment = await _investmentRepository.FirstOrDefaultAsync(i =>
+            i.Id == investmentId &&
+            i.UserId == userId &&
+            i.IsActive);
 
         if (investment == null)
-            throw new InvalidOperationException(
-                "Investment not found.");
+            throw new InvalidOperationException("Investment not found.");
 
         if (investment.TransactionId == null)
-            throw new InvalidOperationException(
-                "Investment purchase transaction not found.");
+            throw new InvalidOperationException("Investment purchase transaction not found.");
 
         if (investment.CurrentValue != investment.InvestedAmount)
-            throw new InvalidOperationException(
-                "Only investments with unchanged value can be cancelled.");
+            throw new InvalidOperationException("Only investments with unchanged value can be cancelled.");
 
-        var purchaseTransaction =
-            await _context.Transactions
-                .FirstOrDefaultAsync(t =>
-                    t.Id == investment.TransactionId &&
-                    t.UserId == userId);
+        var purchaseTransaction = await _transactionRepository.FirstOrDefaultAsync(t =>
+            t.Id == investment.TransactionId &&
+            t.UserId == userId);
 
         if (purchaseTransaction == null)
-            throw new InvalidOperationException(
-                "Investment purchase transaction not found.");
+            throw new InvalidOperationException("Investment purchase transaction not found.");
 
         if (purchaseTransaction.AccountId == null)
-            throw new InvalidOperationException(
-                "Investment source account not found.");
+            throw new InvalidOperationException("Investment source account not found.");
 
         await using var transaction =
-            await _context.Database.BeginTransactionAsync();
+            await _investmentRepository.BeginTransactionAsync();
 
         try
         {
@@ -255,19 +251,18 @@ public class InvestmentService
                 Amount = investment.InvestedAmount,
                 Type = TransactionType.Income,
                 Purpose = TransactionPurpose.InvestmentSale,
-                Description =
-                    $"Investment cancelled: {investment.Name}",
+                Description = $"Investment cancelled: {investment.Name}",
                 TransactionDate = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Transactions.Add(reversalTransaction);
+            await _transactionRepository.AddAsync(reversalTransaction);
 
             investment.IsActive = false;
             investment.CurrentValue = 0;
             investment.InvestedAmount = 0;
 
-            await _context.SaveChangesAsync();
+            await _investmentRepository.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -281,61 +276,44 @@ public class InvestmentService
     }
 
     public async Task<string> SellInvestmentAsync(
-     int userId,
-     int investmentId,
-     InvestmentSellDto dto)
+        int userId,
+        int investmentId,
+        InvestmentSellDto dto)
     {
-
         if (dto.SellAmount <= 0)
-            throw new InvalidOperationException(
-                "Sell amount must be greater than zero.");
+            throw new InvalidOperationException("Sell amount must be greater than zero.");
 
-        var investment = await _context.Investments
-            .FirstOrDefaultAsync(i =>
-                i.Id == investmentId &&
-                i.UserId == userId &&
-                i.IsActive);
+        var investment = await _investmentRepository.FirstOrDefaultAsync(i =>
+            i.Id == investmentId &&
+            i.UserId == userId &&
+            i.IsActive);
 
         if (investment == null)
-            throw new InvalidOperationException(
-                "Investment not found.");
+            throw new InvalidOperationException("Investment not found.");
 
         if (dto.SellAmount > investment.CurrentValue)
-            throw new InvalidOperationException(
-                "Sell amount cannot exceed current investment value.");
+            throw new InvalidOperationException("Sell amount cannot exceed current investment value.");
 
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == dto.AccountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == dto.AccountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (account == null)
-            throw new InvalidOperationException(
-                "Account not found.");
+            throw new InvalidOperationException("Account not found.");
 
         if (account.AccountType == "CREDIT_CARD")
-            throw new InvalidOperationException(
-                "Investment sale cannot be deposited into a credit card.");
+            throw new InvalidOperationException("Investment sale cannot be deposited into a credit card.");
 
-        var transaction = await _context.Database
-            .BeginTransactionAsync();
+        await using var transaction =
+            await _investmentRepository.BeginTransactionAsync();
 
         try
         {
-            var soldPercentage =
-                dto.SellAmount / investment.CurrentValue;
-
-            var investedAmountSold =
-                investment.InvestedAmount * soldPercentage;
-
-            var remainingInvestedAmount =
-                investment.InvestedAmount -
-                investedAmountSold;
-
-            var remainingCurrentValue =
-                investment.CurrentValue -
-                dto.SellAmount;
+            var soldPercentage = dto.SellAmount / investment.CurrentValue;
+            var investedAmountSold = investment.InvestedAmount * soldPercentage;
+            var remainingInvestedAmount = investment.InvestedAmount - investedAmountSold;
+            var remainingCurrentValue = investment.CurrentValue - dto.SellAmount;
 
             var saleTransaction = new Transaction
             {
@@ -344,14 +322,12 @@ public class InvestmentService
                 Amount = dto.SellAmount,
                 Type = TransactionType.Income,
                 Purpose = TransactionPurpose.InvestmentSale,
-                Description =
-                    dto.Description ??
-                    $"Investment sale: {investment.Name}",
+                Description = dto.Description ?? $"Investment sale: {investment.Name}",
                 TransactionDate = dto.SellDate,
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Transactions.Add(saleTransaction);
+            await _transactionRepository.AddAsync(saleTransaction);
 
             if (remainingCurrentValue <= 0.01m)
             {
@@ -361,18 +337,11 @@ public class InvestmentService
             }
             else
             {
-                investment.InvestedAmount =
-                    Math.Round(
-                        remainingInvestedAmount,
-                        2);
-
-                investment.CurrentValue =
-                    Math.Round(
-                        remainingCurrentValue,
-                        2);
+                investment.InvestedAmount = Math.Round(remainingInvestedAmount, 2);
+                investment.CurrentValue = Math.Round(remainingCurrentValue, 2);
             }
 
-            await _context.SaveChangesAsync();
+            await _investmentRepository.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -384,5 +353,4 @@ public class InvestmentService
             throw;
         }
     }
-
 }

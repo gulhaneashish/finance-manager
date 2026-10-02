@@ -1,68 +1,176 @@
-<aside class="sidebar">
+<aside
+  class="sidebar"
+  [class.mobile-open]="isSidebarOpen">
 
   <div class="logo">
-    <mat-icon>account_balance_wallet</mat-icon>
-    <span>Finance Manager</span>
+
+    <mat-icon>
+      account_balance_wallet
+    </mat-icon>
+
+    <span>
+      Finance Manager
+    </span>
+
   </div>
+
 
   <nav>
 
-    <a routerLink="/dashboard"
-       routerLinkActive="active">
-      <mat-icon>dashboard</mat-icon>
-      <span>Dashboard</span>
-    </a>
+    @if (isAdmin) {
+      <!-- DEDICATED ADMIN NAVIGATION (Separated from personal user financials) -->
+      <a
+        routerLink="/admin"
+        routerLinkActive="active"
+        class="admin-nav-link"
+        (click)="onNavigation()">
 
-    <a routerLink="/transactions"
-       routerLinkActive="active">
-      <mat-icon>receipt_long</mat-icon>
-      <span>Transactions</span>
-    </a>
+        <mat-icon>
+          admin_panel_settings
+        </mat-icon>
 
-    <a routerLink="/accounts"
-       routerLinkActive="active">
-      <mat-icon>account_balance</mat-icon>
-      <span>Accounts</span>
-    </a>
+        <span>
+          Admin Control Center
+        </span>
 
-    <a routerLink="/loans"
-       routerLinkActive="active">
-      <mat-icon>handshake</mat-icon>
-      <span>Loans</span>
-    </a>
+      </a>
+    } @else {
+      <!-- STANDARD USER NAVIGATION -->
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        (click)="onNavigation()">
 
-    <a routerLink="/budgets"
-       routerLinkActive="active">
-      <mat-icon>savings</mat-icon>
-      <span>Budgets</span>
-    </a>
-    <a routerLink="/categories"
-       routerLinkActive="active">
-      <mat-icon>category</mat-icon>
-      <span>Categories</span>
-    </a>
-   <a routerLink="/investments"
-       routerLinkActive="active">
-      <mat-icon>trending_up</mat-icon>
-      <span>Investments</span>
-    </a>
-    <a routerLink="/reports"
-       routerLinkActive="active">
-      <mat-icon>bar_chart</mat-icon>
-      <span>Reports</span>
-    </a>
+        <mat-icon>
+          dashboard
+        </mat-icon>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+      <a
+        routerLink="/transactions"
+        routerLinkActive="active"
+        (click)="onNavigation()">
+
+        <mat-icon>
+          receipt_long
+        </mat-icon>
+
+        <span>
+          Transactions
+        </span>
+
+      </a>
+
+      <a
+        routerLink="/accounts"
+        routerLinkActive="active"
+        (click)="onNavigation()">
+
+        <mat-icon>
+          account_balance
+        </mat-icon>
+
+        <span>
+          Accounts
+        </span>
+
+      </a>
+
+      <a
+        routerLink="/loans"
+        routerLinkActive="active"
+        (click)="onNavigation()">
+
+        <mat-icon>
+          handshake
+        </mat-icon>
+
+        <span>
+          Loans
+        </span>
+
+      </a>
+
+      <a
+        routerLink="/budgets"
+        routerLinkActive="active"
+        (click)="onNavigation()">
+
+        <mat-icon>
+          savings
+        </mat-icon>
+
+        <span>
+          Budgets
+        </span>
+
+      </a>
+
+      <a
+        routerLink="/investments"
+        routerLinkActive="active"
+        (click)="onNavigation()">
+
+        <mat-icon>
+          trending_up
+        </mat-icon>
+
+        <span>
+          Investments
+        </span>
+
+      </a>
+
+      <a
+        routerLink="/reports"
+        routerLinkActive="active"
+        (click)="onNavigation()">
+
+        <mat-icon>
+          bar_chart
+        </mat-icon>
+
+        <span>
+          Reports
+        </span>
+
+      </a>
+    }
 
   </nav>
 
+
   <div class="sidebar-bottom">
 
-   <button
-  type="button"
-  (click)="onLogout()">
-      <mat-icon>logout</mat-icon>
-      <span>Logout</span>
+    <button
+      type="button"
+      (click)="onLogout()">
+
+      <mat-icon>
+        logout
+      </mat-icon>
+
+      <span>
+        Logout
+      </span>
+
     </button>
 
   </div>
 
 </aside>
+
+
+@if (isSidebarOpen) {
+
+  <div
+    class="sidebar-overlay"
+    (click)="onNavigation()">
+  </div>
+
+}

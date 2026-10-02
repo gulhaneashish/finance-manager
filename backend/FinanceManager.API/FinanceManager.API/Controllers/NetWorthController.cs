@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using FinanceManager.API.Services;
+using System.Security.Claims;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +10,10 @@ namespace FinanceManager.API.Controllers;
 [Route("api/[controller]")]
 public class NetWorthController : ControllerBase
 {
-    private readonly NetWorthService _service;
+    private readonly INetWorthService _service;
 
     public NetWorthController(
-        NetWorthService service)
+        INetWorthService service)
     {
         _service = service;
     }

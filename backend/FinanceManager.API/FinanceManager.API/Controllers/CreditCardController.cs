@@ -1,6 +1,6 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using FinanceManager.API.DTOs;
-using FinanceManager.API.Services;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +11,10 @@ namespace FinanceManager.API.Controllers;
 [Route("api/[controller]")]
 public class CreditCardController : ControllerBase
 {
-    private readonly CreditCardService _service;
+    private readonly ICreditCardService _service;
 
     public CreditCardController(
-        CreditCardService service)
+        ICreditCardService service)
     {
         _service = service;
     }

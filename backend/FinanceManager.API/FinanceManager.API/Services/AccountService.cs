@@ -1,17 +1,22 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class AccountService
+public class AccountService : IAccountService
 {
-    private readonly FinanceDbContext _context;
+    private readonly IAccountRepository _accountRepository;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public AccountService(FinanceDbContext context)
+    public AccountService(
+        IAccountRepository accountRepository,
+        ITransactionRepository transactionRepository)
     {
-        _context = context;
+        _accountRepository = accountRepository;
+        _transactionRepository = transactionRepository;
     }
 
     // ============================================================
@@ -61,12 +66,11 @@ public class AccountService
 
         var accountName = dto.Name.Trim();
 
-        var existingAccount = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.UserId == userId &&
-                a.IsActive &&
-                a.Name.ToLower() == accountName.ToLower() &&
-                a.AccountType == accountType);
+        var existingAccount = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.UserId == userId &&
+            a.IsActive &&
+            a.Name.ToLower() == accountName.ToLower() &&
+            a.AccountType == accountType);
 
         if (existingAccount != null)
         {
@@ -125,10 +129,10 @@ public class AccountService
             IsActive = true
         };
 
-        _context.Accounts.Add(account);
+        await _accountRepository.AddAsync(account);
 
         // Save first because we need Account.Id
-        await _context.SaveChangesAsync();
+        await _accountRepository.SaveChangesAsync();
 
         // --------------------------------------------------------
         // Create initial transaction
@@ -156,9 +160,9 @@ public class AccountService
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Transactions.Add(initialTransaction);
+            await _transactionRepository.AddAsync(initialTransaction);
 
-            await _context.SaveChangesAsync();
+            await _transactionRepository.SaveChangesAsync();
         }
 
         // --------------------------------------------------------
@@ -197,7 +201,7 @@ public class AccountService
         // + Inactive accounts
         //
 
-        var accounts = await _context.Accounts
+        var accounts = await _accountRepository.Query()
             .Where(a =>
                 a.UserId == userId)
             .OrderByDescending(a => a.IsActive)
@@ -242,10 +246,9 @@ public class AccountService
         int id,
         int userId)
     {
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == id &&
-                a.UserId == userId);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == id &&
+            a.UserId == userId);
 
         if (account == null)
         {
@@ -283,10 +286,9 @@ public class AccountService
         int id,
         int userId)
     {
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == id &&
-                a.UserId == userId);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == id &&
+            a.UserId == userId);
 
         if (account == null)
         {
@@ -297,7 +299,7 @@ public class AccountService
         // Account remains in database.
         account.IsActive = false;
 
-        await _context.SaveChangesAsync();
+        await _accountRepository.SaveChangesAsync();
 
         return true;
     }
@@ -311,104 +313,100 @@ public class AccountService
      int accountId,
      int userId)
     {
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == accountId &&
-                a.UserId == userId);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == accountId &&
+            a.UserId == userId);
 
         if (account == null)
         {
             return null;
         }
 
-        // --------------------------------------------------------
-        // CREDIT CARD
-        // --------------------------------------------------------
+        // ========================================================
+        // CREDIT CARD CALCULATION
+        // ========================================================
 
         if (account.AccountType == "CREDIT_CARD")
         {
-            var purchases = await _context.Transactions
+            var purchases = await _transactionRepository.Query()
                 .Where(t =>
                     t.UserId == userId &&
                     t.AccountId == accountId &&
                     t.Purpose ==
                         TransactionPurpose.CreditCardPurchase)
-                .SumAsync(t =>
-                    (decimal?)t.Amount) ?? 0;
+                .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-            var payments = await _context.Transactions
+            var payments = await _transactionRepository.Query()
                 .Where(t =>
                     t.UserId == userId &&
                     t.ToAccountId == accountId &&
                     t.Purpose ==
                         TransactionPurpose.CreditCardPayment)
-                .SumAsync(t =>
-                    (decimal?)t.Amount) ?? 0;
+                .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-            return purchases - payments;
+            var outstanding = purchases - payments;
+
+            return Math.Max(outstanding, 0);
         }
 
-        // --------------------------------------------------------
-        // NORMAL ACCOUNT
-        // --------------------------------------------------------
+        // ========================================================
+        // NORMAL ACCOUNT CALCULATION
+        // ========================================================
 
-        var income = await _context.Transactions
+        var income = await _transactionRepository.Query()
             .Where(t =>
-                t.AccountId == accountId &&
                 t.UserId == userId &&
+                t.AccountId == accountId &&
                 t.Type == TransactionType.Income &&
                 t.Purpose != TransactionPurpose.Deposit)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var deposits = await _context.Transactions
+        var deposits = await _transactionRepository.Query()
             .Where(t =>
-                t.AccountId == accountId &&
                 t.UserId == userId &&
+                t.AccountId == accountId &&
                 t.Purpose == TransactionPurpose.Deposit)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var expenses = await _context.Transactions
+        var expenses = await _transactionRepository.Query()
             .Where(t =>
+                t.UserId == userId &&
                 t.AccountId == accountId &&
-                t.UserId == userId &&
                 t.Type == TransactionType.Expense)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var transfersIn = await _context.Transactions
+        var transfersIn = await _transactionRepository.Query()
             .Where(t =>
+                t.UserId == userId &&
                 t.ToAccountId == accountId &&
-                t.UserId == userId &&
                 t.Type == TransactionType.Transfer)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var transfersOut = await _context.Transactions
+        var transfersOut = await _transactionRepository.Query()
             .Where(t =>
-                t.FromAccountId == accountId &&
                 t.UserId == userId &&
+                t.FromAccountId == accountId &&
                 t.Type == TransactionType.Transfer)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var creditCardPayments = await _context.Transactions
+        var creditCardPayments = await _transactionRepository.Query()
             .Where(t =>
-                t.FromAccountId == accountId &&
                 t.UserId == userId &&
+                t.FromAccountId == accountId &&
                 t.Purpose ==
                     TransactionPurpose.CreditCardPayment)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        return account.OpeningBalance
+        var currentBalance =
+            account.OpeningBalance
             + income
             + deposits
-            + transfersIn
             - expenses
+            + transfersIn
             - transfersOut
             - creditCardPayments;
+
+        return currentBalance;
     }
 
 
@@ -421,10 +419,9 @@ public class AccountService
         AccountUpdateDto dto,
         int userId)
     {
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == id &&
-                a.UserId == userId);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == id &&
+            a.UserId == userId);
 
         if (account == null)
         {
@@ -487,16 +484,6 @@ public class AccountService
                 "Credit limit is only allowed for credit cards.");
         }
 
-        // --------------------------------------------------------
-        // IMPORTANT:
-        // Do NOT update OpeningBalance here.
-        //
-        // OpeningBalance was already recorded through the
-        // initial transaction.
-        //
-        // If the user wants to add money later, use AddMoneyAsync().
-        // --------------------------------------------------------
-
         account.Name = dto.Name.Trim();
 
         account.AccountType = accountType;
@@ -505,7 +492,7 @@ public class AccountService
 
         account.IsActive = dto.IsActive;
 
-        await _context.SaveChangesAsync();
+        await _accountRepository.SaveChangesAsync();
 
         var balance = await GetBalanceAsync(
             account.Id,
@@ -544,11 +531,10 @@ public class AccountService
                 "Amount must be greater than zero.");
         }
 
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == dto.AccountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == dto.AccountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (account == null)
         {
@@ -584,9 +570,9 @@ public class AccountService
                 DateTime.UtcNow
         };
 
-        _context.Transactions.Add(transaction);
+        await _transactionRepository.AddAsync(transaction);
 
-        await _context.SaveChangesAsync();
+        await _transactionRepository.SaveChangesAsync();
 
         return transaction;
     
@@ -595,7 +581,7 @@ public class AccountService
     public async Task<List<AccountResponseDto>> GetActiveAccountsAsync(
     int userId)
     {
-        var accounts = await _context.Accounts
+        var accounts = await _accountRepository.Query()
             .Where(a =>
                 a.UserId == userId &&
                 a.IsActive)

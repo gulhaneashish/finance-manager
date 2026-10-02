@@ -1,4 +1,4 @@
-﻿using FinanceManager.API.Models;
+using FinanceManager.API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Data;
@@ -25,6 +25,7 @@ public class FinanceDbContext : DbContext
     public DbSet<LoanPayment> LoanPayments { get; set; }
     public DbSet<Investment> Investments { get; set; }
     public DbSet<CategoryBudget> CategoryBudgets { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Transaction>()

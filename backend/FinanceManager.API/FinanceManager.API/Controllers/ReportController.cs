@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using FinanceManager.API.Services;
+using System.Security.Claims;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +10,10 @@ namespace FinanceManager.API.Controllers;
 [Route("api/[controller]")]
 public class ReportController : ControllerBase
 {
-    private readonly ReportService _reportService;
+    private readonly IReportService _reportService;
 
     public ReportController(
-        ReportService reportService)
+        IReportService reportService)
     {
         _reportService = reportService;
     }

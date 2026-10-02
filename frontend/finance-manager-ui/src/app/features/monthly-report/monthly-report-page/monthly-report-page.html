@@ -1,158 +1,353 @@
 <div class="monthly-report-page">
 
+  <!-- =========================
+       HEADER
+  ========================== -->
+
   <div class="page-header">
 
-    <div>
-      <h1>Monthly Report</h1>
-      <p>
-        Analyze your finances for the selected month.
-      </p>
+    <div class="page-title">
+
+      <div class="title-icon">
+        <mat-icon>calendar_month</mat-icon>
+      </div>
+
+      <div>
+        <h1>Monthly Report</h1>
+        <p>
+          Analyze your finances for the selected month.
+        </p>
+      </div>
+
     </div>
+
 
     <div class="month-selector">
 
       <button
         type="button"
-        (click)="previousMonth()">
-        ←
+        (click)="previousMonth()"
+        title="Previous month">
+
+        <mat-icon>chevron_left</mat-icon>
+
       </button>
 
-      <strong>
-        {{ selectedMonth }}/{{ selectedYear }}
-      </strong>
+      <div class="selected-month">
+
+        <mat-icon>calendar_today</mat-icon>
+
+        <strong>
+          {{ selectedMonth }}/{{ selectedYear }}
+        </strong>
+
+      </div>
 
       <button
         type="button"
-        (click)="nextMonth()">
-        →
+        (click)="nextMonth()"
+        title="Next month">
+
+        <mat-icon>chevron_right</mat-icon>
+
       </button>
 
     </div>
 
   </div>
 
+
+  <!-- =========================
+       LOADING
+  ========================== -->
+
   @if (loading$ | async) {
+
     <div class="loading">
-      Loading monthly report...
+
+      <mat-icon>hourglass_empty</mat-icon>
+
+      <span>Loading monthly report...</span>
+
     </div>
+
   }
 
+
+  <!-- =========================
+       ERROR
+  ========================== -->
+
   @if (error$ | async; as error) {
-    <div class="error">
-      {{ error }}
+
+    <div class="alert error">
+
+      <mat-icon>error_outline</mat-icon>
+
+      <span>{{ error }}</span>
+
     </div>
+
   }
+
+
+  <!-- =========================
+       SUMMARY
+  ========================== -->
 
   <div class="summary-grid">
 
-    <div class="summary-card income">
-      <span>Total Income</span>
 
-      <strong>
-        ₹{{ income$ | async | number:'1.0-2' }}
-      </strong>
+    <!-- INCOME -->
+
+    <div class="summary-card income">
+
+      <div class="summary-icon">
+        <mat-icon>trending_up</mat-icon>
+      </div>
+
+      <div class="summary-content">
+
+        <span>Total Income</span>
+
+        <strong>
+          ₹{{ income$ | async | number:'1.0-2' }}
+        </strong>
+
+      </div>
+
     </div>
+
+
+    <!-- EXPENSE -->
 
     <div class="summary-card expense">
-      <span>Total Expenses</span>
 
-      <strong>
-        ₹{{ expenses$ | async | number:'1.0-2' }}
-      </strong>
+      <div class="summary-icon">
+        <mat-icon>trending_down</mat-icon>
+      </div>
+
+      <div class="summary-content">
+
+        <span>Total Expenses</span>
+
+        <strong>
+          ₹{{ expenses$ | async | number:'1.0-2' }}
+        </strong>
+
+      </div>
+
     </div>
 
-    <div class="summary-card net">
-      <span>Net Cash Flow</span>
 
-      <strong>
-        ₹{{ netCashFlow$ | async | number:'1.0-2' }}
-      </strong>
+    <!-- NET -->
+
+    <div class="summary-card net">
+
+      <div class="summary-icon">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+
+      <div class="summary-content">
+
+        <span>Net Cash Flow</span>
+
+        <strong>
+          ₹{{ netCashFlow$ | async | number:'1.0-2' }}
+        </strong>
+
+      </div>
+
     </div>
 
   </div>
 
+
+  <!-- =========================
+       REPORT CARDS
+  ========================== -->
 
   <div class="report-grid">
 
+
+    <!-- BUDGET -->
+
     <div class="report-card">
 
-      <h2>Budget Overview</h2>
+      <div class="card-header">
 
-      <div class="report-row">
-        <span>Expense Budget</span>
-        <strong>
-          ₹{{ expenseBudget$ | async | number:'1.0-2' }}
-        </strong>
+        <div class="card-title">
+
+          <div class="card-icon budget-icon">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+
+          <div>
+            <h2>Budget Overview</h2>
+            <p>Monthly spending plan</p>
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="report-row">
-        <span>Budget Spent</span>
-        <strong>
-          ₹{{ budgetSpent$ | async | number:'1.0-2' }}
-        </strong>
-      </div>
 
-      <div class="report-row">
-        <span>Budget Remaining</span>
-        <strong>
-          ₹{{ budgetRemaining$ | async | number:'1.0-2' }}
-        </strong>
+      <div class="report-list">
+
+        <div class="report-row">
+
+          <span>Expense Budget</span>
+
+          <strong>
+            ₹{{ expenseBudget$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="report-row">
+
+          <span>Budget Spent</span>
+
+          <strong>
+            ₹{{ budgetSpent$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="report-row highlight">
+
+          <span>Budget Remaining</span>
+
+          <strong>
+            ₹{{ budgetRemaining$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
       </div>
 
     </div>
 
 
+    <!-- SAVINGS & INVESTMENTS -->
+
     <div class="report-card">
 
-      <h2>Savings & Investments</h2>
+      <div class="card-header">
 
-      <div class="report-row">
-        <span>Savings Target</span>
-        <strong>
-          ₹{{ savingsTarget$ | async | number:'1.0-2' }}
-        </strong>
+        <div class="card-title">
+
+          <div class="card-icon savings-icon">
+            <mat-icon>savings</mat-icon>
+          </div>
+
+          <div>
+            <h2>Savings & Investments</h2>
+            <p>Monthly financial goals</p>
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="report-row">
-        <span>Savings Amount</span>
-        <strong>
-          ₹{{ savingsAmount$ | async | number:'1.0-2' }}
-        </strong>
-      </div>
 
-      <div class="report-row">
-        <span>Investment Target</span>
-        <strong>
-          ₹{{ investmentTarget$ | async | number:'1.0-2' }}
-        </strong>
-      </div>
+      <div class="report-list">
 
-      <div class="report-row">
-        <span>Investment Amount</span>
-        <strong>
-          ₹{{ investmentAmount$ | async | number:'1.0-2' }}
-        </strong>
+        <div class="report-row">
+
+          <span>Savings Target</span>
+
+          <strong>
+            ₹{{ savingsTarget$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="report-row">
+
+          <span>Savings Amount</span>
+
+          <strong>
+            ₹{{ savingsAmount$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="report-row">
+
+          <span>Investment Target</span>
+
+          <strong>
+            ₹{{ investmentTarget$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="report-row highlight">
+
+          <span>Investment Amount</span>
+
+          <strong>
+            ₹{{ investmentAmount$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
       </div>
 
     </div>
 
 
+    <!-- LOANS -->
+
     <div class="report-card">
 
-      <h2>Loans</h2>
+      <div class="card-header">
 
-      <div class="report-row">
-        <span>Total Borrowed</span>
-        <strong>
-          ₹{{ totalBorrowed$ | async | number:'1.0-2' }}
-        </strong>
+        <div class="card-title">
+
+          <div class="card-icon loan-icon">
+            <mat-icon>handshake</mat-icon>
+          </div>
+
+          <div>
+            <h2>Loans</h2>
+            <p>Borrowed and lent money</p>
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="report-row">
-        <span>Total Lent</span>
-        <strong>
-          ₹{{ totalLent$ | async | number:'1.0-2' }}
-        </strong>
+
+      <div class="report-list">
+
+        <div class="report-row">
+
+          <span>Total Borrowed</span>
+
+          <strong>
+            ₹{{ totalBorrowed$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
+
+        <div class="report-row highlight">
+
+          <span>Total Lent</span>
+
+          <strong>
+            ₹{{ totalLent$ | async | number:'1.0-2' }}
+          </strong>
+
+        </div>
+
       </div>
 
     </div>
@@ -160,16 +355,46 @@
   </div>
 
 
+  <!-- =========================
+       CATEGORY BUDGET
+  ========================== -->
+
   <div class="category-card">
 
-    <h2>Category Budget Report</h2>
+    <div class="card-header">
+
+      <div class="card-title">
+
+        <div class="card-icon category-icon">
+          <mat-icon>category</mat-icon>
+        </div>
+
+        <div>
+          <h2>Category Budget Report</h2>
+          <p>
+            Track your spending against each category budget.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
 
     @if (categories$ | async; as categories) {
 
       @if (categories.length === 0) {
 
         <div class="empty-state">
-          No category budget data available.
+
+          <mat-icon>receipt_long</mat-icon>
+
+          <h3>No category budget data</h3>
+
+          <p>
+            No category budget data is available for this month.
+          </p>
+
         </div>
 
       } @else {
@@ -183,21 +408,52 @@
 
             <div class="category-item">
 
-              <div>
-                <strong>
-                  {{ category.categoryName }}
-                </strong>
+              <!-- CATEGORY -->
 
-                <p>
-                  Budget:
-                  ₹{{ category.budget | number:'1.0-2' }}
+              <div class="category-info">
 
-                  &nbsp; | &nbsp;
+                <div class="category-icon-small">
+                  <mat-icon>label</mat-icon>
+                </div>
 
-                  Spent:
-                  ₹{{ category.spent | number:'1.0-2' }}
-                </p>
+                <div>
+
+                  <strong>
+                    {{ category.categoryName }}
+                  </strong>
+
+                  <span>
+                    Budget ₹{{ category.budget | number:'1.0-2' }}
+                    ·
+                    Spent ₹{{ category.spent | number:'1.0-2' }}
+                  </span>
+
+                </div>
+
               </div>
+
+
+              <!-- PROGRESS -->
+
+              <div class="category-progress">
+
+                <div class="progress-track">
+
+                  <div
+                    class="progress-bar"
+                    [style.width.%]="
+                      category.percentageUsed > 100
+                        ? 100
+                        : category.percentageUsed
+                    ">
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- REMAINING -->
 
               <div class="category-right">
 
@@ -205,8 +461,13 @@
                   ₹{{ category.remaining | number:'1.0-2' }}
                 </strong>
 
-                <span>
+                <span
+                  [class.over-budget]="
+                    category.percentageUsed > 100
+                  ">
+
                   {{ category.percentageUsed | number:'1.0-2' }}%
+
                 </span>
 
               </div>

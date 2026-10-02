@@ -1,13 +1,28 @@
 <div class="app-layout">
 
-  <app-sidebar></app-sidebar>
+  <!-- Ambient FinTech Decorative Orbs -->
+  <div class="ambient-glow glow-blue" aria-hidden="true"></div>
+  <div class="ambient-glow glow-green" aria-hidden="true"></div>
+  <div class="ambient-glow glow-navy" aria-hidden="true"></div>
+
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    (sidebarClosed)="closeSidebar()">
+  </app-sidebar>
+
 
   <div class="main-area">
 
-    <app-header></app-header>
+    <app-header
+      [isSidebarOpen]="isSidebarOpen"
+      (sidebarToggle)="toggleSidebar()">
+    </app-header>
+
 
     <main class="content">
+
       <router-outlet></router-outlet>
+
     </main>
 
   </div>

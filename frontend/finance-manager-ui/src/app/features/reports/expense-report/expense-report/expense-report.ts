@@ -32,6 +32,7 @@ import {
   selectNetAmount,
   selectCategoryExpenses
 } from '../../../../store/report/report.selectors';
+import { MatIconModule } from "@angular/material/icon";
 
 Chart.register(
   ArcElement,
@@ -45,8 +46,9 @@ Chart.register(
   imports: [
     AsyncPipe,
     DecimalPipe,
-    BaseChartDirective
-  ],
+    BaseChartDirective,
+    MatIconModule
+],
   templateUrl: './expense-report.html',
   styleUrl: './expense-report.css'
 })
@@ -75,7 +77,7 @@ export class ExpenseReport {
   fromDate = '';
 
   toDate = '';
-
+showFilters = false;
   doughnutChartType: 'doughnut' = 'doughnut';
 
   doughnutChartData: ChartData<'doughnut'> = {

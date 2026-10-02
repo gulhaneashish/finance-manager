@@ -1,17 +1,31 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class MonthlyReportService
+public class MonthlyReportService : IMonthlyReportService
 {
-    private readonly FinanceDbContext _context;
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly IBudgetRepository _budgetRepository;
+    private readonly ILoanRepository _loanRepository;
+    private readonly IAccountRepository _accountRepository;
+    private readonly IInvestmentRepository _investmentRepository;
 
-    public MonthlyReportService(FinanceDbContext context)
+    public MonthlyReportService(
+        ITransactionRepository transactionRepository,
+        IBudgetRepository budgetRepository,
+        ILoanRepository loanRepository,
+        IAccountRepository accountRepository,
+        IInvestmentRepository investmentRepository)
     {
-        _context = context;
+        _transactionRepository = transactionRepository;
+        _budgetRepository = budgetRepository;
+        _loanRepository = loanRepository;
+        _accountRepository = accountRepository;
+        _investmentRepository = investmentRepository;
     }
 
     public async Task<MonthlyReportDto> GetReportAsync(
@@ -22,7 +36,7 @@ public class MonthlyReportService
         var startDate = new DateTime(year, month, 1);
         var endDate = startDate.AddMonths(1);
 
-        var transactions = await _context.Transactions
+        var transactions = await _transactionRepository.Query()
             .Include(t => t.Category)
             .Where(t =>
                 t.UserId == userId &&
@@ -39,16 +53,16 @@ public class MonthlyReportService
             .Sum(t => t.Amount);
 
         var expenses = transactions
-     .Where(t =>
-         (t.Type == TransactionType.Expense ||
-          t.Type == TransactionType.CreditCard) &&
-         t.Purpose != TransactionPurpose.Investment &&
-         t.Purpose != TransactionPurpose.LoanLent &&
-         t.Purpose != TransactionPurpose.LoanRepayment &&
-         t.Purpose != TransactionPurpose.LoanPayment)
-     .Sum(t => t.Amount);
+            .Where(t =>
+                (t.Type == TransactionType.Expense ||
+                 t.Type == TransactionType.CreditCard) &&
+                t.Purpose != TransactionPurpose.Investment &&
+                t.Purpose != TransactionPurpose.LoanLent &&
+                t.Purpose != TransactionPurpose.LoanRepayment &&
+                t.Purpose != TransactionPurpose.LoanPayment)
+            .Sum(t => t.Amount);
 
-        var budget = await _context.Budgets
+        var budget = await _budgetRepository.Query()
             .Include(b => b.CategoryBudgets)
             .ThenInclude(cb => cb.Category)
             .FirstOrDefaultAsync(b =>
@@ -70,19 +84,18 @@ public class MonthlyReportService
 
         if (budget != null)
         {
-            foreach (var categoryBudget
-                     in budget.CategoryBudgets)
+            foreach (var categoryBudget in budget.CategoryBudgets)
             {
                 var spent = transactions
-     .Where(t =>
-         (t.Type == TransactionType.Expense ||
-          t.Type == TransactionType.CreditCard) &&
-         t.CategoryId == categoryBudget.CategoryId &&
-         t.Purpose != TransactionPurpose.Investment &&
-         t.Purpose != TransactionPurpose.LoanLent &&
-         t.Purpose != TransactionPurpose.LoanRepayment &&
-         t.Purpose != TransactionPurpose.LoanPayment)
-     .Sum(t => t.Amount);
+                    .Where(t =>
+                        (t.Type == TransactionType.Expense ||
+                         t.Type == TransactionType.CreditCard) &&
+                        t.CategoryId == categoryBudget.CategoryId &&
+                        t.Purpose != TransactionPurpose.Investment &&
+                        t.Purpose != TransactionPurpose.LoanLent &&
+                        t.Purpose != TransactionPurpose.LoanRepayment &&
+                        t.Purpose != TransactionPurpose.LoanPayment)
+                    .Sum(t => t.Amount);
 
                 var remaining =
                     categoryBudget.Amount - spent;
@@ -90,34 +103,22 @@ public class MonthlyReportService
                 var percentage =
                     categoryBudget.Amount == 0
                         ? 0
-                        : (spent /
-                           categoryBudget.Amount) * 100;
+                        : (spent / categoryBudget.Amount) * 100;
 
                 categoryReports.Add(
                     new CategoryReportDto
                     {
-                        CategoryId =
-                            categoryBudget.CategoryId,
-
-                        CategoryName =
-                            categoryBudget.Category.Name,
-
-                        Budget =
-                            categoryBudget.Amount,
-
-                        Spent =
-                            spent,
-
-                        Remaining =
-                            remaining,
-
-                        PercentageUsed =
-                            percentage
+                        CategoryId = categoryBudget.CategoryId,
+                        CategoryName = categoryBudget.Category.Name,
+                        Budget = categoryBudget.Amount,
+                        Spent = spent,
+                        Remaining = remaining,
+                        PercentageUsed = percentage
                     });
             }
         }
 
-        var borrowed = await _context.Loans
+        var borrowed = await _loanRepository.Query()
             .Where(l =>
                 l.UserId == userId &&
                 l.Type == LoanType.Borrowed &&
@@ -125,7 +126,7 @@ public class MonthlyReportService
             .Include(l => l.Payments)
             .ToListAsync();
 
-        var lent = await _context.Loans
+        var lent = await _loanRepository.Query()
             .Where(l =>
                 l.UserId == userId &&
                 l.Type == LoanType.Lent &&
@@ -149,7 +150,9 @@ public class MonthlyReportService
 
         // Savings during selected month
         var savingsAmount =
-            CalculateSavings(transactions);
+            await CalculateSavingsAsync(
+                userId,
+                transactions);
 
         // Investment during selected month
         var investmentAmount =
@@ -162,56 +165,49 @@ public class MonthlyReportService
         {
             Year = year,
             Month = month,
-
-            TotalIncome =
-                income,
-
-            TotalExpenses =
-                expenses,
-
-            NetCashFlow =
-                income - expenses,
-
-            ExpenseBudget =
-                expenseBudget,
-
-            BudgetSpent =
-                expenses,
-
-            BudgetRemaining =
-                expenseBudget - expenses,
-
-            SavingsTarget =
-                savingsTarget,
-
-            InvestmentTarget =
-                investmentTarget,
-
-            SavingsAmount =
-                savingsAmount,
-
-            InvestmentAmount =
-                investmentAmount,
-
-            TotalBorrowed =
-                totalBorrowed,
-
-            TotalLent =
-                totalLent,
-
-            Categories =
-                categoryReports
+            TotalIncome = income,
+            TotalExpenses = expenses,
+            NetCashFlow = income - expenses,
+            ExpenseBudget = expenseBudget,
+            BudgetSpent = expenses,
+            BudgetRemaining = expenseBudget - expenses,
+            SavingsTarget = savingsTarget,
+            InvestmentTarget = investmentTarget,
+            SavingsAmount = savingsAmount,
+            InvestmentAmount = investmentAmount,
+            TotalBorrowed = totalBorrowed,
+            TotalLent = totalLent,
+            Categories = categoryReports
         };
     }
 
-    private decimal CalculateSavings(
+    private async Task<decimal> CalculateSavingsAsync(
+        int userId,
         List<Transaction> transactions)
     {
-        return transactions
+        var savingsAccountIds = await _accountRepository.Query()
+            .Where(a =>
+                a.UserId == userId &&
+                a.AccountType == "SAVINGS" &&
+                a.IsActive)
+            .Select(a => a.Id)
+            .ToListAsync();
+
+        var savingsIn = transactions
             .Where(t =>
                 t.Type == TransactionType.Transfer &&
-                t.Purpose == TransactionPurpose.Savings)
+                t.ToAccountId.HasValue &&
+                savingsAccountIds.Contains(t.ToAccountId.Value))
             .Sum(t => t.Amount);
+
+        var savingsOut = transactions
+            .Where(t =>
+                t.Type == TransactionType.Transfer &&
+                t.FromAccountId.HasValue &&
+                savingsAccountIds.Contains(t.FromAccountId.Value))
+            .Sum(t => t.Amount);
+
+        return savingsIn - savingsOut;
     }
 
     private async Task<decimal> CalculateInvestmentsAsync(
@@ -219,13 +215,12 @@ public class MonthlyReportService
         DateTime startDate,
         DateTime endDate)
     {
-        return await _context.Investments
+        return await _investmentRepository.Query()
             .Where(i =>
                 i.UserId == userId &&
                 i.IsActive &&
                 i.InvestmentDate >= startDate &&
                 i.InvestmentDate < endDate)
-            .SumAsync(i =>
-                (decimal?)i.InvestedAmount) ?? 0;
+            .SumAsync(i => (decimal?)i.InvestedAmount) ?? 0;
     }
 }

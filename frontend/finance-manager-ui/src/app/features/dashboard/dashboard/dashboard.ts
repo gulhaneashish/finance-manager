@@ -47,13 +47,21 @@ import {
   selectAccounts,
   selectSavingsInvestments
 } from '../../../store/dashboard/dashboard.selectors';
-import { CategorySpending, MonthlyCashFlow } from '../../../core/models/dashboard.model';
+import { FormsModule } from '@angular/forms';
+import {
+  CategorySpending,
+  DashboardFilter,
+  DashboardPeriod,
+  MonthlyCashFlow
+} from '../../../core/models/dashboard.model';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     AsyncPipe,
     DecimalPipe,
+    FormsModule,
     MatCardModule,
     MatIconModule,
     MatProgressBarModule,
@@ -65,9 +73,13 @@ import { CategorySpending, MonthlyCashFlow } from '../../../core/models/dashboar
 })
 export class Dashboard implements OnInit {
 
-
   private store = inject(Store);
- LoanType=LoanType;
+  LoanType = LoanType;
+
+  selectedPeriod: DashboardPeriod = 'this_month';
+  customStartDate: string = '';
+  customEndDate: string = '';
+
   dashboard$ =
     this.store.select(selectDashboard);
 
@@ -75,86 +87,159 @@ export class Dashboard implements OnInit {
     this.store.select(
       selectDashboardLoading
     );
-accounts$ =
-  this.store.select(selectAccounts);
+  accounts$ =
+    this.store.select(selectAccounts);
   error$ =
     this.store.select(
       selectDashboardError
     );
-    categorySpending$ =
-  this.store.select(selectCategorySpending);
-loanDebt$ =
-  this.store.select(selectLoanDebt);
-savingsInvestments$ =
-  this.store.select(
-    selectSavingsInvestments
-  );
+  categorySpending$ =
+    this.store.select(selectCategorySpending);
+  loanDebt$ =
+    this.store.select(selectLoanDebt);
+  savingsInvestments$ =
+    this.store.select(
+      selectSavingsInvestments
+    );
 
   netWorth$ =
-  this.store.select(selectNetWorth);
+    this.store.select(selectNetWorth);
 
-netWorthLoading$ =
-  this.store.select(selectNetWorthLoading);
+  netWorthLoading$ =
+    this.store.select(selectNetWorthLoading);
 
-netWorthError$ =
-  this.store.select(selectNetWorthError);
-Math: any;
+  netWorthError$ =
+    this.store.select(selectNetWorthError);
+  Math: any;
+
+  private formatDateInput(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  setPeriod(period: DashboardPeriod): void {
+    this.selectedPeriod = period;
+
+    if (period === 'custom') {
+      if (!this.customStartDate || !this.customEndDate) {
+        const now = new Date();
+        this.customEndDate = this.formatDateInput(now);
+        this.customStartDate = this.formatDateInput(new Date(now.getFullYear(), now.getMonth(), 1));
+      }
+      this.applyCustomRange();
+      return;
+    }
+
+    const now = new Date();
+    const year = now.getFullYear();
+
+    this.store.dispatch(
+      loadDashboard({
+        filter: { period }
+      })
+    );
+
+    this.store.dispatch(
+      loadCategorySpending({
+        filter: { period }
+      })
+    );
+
+    this.store.dispatch(
+      loadSavingsInvestments({
+        filter: { period }
+      })
+    );
+
+    this.store.dispatch(
+      loadMonthlyCashFlow({
+        year
+      })
+    );
+  }
+
+  applyCustomRange(): void {
+    if (!this.customStartDate || !this.customEndDate) {
+      return;
+    }
+
+    const year = new Date(this.customStartDate).getFullYear() || new Date().getFullYear();
+
+    this.store.dispatch(
+      loadDashboard({
+        filter: {
+          period: 'custom',
+          startDate: this.customStartDate,
+          endDate: this.customEndDate
+        }
+      })
+    );
+
+    this.store.dispatch(
+      loadCategorySpending({
+        filter: {
+          period: 'custom',
+          startDate: this.customStartDate,
+          endDate: this.customEndDate
+        }
+      })
+    );
+
+    this.store.dispatch(
+      loadSavingsInvestments({
+        filter: {
+          period: 'custom',
+          startDate: this.customStartDate,
+          endDate: this.customEndDate
+        }
+      })
+    );
+
+    this.store.dispatch(
+      loadMonthlyCashFlow({
+        year
+      })
+    );
+  }
 
   ngOnInit(): void {
+    const now = new Date();
+    this.customEndDate = this.formatDateInput(now);
+    this.customStartDate = this.formatDateInput(new Date(now.getFullYear(), now.getMonth(), 1));
 
-  const now = new Date();
+    // Default to 'this_month'
+    this.setPeriod('this_month');
 
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+    this.store.dispatch(loadLoanDebt());
+    this.store.dispatch(loadAccounts());
+    this.store.dispatch(loadNetWorth());
 
-  this.store.dispatch(
-    loadDashboard({
-      year,
-      month
-    })
-  );
+    this.categorySpending$
+      .subscribe(categories => {
+        if (categories && categories.length > 0) {
+          this.updateCategoryChart(categories);
+        } else {
+          this.clearCategoryChart();
+        }
+      });
+  }
 
-  this.store.dispatch(
-    loadCategorySpending({
-      year,
-      month
-    })
-  );
-
-  this.store.dispatch(
-    loadMonthlyCashFlow({
-      year
-    })
-  );
-    this.store.dispatch(
-    loadLoanDebt()
-  );
-    this.store.dispatch(
-    loadAccounts()
-  );
-   this.store.dispatch(
-    loadSavingsInvestments({
-      year,
-      month
-    })
-  );
-  this.categorySpending$
-    .subscribe(categories => {
-
-      if (categories.length > 0) {
-
-        this.updateCategoryChart(
-          categories
-        );
-
-      }
-
-    });
-
-    this.store.dispatch(
-  loadNetWorth()
-);
-}
+  private clearCategoryChart(): void {
+    this.doughnutChartData = {
+      labels: [],
+      datasets: [
+        {
+          data: [],
+          backgroundColor: [],
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 4
+        }
+      ]
+    };
+  }
 
 
 

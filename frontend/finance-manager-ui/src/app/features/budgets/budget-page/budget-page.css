@@ -23,21 +23,21 @@
   margin: 0;
   font-size: 23px;
   line-height: 1.2;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #F8FAFC;
 }
 
 .page-header p {
   margin: 4px 0 0;
   font-size: 12px;
   line-height: 1.4;
-  color: #6b7280;
+  color: #94A3B8;
 }
 
 
 /* =====================================================
    MAIN LAYOUT
-===================================================== */
+==================================================== */
 
 .budget-layout {
   display: grid;
@@ -49,26 +49,28 @@
 
 /* =====================================================
    CARD
-===================================================== */
+==================================================== */
 
 .budget-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: rgba(30, 41, 59, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.75);
   border-radius: 12px;
   padding: 18px;
   box-sizing: border-box;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 
 /* =====================================================
    CARD HEADER
-===================================================== */
+==================================================== */
 
 .card-header {
   margin-bottom: 5px;
-  padding-bottom: 2px;
-  border-bottom: 1px solid #eef0f3;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.6);
 }
 
 .card-header h2 {
@@ -76,19 +78,19 @@
   font-size: 17px;
   line-height: 1.3;
   font-weight: 600;
-  color: #1f2937;
+  color: #F8FAFC;
 }
 
 .card-header p {
   margin: 3px 0 0;
   font-size: 11px;
-  color: #7b8494;
+  color: #94A3B8;
 }
 
 
 /* =====================================================
    FORM
-===================================================== */
+==================================================== */
 
 .budget-form {
   display: flex;
@@ -99,7 +101,7 @@
 
 /* =====================================================
    FORM ROW
-===================================================== */
+==================================================== */
 
 .form-row {
   display: grid;
@@ -110,7 +112,7 @@
 
 /* =====================================================
    FORM GROUP
-===================================================== */
+==================================================== */
 
 .form-group {
   display: flex;
@@ -120,14 +122,14 @@
 
 .form-group label {
   font-size: 11px;
-  font-weight: 500;
-  color: #4b5563;
+  font-weight: 600;
+  color: #CBD5E1;
 }
 
 
 /* =====================================================
    INPUT + SELECT
-===================================================== */
+==================================================== */
 
 .form-group input,
 .form-group select {
@@ -135,27 +137,20 @@
   height: 36px;
   padding: 0 10px;
   box-sizing: border-box;
-
-  border: 1px solid #dfe3e8;
+  border: 1px solid #334155;
   border-radius: 7px;
-
-  background: #ffffff;
-  color: #1f2937;
-
+  background: #0B0F19;
+  color: #F8FAFC;
   font-family: inherit;
   font-size: 12px;
-
   outline: none;
-
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.08);
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 
@@ -182,10 +177,8 @@
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-
   font-size: 12px;
-  color: #6b7280;
-
+  color: #64748B;
   pointer-events: none;
 }
 
@@ -201,7 +194,7 @@
 .category-section {
   margin-top: 2px;
   padding-top: 14px;
-  border-top: 1px solid #eef0f3;
+  border-top: 1px solid rgba(51, 65, 85, 0.6);
 }
 
 
@@ -217,13 +210,13 @@
   margin: 0;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: #F8FAFC;
 }
 
 .section-heading p {
   margin: 3px 0 0;
   font-size: 10px;
-  color: #8a94a6;
+  color: #94A3B8;
 }
 
 
@@ -239,26 +232,21 @@
 }
 
 .category-option {
-  border: 1px solid #e0e7ff;
+  border: 1px solid #334155;
   border-radius: 6px;
-
   padding: 5px 9px;
-
-  background: #f8f9ff;
-  color: #4f46e5;
-
+  background: #1E293B;
+  color: #60A5FA;
   font-family: inherit;
   font-size: 10px;
-  font-weight: 500;
-
+  font-weight: 600;
   cursor: pointer;
-
   transition: 0.15s ease;
 }
 
 .category-option:hover {
-  background: #eef2ff;
-  border-color: #c7d2fe;
+  background: #334155;
+  border-color: #3B82F6;
 }
 
 
@@ -282,15 +270,11 @@
   grid-template-columns: minmax(0, 1fr) 120px 28px;
   align-items: center;
   gap: 8px;
-
   min-height: 36px;
-
   padding: 5px 7px;
-
-  background: #f8fafc;
-  border: 1px solid #edf0f3;
+  background: #0B0F19;
+  border: 1px solid #334155;
   border-radius: 7px;
-
   box-sizing: border-box;
 }
 
@@ -301,14 +285,12 @@
 
 .category-name {
   min-width: 0;
-
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
   font-size: 11px;
   font-weight: 500;
-  color: #374151;
+  color: #F8FAFC;
 }
 
 
@@ -325,31 +307,26 @@
   left: 8px;
   top: 50%;
   transform: translateY(-50%);
-
   font-size: 11px;
-  color: #6b7280;
+  color: #94A3B8;
 }
 
 .category-amount input {
   width: 100%;
   height: 29px;
-
   padding: 0 7px 0 21px;
   box-sizing: border-box;
-
-  border: 1px solid #dfe3e8;
+  border: 1px solid #334155;
   border-radius: 6px;
-
-  background: white;
-
+  background: #1E293B;
   font-family: inherit;
   font-size: 11px;
-
+  color: #F8FAFC;
   outline: none;
 }
 
 .category-amount input:focus {
-  border-color: #6366f1;
+  border-color: #3B82F6;
 }
 
 
@@ -360,23 +337,18 @@
 .remove-button {
   width: 26px;
   height: 26px;
-
   border: none;
   border-radius: 6px;
-
-  background: #fff1f2;
-  color: #dc2626;
-
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
   font-size: 16px;
   line-height: 1;
-
   cursor: pointer;
-
   transition: 0.15s ease;
 }
 
 .remove-button:hover {
-  background: #ffe4e6;
+  background: rgba(239, 68, 68, 0.25);
 }
 
 
@@ -386,35 +358,32 @@
 
 .category-summary {
   margin-top: 9px;
-
   padding: 9px 10px;
-
   border-radius: 7px;
-  background: #f8fafc;
-  border: 1px solid #edf0f3;
+  background: #0B0F19;
+  border: 1px solid #334155;
 }
 
 .summary-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding: 3px 0;
 }
 
 .summary-line span {
   font-size: 10px;
-  color: #6b7280;
+  color: #94A3B8;
 }
 
 .summary-line strong {
   font-size: 11px;
   font-weight: 600;
-  color: #374151;
+  color: #F8FAFC;
 }
 
 .summary-line + .summary-line {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #334155;
   margin-top: 4px;
   padding-top: 7px;
 }
@@ -425,7 +394,7 @@
 ===================================================== */
 
 .summary-line strong.warning {
-  color: #dc2626;
+  color: #DC2626;
 }
 
 
@@ -436,26 +405,19 @@
 .form-actions {
   display: flex;
   gap: 8px;
-
   margin-top: 2px;
   padding-top: 13px;
-
-  border-top: 1px solid #eef0f3;
+  border-top: 1px solid #334155;
 }
 
 .form-actions button {
   height: 35px;
-
   padding: 0 15px;
-
   border-radius: 7px;
-
   font-family: inherit;
   font-size: 11px;
-  font-weight: 500;
-
+  font-weight: 600;
   cursor: pointer;
-
   transition: 0.15s ease;
 }
 
@@ -465,13 +427,15 @@
 ===================================================== */
 
 .primary-button {
-  border: 1px solid #4f46e5;
-  background: #4f46e5;
+  border: 1px solid #2563EB;
+  background: #2563EB;
   color: white;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
 }
 
 .primary-button:hover {
-  background: #4338ca;
+  background: #1D4ED8;
+  border-color: #1D4ED8;
 }
 
 .primary-button:disabled {
@@ -485,13 +449,15 @@
 ===================================================== */
 
 .secondary-button {
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #4b5563;
+  border: 1px solid #334155;
+  background: #0B0F19;
+  color: #CBD5E1;
 }
 
 .secondary-button:hover {
-  background: #f9fafb;
+  background: #334155;
+  color: #F8FAFC;
+  border-color: #475569;
 }
 
 
@@ -523,30 +489,24 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-
   min-height: 64px;
-
   padding: 10px;
-
   box-sizing: border-box;
-
-  background: #f8fafc;
-  border: 1px solid #edf0f3;
+  background: #0B0F19;
+  border: 1px solid #334155;
   border-radius: 8px;
 }
 
 .budget-item span {
   margin-bottom: 5px;
-
   font-size: 10px;
-  color: #7b8494;
+  color: #94A3B8;
 }
 
 .budget-item strong {
   font-size: 14px;
   font-weight: 600;
-  color: #1f2937;
-
+  color: #F8FAFC;
   white-space: nowrap;
 }
 
@@ -556,11 +516,11 @@
 ===================================================== */
 
 .budget-item .spent-value {
-  color: #dc2626;
+  color: #F87171;
 }
 
 .budget-item .remaining-value {
-  color: #059669;
+  color: #34D399;
 }
 
 
@@ -575,24 +535,20 @@
 .edit-button {
   width: 100%;
   height: 34px;
-
-  border: 1px solid #c7d2fe;
+  border: 1px solid #334155;
   border-radius: 7px;
-
-  background: #eef2ff;
-  color: #4f46e5;
-
+  background: #1E293B;
+  color: #60A5FA;
   font-family: inherit;
   font-size: 11px;
-  font-weight: 500;
-
+  font-weight: 600;
   cursor: pointer;
-
   transition: 0.15s ease;
 }
 
 .edit-button:hover {
-  background: #e0e7ff;
+  background: #334155;
+  color: #93C5FD;
 }
 
 
@@ -607,10 +563,10 @@
 
   border-radius: 7px;
 
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
 
-  color: #b91c1c;
+  color: #F87171;
 
   font-size: 11px;
 }
@@ -625,48 +581,37 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   min-height: 190px;
-
   text-align: center;
-
-  border: 1px dashed #dfe3e8;
+  border: 1px dashed #334155;
   border-radius: 9px;
-
-  background: #fafafa;
+  background: #0B0F19;
 }
 
 .empty-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 40px;
   height: 40px;
-
   margin-bottom: 9px;
-
   border-radius: 50%;
-
-  background: #eef2ff;
-  color: #4f46e5;
-
+  background: rgba(37, 99, 235, 0.2);
+  color: #60A5FA;
   font-size: 17px;
   font-weight: 600;
 }
 
 .empty-state strong {
   margin-bottom: 3px;
-
   font-size: 12px;
   font-weight: 600;
-
-  color: #374151;
+  color: #F8FAFC;
 }
 
 .empty-state span {
   font-size: 10px;
-  color: #8a94a6;
+  color: #94A3B8;
 }
 
 

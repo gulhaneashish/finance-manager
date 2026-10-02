@@ -1,170 +1,426 @@
 <div class="report-page">
 
-  <!-- HEADER -->
+  <!-- =========================
+       PAGE HEADER
+  ========================== -->
 
- <div class="top-section">
-
-  <!-- HEADER -->
   <div class="page-header">
-    <div>
-      <h1>Expense Report</h1>
-      <p>
-        Analyze your income, expenses and spending patterns.
-      </p>
+
+    <div class="page-title">
+
+      <div class="title-icon">
+        <mat-icon>bar_chart</mat-icon>
+      </div>
+
+      <div>
+        <h1>Expense Report</h1>
+
+        <p>
+          Analyze your income, expenses and spending patterns.
+        </p>
+      </div>
+
     </div>
+  <button
+    type="button"
+    class="filter-button"
+    (click)="showFilters = !showFilters">
+
+    <mat-icon>
+      filter_alt
+    </mat-icon>
+
+    Filter
+
+  </button>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filter-card">
 
-    <div class="filter-group">
-      <label for="fromDate">
-        From Date
-      </label>
+  <!-- =========================
+       FILTER CARD
+  ========================== -->
 
-      <input
-        id="fromDate"
-        type="date"
-        [value]="fromDate"
-        (input)="fromDate = $any($event.target).value">
+
+@if (showFilters) {
+
+  
+
+   <div class="filter-card">
+
+    <div class="filter-title">
+
+      <mat-icon>filter_alt</mat-icon>
+
+      <div>
+        <h3>Report Period</h3>
+        <p>Select the period you want to analyze.</p>
+      </div>
+
     </div>
 
-    <div class="filter-group">
-      <label for="toDate">
-        To Date
-      </label>
 
-      <input
-        id="toDate"
-        type="date"
-        [value]="toDate"
-        (input)="toDate = $any($event.target).value">
-    </div>
+    <div class="filter-controls">
 
-    <div class="filter-actions">
-      <button
-        type="button"
-        class="apply-button"
-        (click)="applyFilter()">
-        Apply
-      </button>
+      <div class="filter-group">
 
-      <button
-        type="button"
-        class="clear-button"
-        (click)="clearFilter()">
-        Clear
-      </button>
+        <label for="fromDate">
+          From Date
+        </label>
+
+        <div class="input-wrapper">
+
+          <mat-icon>calendar_today</mat-icon>
+
+          <input
+            id="fromDate"
+            type="date"
+            [value]="fromDate"
+            (input)="fromDate = $any($event.target).value">
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-group">
+
+        <label for="toDate">
+          To Date
+        </label>
+
+        <div class="input-wrapper">
+
+          <mat-icon>event</mat-icon>
+
+          <input
+            id="toDate"
+            type="date"
+            [value]="toDate"
+            (input)="toDate = $any($event.target).value">
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-actions">
+
+        <button
+          type="button"
+          class="apply-button"
+          (click)="applyFilter()">
+
+          <mat-icon>search</mat-icon>
+          Apply
+
+        </button>
+
+
+        <button
+          type="button"
+          class="clear-button"
+          (click)="clearFilter()">
+
+          <mat-icon>refresh</mat-icon>
+          Clear
+
+        </button>
+
+      </div>
+
     </div>
 
   </div>
 
-</div>
 
-  <!-- LOADING -->
+}
+  <!-- =========================
+       LOADING
+  ========================== -->
 
   @if (loading$ | async) {
 
     <div class="loading">
-      Loading report...
+
+      <mat-icon>hourglass_empty</mat-icon>
+
+      <span>
+        Loading report...
+      </span>
+
     </div>
 
   }
 
 
-  <!-- ERROR -->
+  <!-- =========================
+       ERROR
+  ========================== -->
 
   @if (error$ | async; as error) {
 
-    <div class="error">
-      {{ error }}
+    <div class="alert error">
+
+      <mat-icon>error_outline</mat-icon>
+
+      <span>
+        {{ error }}
+      </span>
+
     </div>
 
   }
 
 
-  <!-- SUMMARY -->
+  <!-- =========================
+       SUMMARY
+  ========================== -->
 
   <div class="summary-grid">
 
+    <!-- INCOME -->
+
     <div class="summary-card income">
 
-      <span class="summary-label">
-        Total Income
-      </span>
+      <div class="summary-icon">
+        <mat-icon>trending_up</mat-icon>
+      </div>
 
-      <strong>
-        ₹{{ totalIncome$ | async | number:'1.0-2' }}
-      </strong>
+      <div class="summary-content">
+
+        <span>
+          Total Income
+        </span>
+
+        <strong>
+          ₹{{ totalIncome$ | async | number:'1.0-2' }}
+        </strong>
+
+      </div>
 
     </div>
 
+
+    <!-- EXPENSE -->
 
     <div class="summary-card expense">
 
-      <span class="summary-label">
-        Total Expense
-      </span>
+      <div class="summary-icon">
+        <mat-icon>trending_down</mat-icon>
+      </div>
 
-      <strong>
-        ₹{{ totalExpense$ | async | number:'1.0-2' }}
-      </strong>
+      <div class="summary-content">
+
+        <span>
+          Total Expense
+        </span>
+
+        <strong>
+          ₹{{ totalExpense$ | async | number:'1.0-2' }}
+        </strong>
+
+      </div>
 
     </div>
 
 
+    <!-- NET -->
+
     <div class="summary-card net">
 
-      <span class="summary-label">
-        Net Amount
-      </span>
+      <div class="summary-icon">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
 
-      <strong>
-        ₹{{ netAmount$ | async | number:'1.0-2' }}
-      </strong>
+      <div class="summary-content">
+
+        <span>
+          Net Amount
+        </span>
+
+        <strong>
+          ₹{{ netAmount$ | async | number:'1.0-2' }}
+        </strong>
+
+      </div>
 
     </div>
 
   </div>
 
 
-  <!-- CHART -->
+  <!-- =========================
+       REPORT DETAILS
+  ========================== -->
 
- <!-- REPORT DETAILS -->
-<div class="report-details">
+  <div class="report-details">
 
-  <!-- CHART -->
-  <div class="chart-card">
 
-    <div class="chart-header">
-      <div>
-        <h2>Expenses by Category</h2>
-        <p>Where your money is going</p>
+    <!-- =========================
+         CHART
+    ========================== -->
+
+    <div class="chart-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>Expenses by Category</h2>
+
+          <p>
+            See how your expenses are distributed.
+          </p>
+
+        </div>
+
+        <div class="card-header-icon">
+
+          <mat-icon>
+            pie_chart
+          </mat-icon>
+
+        </div>
+
       </div>
-    </div>
 
-    <div class="chart-container">
 
-      @if (categoryExpenses$ | async; as categories) {
+      <div class="chart-container">
 
-        @if (categories.length > 0) {
+        @if (categoryExpenses$ | async; as categories) {
 
-          <canvas
-            baseChart
-            [type]="doughnutChartType"
-            [data]="doughnutChartData"
-            [options]="doughnutChartOptions">
-          </canvas>
+          @if (categories.length > 0) {
 
-        } @else {
+            <canvas
+              baseChart
+              [type]="doughnutChartType"
+              [data]="doughnutChartData"
+              [options]="doughnutChartOptions">
+            </canvas>
 
-          <div class="chart-empty">
-            <div>
+          } @else {
+
+            <div class="chart-empty">
+
+              <div class="empty-icon">
+                <mat-icon>
+                  pie_chart_outline
+                </mat-icon>
+              </div>
+
               <h3>No expense data</h3>
+
               <p>
                 There are no expenses for the selected period.
               </p>
+
             </div>
+
+          }
+
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         CATEGORY BREAKDOWN
+    ========================== -->
+
+    <div class="category-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>Expense Breakdown</h2>
+
+          <p>
+            See where your money is going.
+          </p>
+
+        </div>
+
+        <div class="card-header-icon">
+
+          <mat-icon>
+            category
+          </mat-icon>
+
+        </div>
+
+      </div>
+
+
+      @if (categoryExpenses$ | async; as categories) {
+
+        @if (categories.length === 0) {
+
+          <div class="empty-state">
+
+            <div class="empty-icon">
+
+              <mat-icon>
+                receipt_long
+              </mat-icon>
+
+            </div>
+
+            <h3>No expenses found</h3>
+
+            <p>
+              There are no expense transactions
+              for the selected period.
+            </p>
+
+          </div>
+
+        } @else {
+
+          <div class="category-list">
+
+            @for (
+              category of categories;
+              track category.categoryId
+            ) {
+
+              <div class="category-item">
+
+                <div class="category-left">
+
+                  <div class="category-icon">
+                    <mat-icon>
+                      label
+                    </mat-icon>
+                  </div>
+
+                  <div class="category-name">
+
+                    <strong>
+                      {{ category.categoryName }}
+                    </strong>
+
+                    <span>
+                      Expense
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <div class="category-amount">
+
+                  ₹{{ category.amount | number:'1.0-2' }}
+
+                </div>
+
+              </div>
+
+            }
+
           </div>
 
         }
@@ -172,67 +428,6 @@
       }
 
     </div>
-
-  </div>
-
-
-  <!-- CATEGORY BREAKDOWN -->
-  <div class="category-section">
-
-    <div class="section-header">
-      <div>
-        <h2>Expense by Category</h2>
-        <p>See where your money is going.</p>
-      </div>
-    </div>
-
-    @if (categoryExpenses$ | async; as categories) {
-
-      @if (categories.length === 0) {
-
-        <div class="empty-state">
-
-          <h3>No expenses found</h3>
-
-          <p>
-            There are no expense transactions
-            for the selected period.
-          </p>
-
-        </div>
-
-      } @else {
-
-        <div class="category-list">
-
-          @for (
-            category of categories;
-            track category.categoryId
-          ) {
-
-            <div class="category-item">
-
-              <div class="category-info">
-
-                <span>
-                  {{ category.categoryName }}
-                </span>
-
-                <strong>
-                  ₹{{ category.amount | number:'1.0-2' }}
-                </strong>
-
-              </div>
-
-            </div>
-
-          }
-
-        </div>
-
-      }
-
-    }
 
   </div>
 

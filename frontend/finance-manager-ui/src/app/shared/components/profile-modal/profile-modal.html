@@ -1,0 +1,480 @@
+@if (isOpen) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="header-info">
+          <div class="header-icon-badge">
+            <mat-icon>manage_accounts</mat-icon>
+          </div>
+          <div>
+            <h2 class="modal-title">Profile Information</h2>
+            <p class="modal-subtitle">
+              Manage your personal credentials, identity, and account security
+            </p>
+          </div>
+        </div>
+        <button class="btn-close" (click)="closeModal()" aria-label="Close modal">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="modal-tabs">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab === 'details'"
+          (click)="activeTab = 'details'"
+        >
+          <mat-icon>person</mat-icon>
+          <span>Personal Details</span>
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab === 'security'"
+          (click)="activeTab = 'security'"
+        >
+          <mat-icon>lock_reset</mat-icon>
+          <span>Security & Password</span>
+          <span class="security-badge">
+            <mat-icon>verified_user</mat-icon>
+          </span>
+        </button>
+      </div>
+
+      <!-- Status Alert Banner -->
+      @if (statusMessage) {
+        <div class="status-banner" [ngClass]="statusMessage.type">
+          <mat-icon>{{ statusMessage.type === 'success' ? 'check_circle' : 'error' }}</mat-icon>
+          <span>{{ statusMessage.text }}</span>
+          <button class="btn-banner-close" (click)="statusMessage = null">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        @if (isLoading) {
+          <div class="loading-state">
+            <mat-icon class="spinning">sync</mat-icon>
+            <p>Loading your profile details...</p>
+          </div>
+        } @else {
+          <!-- TAB 1: PERSONAL DETAILS -->
+          @if (activeTab === 'details') {
+            <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
+              <!-- Top Avatar Section -->
+              <div class="avatar-section">
+                <div class="avatar-wrapper">
+                  @if (profilePhotoPreview) {
+                    <img [src]="profilePhotoPreview" alt="Profile avatar" class="avatar-img" />
+                  } @else {
+                    <div class="avatar-placeholder">
+                      <mat-icon>person</mat-icon>
+                    </div>
+                  }
+
+                  <label class="avatar-upload-btn" title="Change photo">
+                    <mat-icon>photo_camera</mat-icon>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      (change)="onPhotoSelected($event)"
+                      hidden
+                    />
+                  </label>
+                </div>
+
+                <div class="avatar-meta">
+                  <div class="avatar-title-row">
+                    <h3>{{ profileForm.get('name')?.value || profile?.name || 'User Profile' }}</h3>
+                    <span class="status-pill active">
+                      <span class="pulse-dot"></span>
+                      {{ profile?.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
+                  <p class="avatar-email">{{ profile?.email }}</p>
+
+                  <div class="avatar-actions">
+                    <label class="btn-change-photo">
+                      <mat-icon>upload</mat-icon>
+                      <span>Change Photo</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        (change)="onPhotoSelected($event)"
+                        hidden
+                      />
+                    </label>
+
+                    @if (profilePhotoPreview) {
+                      <button
+                        type="button"
+                        class="btn-remove-photo"
+                        (click)="removePhoto()"
+                      >
+                        <mat-icon>delete_outline</mat-icon>
+                        <span>Remove</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Fields Grid -->
+              <div class="fields-grid">
+                <!-- Full Name (Editable) -->
+                <div class="form-group">
+                  <div class="label-row">
+                    <label for="profileName">
+                      <mat-icon class="label-icon">badge</mat-icon>
+                      Full Name
+                    </label>
+                    <span class="field-tag editable">✅ Editable</span>
+                  </div>
+                  <div class="input-wrapper">
+                    <input
+                      id="profileName"
+                      type="text"
+                      formControlName="name"
+                      placeholder="e.g. Ashish Gulhane"
+                    />
+                  </div>
+                  @if (profileForm.get('name')?.touched && profileForm.get('name')?.invalid) {
+                    <p class="field-error">Please enter your full name (minimum 2 characters).</p>
+                  }
+                </div>
+
+                <!-- Email (Editable with security caution) -->
+                <div class="form-group">
+                  <div class="label-row">
+                    <label for="profileEmail">
+                      <mat-icon class="label-icon">mail</mat-icon>
+                      Email Address
+                    </label>
+                    <span class="field-tag caution">⚠️ Updates Login</span>
+                  </div>
+                  <div class="input-wrapper">
+                    <input
+                      id="profileEmail"
+                      type="email"
+                      formControlName="email"
+                      placeholder="e.g. name@domain.com"
+                    />
+                  </div>
+                  <p class="field-hint">
+                    Changing this updates your sign-in email. You will use the new address on your next login.
+                  </p>
+                  @if (profileForm.get('email')?.touched && profileForm.get('email')?.invalid) {
+                    <p class="field-error">Please provide a valid email address.</p>
+                  }
+                </div>
+
+                <!-- Phone Number (Editable) -->
+                <div class="form-group">
+                  <div class="label-row">
+                    <label for="profilePhone">
+                      <mat-icon class="label-icon">phone</mat-icon>
+                      Phone Number
+                    </label>
+                    <span class="field-tag editable">✅ Editable</span>
+                  </div>
+                  <div class="input-wrapper">
+                    <input
+                      id="profilePhone"
+                      type="tel"
+                      formControlName="phoneNumber"
+                      placeholder="e.g. +91 98765 43210"
+                    />
+                  </div>
+                  @if (profileForm.get('phoneNumber')?.touched && profileForm.get('phoneNumber')?.invalid) {
+                    <p class="field-error">Please enter a valid phone number.</p>
+                  }
+                </div>
+
+                <!-- Username (Fixed / Locked) -->
+                <div class="form-group locked-group">
+                  <div class="label-row">
+                    <label for="profileUsername">
+                      <mat-icon class="label-icon">alternate_email</mat-icon>
+                      Username
+                    </label>
+                    <span class="field-tag locked">❌ Fixed</span>
+                  </div>
+                  <div class="input-wrapper locked">
+                    <input
+                      id="profileUsername"
+                      type="text"
+                      [value]="profile?.username || ''"
+                      disabled
+                      readonly
+                    />
+                    <mat-icon class="lock-icon" title="Username cannot be altered">lock</mat-icon>
+                  </div>
+                  <p class="field-hint">Fixed unique identifier kept permanent for system references.</p>
+                </div>
+
+                <!-- Role (Fixed / System Protected) -->
+                <div class="form-group locked-group">
+                  <div class="label-row">
+                    <label>
+                      <mat-icon class="label-icon">security</mat-icon>
+                      Assigned Role
+                    </label>
+                    <span class="field-tag locked">❌ Protected</span>
+                  </div>
+                  <div class="input-wrapper locked role-display">
+                    <span class="role-badge" [class.admin]="profile?.role?.toLowerCase() === 'admin'">
+                      <mat-icon>{{ profile?.role?.toLowerCase() === 'admin' ? 'admin_panel_settings' : 'person' }}</mat-icon>
+                      {{ profile?.role || 'User' }}
+                    </span>
+                    <mat-icon class="lock-icon" title="Admins cannot change own role">lock</mat-icon>
+                  </div>
+                  <p class="field-hint">Permissions are policy-controlled. Self-role elevation is prohibited.</p>
+                </div>
+
+                <!-- Account Status (Fixed / Managed) -->
+                <div class="form-group locked-group">
+                  <div class="label-row">
+                    <label>
+                      <mat-icon class="label-icon">verified</mat-icon>
+                      Account Status
+                    </label>
+                    <span class="field-tag locked">❌ Managed</span>
+                  </div>
+                  <div class="input-wrapper locked status-display">
+                    <div class="status-indicator">
+                      <span class="dot" [class.active]="profile?.isActive"></span>
+                      <span class="status-text">{{ profile?.isActive ? 'Active & In Good Standing' : 'Deactivated' }}</span>
+                    </div>
+                    <mat-icon class="lock-icon">lock</mat-icon>
+                  </div>
+                  <p class="field-hint">Account lifecycle managed by higher-level administrators.</p>
+                </div>
+
+                <!-- Last Login (Fixed / System Timestamp) -->
+                <div class="form-group locked-group full-width">
+                  <div class="label-row">
+                    <label>
+                      <mat-icon class="label-icon">schedule</mat-icon>
+                      Last Login Activity
+                    </label>
+                    <span class="field-tag locked">❌ System-Generated</span>
+                  </div>
+                  <div class="input-wrapper locked timestamp-display">
+                    <span class="timestamp-value">
+                      {{ profile?.lastLoginAt ? (profile?.lastLoginAt | date:'medium') : 'First session active' }}
+                    </span>
+                    <span class="timestamp-badge">UTC Recorded</span>
+                  </div>
+                  <p class="field-hint">Automatically recorded upon successful cryptographic authentication.</p>
+                </div>
+              </div>
+
+              <!-- Footer Actions -->
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  (click)="closeModal()"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="btn-primary"
+                  [disabled]="isSaving || profileForm.invalid"
+                >
+                  @if (isSaving) {
+                    <mat-icon class="spinning">sync</mat-icon>
+                    <span>Saving Changes...</span>
+                  } @else {
+                    <mat-icon>save</mat-icon>
+                    <span>Save Profile Changes</span>
+                  }
+                </button>
+              </div>
+            </form>
+          }
+
+          <!-- TAB 2: SECURITY & PASSWORD -->
+          @if (activeTab === 'security') {
+            <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+              <!-- Security Banner -->
+              <div class="security-info-box">
+                <div class="info-icon">
+                  <mat-icon>shield</mat-icon>
+                </div>
+                <div class="info-text">
+                  <h4>Cryptographic Security Protection</h4>
+                  <p>
+                    Changing your password will encrypt your new password using salted BCrypt.
+                    For maximum defense against unauthorized access, <strong>all active refresh tokens and other device sessions will be invalidated immediately</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div class="password-fields">
+                <!-- Current Password -->
+                <div class="form-group">
+                  <label for="currPassword">
+                    <mat-icon class="label-icon">key</mat-icon>
+                    Current Password
+                  </label>
+                  <div class="input-wrapper password-wrapper">
+                    <input
+                      id="currPassword"
+                      [type]="showCurrentPassword ? 'text' : 'password'"
+                      formControlName="currentPassword"
+                      placeholder="Enter your current password"
+                    />
+                    <button
+                      type="button"
+                      class="btn-eye"
+                      (click)="showCurrentPassword = !showCurrentPassword"
+                      tabindex="-1"
+                      title="Toggle password view"
+                    >
+                      <mat-icon>{{ showCurrentPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                  </div>
+                  @if (passwordForm.get('currentPassword')?.touched && passwordForm.get('currentPassword')?.invalid) {
+                    <p class="field-error">Your current password is required for security verification.</p>
+                  }
+                </div>
+
+                <!-- New Password -->
+                <div class="form-group">
+                  <label for="newPassword">
+                    <mat-icon class="label-icon">lock</mat-icon>
+                    New Password
+                  </label>
+                  <div class="input-wrapper password-wrapper">
+                    <input
+                      id="newPassword"
+                      [type]="showNewPassword ? 'text' : 'password'"
+                      formControlName="newPassword"
+                      placeholder="Enter strong new password"
+                    />
+                    <button
+                      type="button"
+                      class="btn-eye"
+                      (click)="showNewPassword = !showNewPassword"
+                      tabindex="-1"
+                      title="Toggle password view"
+                    >
+                      <mat-icon>{{ showNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                  </div>
+
+                  <!-- Dynamic Strength Meter -->
+                  @if (passwordForm.get('newPassword')?.value) {
+                    <div class="strength-meter">
+                      <div class="strength-labels">
+                        <span>Password Strength:</span>
+                        <strong class="strength-value" [ngClass]="passwordStrength.class">
+                          {{ passwordStrength.label }}
+                        </strong>
+                      </div>
+                      <div class="meter-bar-track">
+                        <div
+                          class="meter-bar-fill"
+                          [ngClass]="passwordStrength.class"
+                          [style.width.%]="passwordStrength.score * 25"
+                        ></div>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Password Requirements Checklist -->
+                  <div class="requirements-box">
+                    <span class="req-title">Security Requirements:</span>
+                    <ul class="req-list">
+                      <li [class.met]="hasMinLength">
+                        <mat-icon>{{ hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>At least 8 characters</span>
+                      </li>
+                      <li [class.met]="hasUpperAndLower">
+                        <mat-icon>{{ hasUpperAndLower ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>Uppercase (A-Z) and lowercase (a-z) letters</span>
+                      </li>
+                      <li [class.met]="hasNumber">
+                        <mat-icon>{{ hasNumber ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>At least one number (0-9)</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Confirm New Password -->
+                <div class="form-group">
+                  <label for="confirmNewPassword">
+                    <mat-icon class="label-icon">verified_user</mat-icon>
+                    Confirm New Password
+                  </label>
+                  <div class="input-wrapper password-wrapper">
+                    <input
+                      id="confirmNewPassword"
+                      [type]="showConfirmPassword ? 'text' : 'password'"
+                      formControlName="confirmNewPassword"
+                      placeholder="Re-enter new password"
+                    />
+                    <button
+                      type="button"
+                      class="btn-eye"
+                      (click)="showConfirmPassword = !showConfirmPassword"
+                      tabindex="-1"
+                      title="Toggle password view"
+                    >
+                      <mat-icon>{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                  </div>
+                  @if (passwordForm.get('confirmNewPassword')?.value) {
+                    @if (passwordsMatch) {
+                      <p class="field-success">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Passwords match</span>
+                      </p>
+                    } @else {
+                      <p class="field-error">
+                        <mat-icon>error_outline</mat-icon>
+                        <span>Passwords do not match</span>
+                      </p>
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Security Action Footer -->
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  (click)="closeModal()"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="btn-primary danger-btn"
+                  [disabled]="isChangingPassword || passwordForm.invalid || !passwordsMatch"
+                >
+                  @if (isChangingPassword) {
+                    <mat-icon class="spinning">sync</mat-icon>
+                    <span>Updating Password...</span>
+                  } @else {
+                    <mat-icon>lock_reset</mat-icon>
+                    <span>Update Password & Invalidate Sessions</span>
+                  }
+                </button>
+              </div>
+            </form>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

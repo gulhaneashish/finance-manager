@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, inject, OnInit } from '@angular/core';
 
 import {
   FormBuilder,
@@ -43,10 +43,11 @@ import { loadActiveAccounts } from '../../../store/accounts/accounts.actions';
   styleUrl: './transaction-form.css'
 })
 export class TransactionForm implements OnInit {
+  @Output() formClosed = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
   private store = inject(Store);
-TransactionType=TransactionType
+  TransactionType = TransactionType;
   categories$ = this.store.select(
     selectAllCategories
   );
@@ -182,5 +183,11 @@ TransactionType=TransactionType
         }
       })
     );
+
+    this.formClosed.emit();
+  }
+
+  cancel(): void {
+    this.formClosed.emit();
   }
 }

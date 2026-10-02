@@ -1,6 +1,6 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using FinanceManager.API.DTOs;
-using FinanceManager.API.Services;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +11,9 @@ namespace FinanceManager.API.Controllers;
 [Route("api/[controller]")]
 public class BudgetController : ControllerBase
 {
-    private readonly BudgetService _budgetService;
+    private readonly IBudgetService _budgetService;
 
-    public BudgetController(BudgetService budgetService)
+    public BudgetController(IBudgetService budgetService)
     {
         _budgetService = budgetService;
     }

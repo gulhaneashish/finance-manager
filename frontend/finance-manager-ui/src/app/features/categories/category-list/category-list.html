@@ -1,67 +1,93 @@
 <div class="category-page">
 
+  <!-- Header -->
   <div class="page-header">
-    <div>
-      <h1>Categories</h1>
-      <p>
-        Manage the categories used to organize your transactions.
-      </p>
+    <div class="page-title">
+      <div class="title-icon">
+        <mat-icon>category</mat-icon>
+      </div>
+
+      <div>
+        <h1>Categories</h1>
+        <p>
+          Organize your income and expenses with custom categories.
+        </p>
+      </div>
     </div>
   </div>
 
+  <!-- Content -->
   <div class="category-content">
 
+    <!-- Add Category -->
     <section class="category-form-card">
 
-      <h2>Add Category</h2>
+      <div class="card-header">
+        <div class="card-icon">
+          <mat-icon>add_circle</mat-icon>
+        </div>
+
+        <div>
+          <h2>Add Category</h2>
+          <p>Create a category for your transactions.</p>
+        </div>
+      </div>
 
       <form
         [formGroup]="categoryForm"
         (ngSubmit)="submit()">
 
         <div class="form-group">
-
           <label for="name">
             Category Name
           </label>
 
-          <input
-            id="name"
-            type="text"
-            formControlName="name"
-            placeholder="e.g. Food"
-            maxlength="50"
-          >
+          <div class="input-wrapper">
+            <mat-icon>label</mat-icon>
 
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder="e.g. Food, Salary, Shopping"
+              maxlength="50">
+          </div>
         </div>
 
         <div class="form-group">
-
           <label for="type">
-            Type
+            Category Type
           </label>
 
-          <select
-            id="type"
-            formControlName="type">
+          <div class="input-wrapper">
+            <mat-icon>swap_vert</mat-icon>
 
-            <option value="EXPENSE">
-              Expense
-            </option>
+            <select
+              id="type"
+              formControlName="type">
 
-            <option value="INCOME">
-              Income
-            </option>
+              <option value="EXPENSE">
+                Expense
+              </option>
 
-          </select>
+              <option value="INCOME">
+                Income
+              </option>
 
+            </select>
+          </div>
         </div>
 
         <button
           type="submit"
+          class="add-category-button"
           [disabled]="loading$ | async">
 
-          + Add Category
+          <mat-icon>add</mat-icon>
+
+          <span>
+            {{ (loading$ | async) ? 'Adding...' : 'Add Category' }}
+          </span>
 
         </button>
 
@@ -70,26 +96,57 @@
     </section>
 
 
+    <!-- Category List -->
     <section class="category-list-card">
 
-      <h2>Your Categories</h2>
+      <div class="card-header">
 
+        <div class="card-icon list-icon">
+          <mat-icon>list_alt</mat-icon>
+        </div>
+
+        <div>
+          <h2>Your Categories</h2>
+          <p>
+            Manage the categories used in your transactions.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- Error -->
       @if (error$ | async; as error) {
 
         <div class="error">
-          {{ error }}
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ error }}</span>
         </div>
 
       }
 
+
+      <!-- Empty State -->
       @if ((categories$ | async)?.length === 0) {
 
         <div class="empty-state">
-          No categories found.
+
+          <div class="empty-icon">
+            <mat-icon>category</mat-icon>
+          </div>
+
+          <h3>No categories yet</h3>
+
+          <p>
+            Add your first category to start organizing
+            your transactions.
+          </p>
+
         </div>
 
       } @else {
 
+        <!-- Category List -->
         <div class="category-list">
 
           @for (
@@ -99,29 +156,50 @@
 
             <div class="category-row">
 
-              <div class="category-info">
+              <div class="category-left">
 
-                <span class="category-name">
-                  {{ category.name }}
-                </span>
+                <div
+                  class="category-icon"
+                  [class.income-icon]="category.type === 'INCOME'"
+                  [class.expense-icon]="category.type === 'EXPENSE'">
 
-                <span
-                  class="category-type"
-                  [class.income]="category.type === 'INCOME'"
-                  [class.expense]="category.type === 'EXPENSE'">
+                  <mat-icon>
+                    {{
+                      category.type === 'INCOME'
+                        ? 'trending_up'
+                        : 'trending_down'
+                    }}
+                  </mat-icon>
 
-                  {{ category.type }}
+                </div>
 
-                </span>
+                <div class="category-info">
+
+                  <span class="category-name">
+                    {{ category.name }}
+                  </span>
+
+                  <span
+                    class="category-type"
+                    [class.income]="category.type === 'INCOME'"
+                    [class.expense]="category.type === 'EXPENSE'">
+
+                    {{ category.type }}
+
+                  </span>
+
+                </div>
 
               </div>
+
 
               <button
                 type="button"
                 class="delete-button"
+                title="Delete category"
                 (click)="delete(category.id)">
 
-                🗑
+                <mat-icon>delete_outline</mat-icon>
 
               </button>
 

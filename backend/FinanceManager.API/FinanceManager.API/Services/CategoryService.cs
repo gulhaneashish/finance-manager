@@ -1,28 +1,32 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class CategoryService
+public class CategoryService : ICategoryService
 {
-    private readonly FinanceDbContext _context;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public CategoryService(FinanceDbContext context)
+    public CategoryService(
+        ICategoryRepository categoryRepository,
+        ITransactionRepository transactionRepository)
     {
-        _context = context;
+        _categoryRepository = categoryRepository;
+        _transactionRepository = transactionRepository;
     }
 
     public async Task<CategoryResponseDto> CreateAsync(
         CategoryCreateDto dto,
         int userId)
     {
-        var existing = await _context.Categories
-            .FirstOrDefaultAsync(c =>
-                c.UserId == userId &&
-                c.Name.ToLower() == dto.Name.ToLower() &&
-                c.Type == dto.Type);
+        var existing = await _categoryRepository.FirstOrDefaultAsync(c =>
+            c.UserId == userId &&
+            c.Name.ToLower() == dto.Name.ToLower() &&
+            c.Type == dto.Type);
 
         if (existing != null)
         {
@@ -37,9 +41,8 @@ public class CategoryService
             Type = dto.Type.ToUpper(),
         };
 
-        _context.Categories.Add(category);
-
-        await _context.SaveChangesAsync();
+        await _categoryRepository.AddAsync(category);
+        await _categoryRepository.SaveChangesAsync();
 
         return MapToDto(category);
     }
@@ -47,7 +50,7 @@ public class CategoryService
     public async Task<List<CategoryResponseDto>> GetAllAsync(
         int userId)
     {
-        var categories = await _context.Categories
+        var categories = await _categoryRepository.Query()
             .Where(c => c.UserId == userId)
             .OrderBy(c => c.Type)
             .ThenBy(c => c.Name)
@@ -62,18 +65,17 @@ public class CategoryService
         int id,
         int userId)
     {
-        var category = await _context.Categories
-            .FirstOrDefaultAsync(c =>
-                c.Id == id &&
-                c.UserId == userId);
+        var category = await _categoryRepository.FirstOrDefaultAsync(c =>
+            c.Id == id &&
+            c.UserId == userId);
 
         if (category == null)
         {
             return false;
         }
 
-        var hasTransactions = await _context.Transactions
-            .AnyAsync(t => t.CategoryId == id);
+        var hasTransactions = await _transactionRepository.AnyAsync(t =>
+            t.CategoryId == id);
 
         if (hasTransactions)
         {
@@ -81,9 +83,8 @@ public class CategoryService
                 "Category cannot be deleted because it is used by transactions.");
         }
 
-        _context.Categories.Remove(category);
-
-        await _context.SaveChangesAsync();
+        _categoryRepository.Remove(category);
+        await _categoryRepository.SaveChangesAsync();
 
         return true;
     }

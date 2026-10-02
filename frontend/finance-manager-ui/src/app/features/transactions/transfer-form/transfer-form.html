@@ -1,154 +1,105 @@
-<div class="transfer-form">
-
-  <h2>Transfer Money</h2>
-
-  <form
-    [formGroup]="transferForm"
-    (ngSubmit)="submit()">
-
+<div class="transfer-form-body">
+  <form [formGroup]="transferForm" (ngSubmit)="submit()">
     <!-- From Account -->
-
-    <label>
-      From Account
-    </label>
-
-    <select formControlName="fromAccountId">
-
-      <option [ngValue]="0">
-        Select source account
-      </option>
-
-      @for (
-        account of transferAccounts$ | async;
-        track account.id
-      ) {
-
-        <option [ngValue]="account.id">
-
-          {{ account.name }}
-          — ₹{{ account.currentBalance }}
-
-        </option>
-
-      }
-
-    </select>
-
+    <div class="form-field">
+      <label for="fromAccount">
+        From Account <span class="required">*</span>
+      </label>
+      <select id="fromAccount" formControlName="fromAccountId">
+        <option [ngValue]="0">-- Select source account --</option>
+        @for (account of transferAccounts$ | async; track account.id) {
+          <option [ngValue]="account.id">
+            {{ account.name }} (₹{{ account.currentBalance | number:'1.0-2' }})
+          </option>
+        }
+      </select>
+    </div>
 
     <!-- To Account -->
+    <div class="form-field">
+      <label for="toAccount">
+        To Account <span class="required">*</span>
+      </label>
+      <select id="toAccount" formControlName="toAccountId">
+        <option [ngValue]="0">-- Select destination account --</option>
+        @for (account of transferAccounts$ | async; track account.id) {
+          <option
+            [ngValue]="account.id"
+            [disabled]="account.id === transferForm.controls.fromAccountId.value"
+          >
+            {{ account.name }} (₹{{ account.currentBalance | number:'1.0-2' }})
+          </option>
+        }
+      </select>
+    </div>
 
-    <label>
-      To Account
-    </label>
-
-    <select formControlName="toAccountId">
-
-      <option [ngValue]="0">
-        Select destination account
-      </option>
-
-      @for (
-        account of transferAccounts$ | async;
-        track account.id
-      ) {
-
-        <option
-          [ngValue]="account.id"
-          [disabled]="
-            account.id ===
-            transferForm.controls.fromAccountId.value
-          "
-        >
-
-          {{ account.name }}
-
-        </option>
-
-      }
-
-    </select>
-
-
-    <!-- Same Account Validation -->
-
+    <!-- Same Account Warning -->
     @if (
       transferForm.controls.toAccountId.value !== 0 &&
-      transferForm.controls.toAccountId.value ===
-      transferForm.controls.fromAccountId.value
+      transferForm.controls.toAccountId.value === transferForm.controls.fromAccountId.value
     ) {
-
-      <small>
+      <div class="form-validation-warning">
         Source and destination accounts must be different.
-      </small>
-
+      </div>
     }
 
-
     <!-- Transfer Purpose -->
-
-    <label>
-      Transfer Purpose
-    </label>
-
-    <select formControlName="transactionPurpose">
-
-      <option [ngValue]="10">
-         Transfer
-      </option>
-
-      <option [ngValue]="1">
-        Savings
-      </option>
-
-    </select>
-
+    <div class="form-field">
+      <label for="transferPurpose">Transfer Purpose</label>
+      <select id="transferPurpose" formControlName="transactionPurpose">
+        <option [ngValue]="10">🔄 Standard Transfer</option>
+        <option [ngValue]="1">🐷 Savings Goal</option>
+      </select>
+    </div>
 
     <!-- Amount -->
-
-    <label>
-      Amount
-    </label>
-
-    <input
-      type="number"
-      formControlName="amount"
-      min="0.01"
-    />
-
+    <div class="form-field">
+      <label for="transferAmount">
+        Amount (₹) <span class="required">*</span>
+      </label>
+      <input
+        id="transferAmount"
+        type="number"
+        formControlName="amount"
+        min="0.01"
+        step="0.01"
+        placeholder="0.00"
+      />
+    </div>
 
     <!-- Date -->
-
-    <label>
-      Date
-    </label>
-
-    <input
-      type="date"
-      formControlName="transactionDate"
-    />
-
+    <div class="form-field">
+      <label for="transferDate">Date <span class="required">*</span></label>
+      <input
+        id="transferDate"
+        type="date"
+        formControlName="transactionDate"
+      />
+    </div>
 
     <!-- Description -->
+    <div class="form-field">
+      <label for="transferDescription">Description (Optional)</label>
+      <input
+        id="transferDescription"
+        type="text"
+        formControlName="description"
+        placeholder="e.g. Monthly savings, emergency fund"
+      />
+    </div>
 
-    <label>
-      Description
-    </label>
-
-    <input
-      type="text"
-      formControlName="description"
-    />
-
-
-    <!-- Submit -->
-
-    <button
-      type="submit"
-      [disabled]="transferForm.invalid"
-    >
-      Transfer Money
-    </button>
-
+    <!-- Dialog Actions Footer -->
+    <div class="dialog-actions-footer">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn-submit transfer-submit"
+        [disabled]="transferForm.invalid || transferForm.controls.fromAccountId.value === transferForm.controls.toAccountId.value"
+      >
+        Transfer Money
+      </button>
+    </div>
   </form>
-
 </div>

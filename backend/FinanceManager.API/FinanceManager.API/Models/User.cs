@@ -1,4 +1,4 @@
-﻿namespace FinanceManager.API.Models;
+namespace FinanceManager.API.Models;
 
 public class User
 {
@@ -11,6 +11,22 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+
+    public string Role { get; set; } = "User";
+
+    public bool IsActive { get; set; } = true;
+
+    public string? ProfilePictureUrl { get; set; }
+
+    public string? PhoneNumber { get; set; }
+
+    public string? Username { get; set; }
+
+    public DateTime? LastLoginAt { get; set; }
 
     public ICollection<Account> Accounts { get; set; } = new List<Account>();
 

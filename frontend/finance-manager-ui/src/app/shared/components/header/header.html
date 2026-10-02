@@ -1,69 +1,118 @@
 <header class="header">
 
-  <div>
-   <h2>Personal Finance</h2>
+  <div class="header-left">
+
+    <button
+      class="mobile-menu-button"
+      type="button"
+      (click)="toggleSidebar()"
+      aria-label="Toggle navigation">
+
+      <mat-icon>
+        {{ isSidebarOpen ? 'close' : 'menu' }}
+      </mat-icon>
+
+    </button>
+
+
+    <h2>
+      Personal Finance
+    </h2>
+
   </div>
+
 
   <div class="header-actions">
 
-    <button mat-icon-button>
-      <mat-icon>notifications</mat-icon>
-    </button>
-
-@if (user$ | async; as user) {
-
-  <div class="profile-container">
-
     <button
-      class="profile"
+      mat-icon-button
       type="button"
-      (click)="toggleProfileMenu()"
-    >
+      aria-label="Notifications">
+
       <mat-icon>
-        account_circle
+        notifications
       </mat-icon>
 
-      <span>
-        {{ user.name }}
-      </span>
-
-      <mat-icon class="profile-arrow">
-        expand_more
-      </mat-icon>
     </button>
 
-   @if (showProfileMenu) {
 
-  <div class="profile-menu">
+    @if (user$ | async; as user) {
 
-    <div class="profile-menu-header">
+      <div class="profile-container">
 
-      <div class="profile-avatar">
-        <mat-icon>account_circle</mat-icon>
+        <button
+          class="profile"
+          type="button"
+          (click)="toggleProfileMenu()">
+
+          <mat-icon>
+            account_circle
+          </mat-icon>
+
+          <span>
+            {{ user.name }}
+          </span>
+
+          <mat-icon class="profile-arrow">
+            expand_more
+          </mat-icon>
+
+        </button>
+
+
+        @if (showProfileMenu) {
+
+          <div class="profile-menu">
+
+            <div class="profile-menu-header">
+
+              <div class="profile-avatar">
+
+                <mat-icon>
+                  account_circle
+                </mat-icon>
+
+              </div>
+
+
+              <div class="profile-details">
+
+                <h4>
+                  {{ user.name }}
+                </h4>
+
+                <p>
+                  {{ user.email }}
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="profile-divider"></div>
+
+
+            <div class="profile-item" (click)="openProfileModal()">
+              <mat-icon>person</mat-icon>
+              <span>Profile Information</span>
+            </div>
+
+            <div
+              class="profile-item"
+              routerLink="/categories"
+              (click)="showProfileMenu = false">
+              <mat-icon>category</mat-icon>
+              <span>Categories</span>
+            </div>
+          </div>
+        }
       </div>
-
-      <div class="profile-details">
-        <h4>{{ user.name }}</h4>
-        <p>{{ user.email }}</p>
-      </div>
-
-    </div>
-
-    <div class="profile-divider"></div>
-
-    <div class="profile-item">
-      <mat-icon>person</mat-icon>
-      <span>Profile Information</span>
-    </div>
-
+    }
   </div>
-
-}
-
-  </div>
-
-}
-
-  </div>
-
 </header>
+
+<app-profile-modal
+  [isOpen]="showProfileModal"
+  (closed)="closeProfileModal()">
+</app-profile-modal>

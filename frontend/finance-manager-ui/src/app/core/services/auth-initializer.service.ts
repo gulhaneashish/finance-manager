@@ -40,6 +40,10 @@ export class AuthInitializerService {
       this.authService.getCurrentUser()
     );
 
+    if (user && user.role) {
+      localStorage.setItem('role', user.role);
+    }
+
     this.store.dispatch(
       setUser({
         user

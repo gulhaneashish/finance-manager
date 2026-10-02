@@ -1,10 +1,12 @@
 .investment-form {
-  max-width: 650px;
-  margin: 30px auto;
-  padding: 24px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  max-width: 620px;
+  margin: 24px auto;
+  padding: 30px;
+  background: rgba(30, 41, 59, 0.72);
+  border-radius: 16px;
+  border: 1px solid rgba(51, 65, 85, 0.75);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
 }
 
 .form-header {
@@ -13,10 +15,16 @@
 
 .form-header h2 {
   margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #F8FAFC;
+  letter-spacing: -0.01em;
 }
 
 .form-header p {
   margin-top: 6px;
+  font-size: 13px;
+  color: #94A3B8;
 }
 
 .form-group {
@@ -26,7 +34,9 @@
 .form-group label {
   display: block;
   margin-bottom: 7px;
+  font-size: 13px;
   font-weight: 600;
+  color: #CBD5E1;
 }
 
 .form-group input,
@@ -34,66 +44,93 @@
 .form-group textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 11px 13px;
+  border: 1px solid #334155;
+  border-radius: 9px;
+  background: #0B0F19;
+  color: #F8FAFC;
   font-size: 14px;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-group select option {
+  background: #0B0F19;
+  color: #F8FAFC;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .form-group textarea {
   resize: vertical;
+  min-height: 85px;
+  font-family: inherit;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #64748B;
 }
 
 .validation {
   margin-top: 5px;
-  font-size: 13px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.form-actions button {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.save-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  font-size: 12px;
+  color: #F87171;
 }
 
 .form-actions {
   display: flex;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 26px;
 }
 
 .form-actions button {
   flex: 1;
   padding: 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cancel-btn {
-  background: #e9ecef;
-  color: #333;
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94A3B8;
 }
 
-.submit-btn {
-  background: #198754;
+.cancel-btn:hover {
+  background: #334155;
+  color: #F8FAFC;
+}
+
+.save-btn {
+  border: none;
+  background: #2563EB;
   color: white;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
 }
 
-.submit-btn:disabled {
-  opacity: 0.6;
+.save-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (max-width: 600px) {
+  .investment-form {
+    margin: 16px;
+    padding: 20px 16px;
+  }
 }

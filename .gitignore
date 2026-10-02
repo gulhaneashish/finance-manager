@@ -1,7 +1,7 @@
 # Angular
-frontend/node_modules/
-frontend/dist/
-frontend/.angular/
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/.angular/
 
 # Angular environment files
 frontend/src/environments/

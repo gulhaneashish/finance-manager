@@ -23,12 +23,12 @@
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #111827;
+  color: #F8FAFC;
 }
 
 .page-header p {
   margin: 4px 0 0;
-  color: #6b7280;
+  color: #94A3B8;
   font-size: 13px;
 }
 
@@ -38,27 +38,29 @@
 ========================= */
 
 .net-worth-card {
-  background: #ffffff;
+  background: rgba(30, 41, 59, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.75);
   border-radius: 12px;
   padding: 20px 22px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .net-worth-card span {
-  color: #6b7280;
+  color: #94A3B8;
   font-size: 13px;
   font-weight: 600;
 }
 
 .net-worth-card strong {
   font-size: 20px;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #F8FAFC;
 }
 
 
@@ -78,10 +80,13 @@
 ========================= */
 
 .section-card {
-  background: #ffffff;
+  background: rgba(30, 41, 59, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(51, 65, 85, 0.75);
   border-radius: 12px;
   padding: 18px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 
@@ -93,33 +98,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding-bottom: 12px;
   margin-bottom: 12px;
-
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.6);
 }
 
 .section-header h2 {
   margin: 0;
   font-size: 16px;
-  color: #1f2937;
+  font-weight: 700;
+  color: #F8FAFC;
 }
 
 .section-header p {
   margin: 3px 0 0;
-  color: #6b7280;
+  color: #94A3B8;
   font-size: 12px;
 }
 
 .section-total {
   font-size: 15px;
-  color: #16a34a;
+  font-weight: 700;
+  color: #34D399;
   white-space: nowrap;
 }
 
 .liability-total {
-  color: #dc2626;
+  color: #F87171;
 }
 
 
@@ -141,20 +146,21 @@
 .balance-item {
   padding: 12px;
   border-radius: 9px;
-  background: #f9fafb;
-  border: 1px solid #f1f5f9;
+  background: #0B0F19;
+  border: 1px solid #334155;
 }
 
 .balance-item span {
   display: block;
-  color: #6b7280;
+  color: #94A3B8;
   font-size: 12px;
   margin-bottom: 5px;
 }
 
 .balance-item strong {
-  font-size: 12px;
-  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  color: #F8FAFC;
 }
 
 
@@ -172,13 +178,15 @@
 }
 
 .loading {
-  background: #eff6ff;
-  color: #2563eb;
+  background: rgba(37, 99, 235, 0.15);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .error {
-  background: #fef2f2;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 

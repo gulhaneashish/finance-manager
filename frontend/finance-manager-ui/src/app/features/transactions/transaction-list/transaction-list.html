@@ -66,80 +66,77 @@
 
 
   <!-- =====================================================
-       TRANSACTION FORM
+       ADD TRANSACTION MODAL DIALOG
   ====================================================== -->
-
   @if (showTransactionForm) {
-
-    <div class="form-section">
-
-      <div class="form-section-header">
-
-        <div>
-          <h2>Add Transaction</h2>
-
-          <p>
-            Add income or expense.
-          </p>
+    <div class="dialog-backdrop" (click)="closeTransactionForm()">
+      <div class="dialog-card" (click)="$event.stopPropagation()">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+          <div class="dialog-header-info">
+            <div class="dialog-badge transaction-badge">
+              <mat-icon>add_circle_outline</mat-icon>
+            </div>
+            <div>
+              <h3>Add Transaction</h3>
+              <p>Record a new income or expense entry</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-dialog-close"
+            (click)="closeTransactionForm()"
+            aria-label="Close dialog"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
 
-        <button
-          type="button"
-          class="close-form-button"
-          (click)="closeTransactionForm()">
-
-          ✕
-
-        </button>
-
+        <!-- Dialog Body -->
+        <div class="dialog-body">
+          <app-transaction-form
+            (formClosed)="closeTransactionForm()">
+          </app-transaction-form>
+        </div>
       </div>
-
-
-      <app-transaction-form
-        (formClosed)="closeTransactionForm()">
-      </app-transaction-form>
-
     </div>
-
   }
 
-
   <!-- =====================================================
-       TRANSFER FORM
+       ADD TRANSFER MODAL DIALOG
   ====================================================== -->
-
   @if (showTransferForm) {
-
-    <div class="form-section">
-
-      <div class="form-section-header">
-
-        <div>
-          <h2>Add Transfer</h2>
-
-          <p>
-            Transfer money between accounts.
-          </p>
+    <div class="dialog-backdrop" (click)="closeTransferForm()">
+      <div class="dialog-card" (click)="$event.stopPropagation()">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+          <div class="dialog-header-info">
+            <div class="dialog-badge transfer-badge">
+              <mat-icon>swap_horiz</mat-icon>
+            </div>
+            <div>
+              <h3>Transfer Money</h3>
+              <p>Move funds seamlessly between your accounts</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-dialog-close"
+            (click)="closeTransferForm()"
+            aria-label="Close dialog"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
 
-        <button
-          type="button"
-          class="close-form-button"
-          (click)="closeTransferForm()">
-
-          ✕
-
-        </button>
-
+        <!-- Dialog Body -->
+        <div class="dialog-body">
+          <app-transfer-form
+            (formClosed)="closeTransferForm()">
+          </app-transfer-form>
+        </div>
       </div>
-
-
-      <app-transfer-form
-        (formClosed)="closeTransferForm()">
-      </app-transfer-form>
-
     </div>
-
   }
 
 
@@ -306,10 +303,37 @@
       </span>
     </div>
 
-    <span class="transaction-count">
-      {{ (transactions$ | async)?.length || 0 }}
-      transactions
-    </span>
+    <div class="header-controls">
+      <div class="sort-selector">
+        <label for="transactionSort">
+          <mat-icon>sort</mat-icon>
+          <span>Order:</span>
+        </label>
+        <select
+          id="transactionSort"
+          [(ngModel)]="sortBy"
+          (ngModelChange)="onSortChange()"
+        >
+          <option value="newest">🕒 Latest Entered First (Newest ID)</option>
+          <option value="oldest">🕒 First Entered First (Oldest ID)</option>
+          <option value="dateDesc">📅 Transaction Date (Newest First)</option>
+          <option value="dateAsc">📅 Transaction Date (Oldest First)</option>
+          <option value="amountDesc">💵 Amount (High to Low)</option>
+          <option value="amountAsc">💵 Amount (Low to High)</option>
+        </select>
+      </div>
+
+      <div class="header-count-group">
+        <span class="transaction-count">
+          {{ (transactions$ | async)?.length || 0 }} transactions
+        </span>
+        @if ((transactions$ | async)?.length) {
+          <span class="page-badge">
+            Page {{ currentPage }} of {{ getTotalPages((transactions$ | async)!.length) }}
+          </span>
+        }
+      </div>
+    </div>
 
   </div>
 
@@ -354,20 +378,29 @@
 
         <div class="transaction-table-header">
 
-          <span>
-            Transaction
+          <span class="sortable-header" (click)="toggleSort('id')" title="Click to toggle ID sort">
+            <span>Transaction</span>
+            <mat-icon class="header-sort-icon">
+              {{ sortBy === 'newest' ? 'arrow_downward' : (sortBy === 'oldest' ? 'arrow_upward' : 'unfold_more') }}
+            </mat-icon>
           </span>
 
           <span>
             Type
           </span>
 
-          <span>
-            Date
+          <span class="sortable-header" (click)="toggleSort('date')" title="Click to toggle Date sort">
+            <span>Date</span>
+            <mat-icon class="header-sort-icon">
+              {{ sortBy === 'dateDesc' ? 'arrow_downward' : (sortBy === 'dateAsc' ? 'arrow_upward' : 'unfold_more') }}
+            </mat-icon>
           </span>
 
-          <span class="amount-header">
-            Amount
+          <span class="amount-header sortable-header" (click)="toggleSort('amount')" title="Click to toggle Amount sort">
+            <span>Amount</span>
+            <mat-icon class="header-sort-icon">
+              {{ sortBy === 'amountDesc' ? 'arrow_downward' : (sortBy === 'amountAsc' ? 'arrow_upward' : 'unfold_more') }}
+            </mat-icon>
           </span>
 
           <span class="action-header">
@@ -380,7 +413,7 @@
         <!-- TRANSACTION ROWS -->
 
         @for (
-          transaction of transactions;
+          transaction of getPagedTransactions(transactions);
           track transaction.id
         ) {
 
@@ -684,6 +717,90 @@
           </div>
 
         }
+
+      </div>
+
+      <!-- =====================================================
+           PAGINATION BAR
+      ====================================================== -->
+      <div class="pagination-bar">
+
+        <!-- SHOWING COUNT -->
+        <div class="pagination-summary">
+          Showing
+          <strong>{{ getStartIndex(transactions.length) }}</strong>
+          –
+          <strong>{{ getEndIndex(transactions.length) }}</strong>
+          of
+          <strong>{{ transactions.length }}</strong>
+          transactions
+        </div>
+
+        <div class="pagination-actions">
+
+          <!-- PAGE SIZE SELECTOR -->
+          <div class="page-size-wrap">
+            <label for="pageSizeSelect">Show:</label>
+            <select
+              id="pageSizeSelect"
+              [ngModel]="pageSize"
+              (ngModelChange)="onPageSizeChange($event)">
+              @for (size of pageSizeOptions; track size) {
+                <option [value]="size">{{ size }} / page</option>
+              }
+            </select>
+          </div>
+
+          <!-- PAGE NAVIGATION BUTTONS -->
+          <div class="page-nav">
+            <button
+              type="button"
+              class="page-nav-btn"
+              [disabled]="currentPage === 1"
+              (click)="setPage(1, transactions.length)"
+              title="First page">
+              «
+            </button>
+
+            <button
+              type="button"
+              class="page-nav-btn"
+              [disabled]="currentPage === 1"
+              (click)="setPage(currentPage - 1, transactions.length)"
+              title="Previous page">
+              ‹
+            </button>
+
+            @for (p of getPageNumbers(transactions.length); track p) {
+              <button
+                type="button"
+                class="page-num-btn"
+                [class.active]="p === currentPage"
+                (click)="setPage(p, transactions.length)">
+                {{ p }}
+              </button>
+            }
+
+            <button
+              type="button"
+              class="page-nav-btn"
+              [disabled]="currentPage >= getTotalPages(transactions.length)"
+              (click)="setPage(currentPage + 1, transactions.length)"
+              title="Next page">
+              ›
+            </button>
+
+            <button
+              type="button"
+              class="page-nav-btn"
+              [disabled]="currentPage >= getTotalPages(transactions.length)"
+              (click)="setPage(getTotalPages(transactions.length), transactions.length)"
+              title="Last page">
+              »
+            </button>
+          </div>
+
+        </div>
 
       </div>
 

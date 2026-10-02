@@ -58,27 +58,28 @@ export class Login {
     this.authService
       .login(this.loginForm.getRawValue())
       .subscribe({
-   next: response => {
+        next: response => {
+          this.authService.saveTokens(response.token, response.refreshToken, response.role);
 
-  localStorage.setItem(
-    'token',
-    response.token
-  );
+          this.store.dispatch(
+            setUser({
+              user: {
+                userId: response.userId,
+                name: response.name,
+                email: response.email,
+                role: response.role
+              }
+            })
+          );
 
-  this.store.dispatch(
-    setUser({
-      user: {
-        userId: response.userId,
-        name: response.name,
-        email: response.email
-      }
-    })
-  );
+          this.isLoading = false;
 
-  this.isLoading = false;
-
-  this.router.navigate(['/dashboard']);
-},
+          if (response.role?.toLowerCase() === 'admin') {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        },
 
         error: error => {
           this.isLoading = false;

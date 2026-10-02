@@ -1,27 +1,34 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class NetWorthService
+public class NetWorthService : INetWorthService
 {
-    private readonly FinanceDbContext _context;
-    private readonly AccountBalanceService _accountBalanceService;
+    private readonly IAccountRepository _accountRepository;
+    private readonly IInvestmentRepository _investmentRepository;
+    private readonly ILoanRepository _loanRepository;
+    private readonly IAccountBalanceService _accountBalanceService;
 
     public NetWorthService(
-        FinanceDbContext context,
-        AccountBalanceService accountBalanceService)
+        IAccountRepository accountRepository,
+        IInvestmentRepository investmentRepository,
+        ILoanRepository loanRepository,
+        IAccountBalanceService accountBalanceService)
     {
-        _context = context;
+        _accountRepository = accountRepository;
+        _investmentRepository = investmentRepository;
+        _loanRepository = loanRepository;
         _accountBalanceService = accountBalanceService;
     }
 
     public async Task<NetWorthDto> GetNetWorthAsync(
         int userId)
     {
-        var accounts = await _context.Accounts
+        var accounts = await _accountRepository.Query()
             .Where(a =>
                 a.UserId == userId &&
                 a.IsActive)
@@ -61,14 +68,14 @@ public class NetWorthService
         }
 
         var investmentBalance =
-            await _context.Investments
+            await _investmentRepository.Query()
                 .Where(i =>
                     i.UserId == userId &&
                     i.IsActive)
                 .SumAsync(i =>
                     (decimal?)i.CurrentValue) ?? 0;
 
-        var loans = await _context.Loans
+        var loans = await _loanRepository.Query()
             .Where(l =>
                 l.UserId == userId &&
                 l.IsActive)
@@ -111,23 +118,14 @@ public class NetWorthService
         return new NetWorthDto
         {
             TotalAssets = totalAssets,
-
             BankBalance = bankBalance,
-
             CashBalance = cashBalance,
-
             SavingsBalance = savingsBalance,
-
             InvestmentBalance = investmentBalance,
-
             CreditCardDebt = creditCardDebt,
-
             LoansPayable = loansPayable,
-
             LoansReceivable = loansReceivable,
-
             TotalLiabilities = totalLiabilities,
-
             NetWorth = netWorth
         };
     }

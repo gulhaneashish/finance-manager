@@ -34,9 +34,9 @@ export class DashboardEffects {
         DashboardActions.loadDashboard
       ),
 
-      switchMap(({ year, month }) =>
+      switchMap(action =>
         this.dashboardService
-          .getSummary(year, month)
+          .getSummary(action.filter ?? (action.year ? { year: action.year, month: action.month } : undefined))
           .pipe(
 
             map(dashboard =>
@@ -65,10 +65,9 @@ export class DashboardEffects {
       DashboardActions.loadCategorySpending
     ),
 
-    switchMap(({ year, month }) =>
-
+    switchMap(action =>
       this.dashboardService
-        .getCategorySpending(year, month)
+        .getCategorySpending(action.filter ?? (action.year ? { year: action.year, month: action.month } : undefined))
 
         .pipe(
 
@@ -199,9 +198,9 @@ loadSavingsInvestments$ = createEffect(() =>
       DashboardActions.loadSavingsInvestments
     ),
 
-    switchMap(({ year, month }) =>
+    switchMap(action =>
       this.dashboardService
-        .getSavingsInvestments(year, month)
+        .getSavingsInvestments(action.filter ?? (action.year ? { year: action.year, month: action.month } : undefined))
         .pipe(
 
           map(savingsInvestments =>

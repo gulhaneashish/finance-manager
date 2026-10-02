@@ -1,455 +1,816 @@
 <div class="investment-page">
 
+  <!-- PAGE HEADER -->
   <div class="page-header">
+    <div class="page-title">
+      <div class="title-icon">
+        <mat-icon>trending_up</mat-icon>
+      </div>
 
-    <div>
-      <h2>Investments</h2>
-      <p>Track your investment portfolio</p>
+      <div>
+        <h1>Investments</h1>
+        <p>Track and manage your investment portfolio</p>
+      </div>
     </div>
 
-     <button
-    type="button"
-    class="add-btn"
-    (click)="addInvestment()">
-    + Add Investment
-  </button>
-
+    <button
+      type="button"
+      class="add-btn"
+      (click)="addInvestment()">
+      <mat-icon>add</mat-icon>
+      Add Investment
+    </button>
   </div>
 
 
   <!-- SUCCESS -->
-
-  <div
-    class="success"
-    *ngIf="operationSuccess$ | async as success"
-  >
-    {{ success }}
-  </div>
+  @if (operationSuccess$ | async; as success) {
+    <div class="alert success">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ success }}</span>
+    </div>
+  }
 
 
   <!-- ERROR -->
-
-  <div
-    class="error"
-    *ngIf="error$ | async as error"
-  >
-    {{ error }}
-  </div>
+  @if (error$ | async; as error) {
+    <div class="alert error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+  }
 
 
   <!-- LOADING -->
-
-  <div
-    class="loading"
-    *ngIf="loading$ | async"
-  >
-    Loading investments...
-  </div>
+  @if (loading$ | async) {
+    <div class="loading">
+      <mat-icon>hourglass_empty</mat-icon>
+      Loading investments...
+    </div>
+  }
 
 
   <!-- SUMMARY -->
-
-  <ng-container
-    *ngIf="summary$ | async as summary"
-  >
+  @if (summary$ | async; as summary) {
 
     <div class="summary-grid">
 
-      <div class="summary-card">
+      <div class="summary-card invested">
+        <div class="summary-icon">
+          <mat-icon>savings</mat-icon>
+        </div>
 
-        <span>Total Invested</span>
-
-        <strong>
-          ₹{{ summary.totalInvestedAmount | number:'1.2-2' }}
-        </strong>
-
+        <div class="summary-info">
+          <span>Total Invested</span>
+          <strong>
+            ₹{{ summary.totalInvestedAmount | number:'1.2-2' }}
+          </strong>
+        </div>
       </div>
 
 
-      <div class="summary-card">
+      <div class="summary-card current">
+        <div class="summary-icon">
+          <mat-icon>account_balance</mat-icon>
+        </div>
 
-        <span>Current Value</span>
-
-        <strong>
-          ₹{{ summary.totalCurrentValue | number:'1.2-2' }}
-        </strong>
-
+        <div class="summary-info">
+          <span>Current Value</span>
+          <strong>
+            ₹{{ summary.totalCurrentValue | number:'1.2-2' }}
+          </strong>
+        </div>
       </div>
 
 
-      <div class="summary-card">
+      <div class="summary-card profit">
+        <div class="summary-icon">
+          <mat-icon>trending_up</mat-icon>
+        </div>
 
-        <span>Profit / Loss</span>
+        <div class="summary-info">
+          <span>Profit / Loss</span>
 
-        <strong>
-          ₹{{ summary.totalProfitLoss | number:'1.2-2' }}
-        </strong>
+          <strong
+            [class.negative]="summary.totalProfitLoss < 0">
 
+            ₹{{ summary.totalProfitLoss | number:'1.2-2' }}
+
+          </strong>
+        </div>
       </div>
 
 
-      <div class="summary-card">
+      <div class="summary-card return">
+        <div class="summary-icon">
+          <mat-icon>percent</mat-icon>
+        </div>
 
-        <span>Return</span>
+        <div class="summary-info">
+          <span>Total Return</span>
 
-        <strong>
-          {{ summary.totalProfitLossPercentage | number:'1.2-2' }}%
+          <strong
+            [class.negative]="summary.totalProfitLossPercentage < 0">
 
-        </strong>
+            {{ summary.totalProfitLossPercentage | number:'1.2-2' }}%
+
+          </strong>
+        </div>
+      </div>
+
+    </div>
+  }
+
+
+  <!-- ================= ADD INVESTMENT POPUP ================= -->
+  @if (showAddForm) {
+    <div class="form-overlay">
+      <div class="investment-form-card">
+        <div class="form-header">
+          <div>
+            <h3>Add Investment</h3>
+            <p>Create a new investment for your portfolio</p>
+          </div>
+
+          <button
+            type="button"
+            class="close-btn"
+            (click)="closeAddForm()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <form [formGroup]="addForm" (ngSubmit)="submitAdd()">
+          <!-- ROW 1: ACCOUNT & NAME -->
+          <div class="form-row">
+            <!-- ACCOUNT -->
+            <div class="form-group">
+              <label for="addAccount">Account</label>
+              <div class="input-wrapper">
+                <mat-icon>account_balance</mat-icon>
+                <select id="addAccount" formControlName="accountId">
+                  <option [ngValue]="0">Select Account</option>
+                  @if (transferAccounts$ | async; as accounts) {
+                    @for (account of accounts; track account.id) {
+                      <option [ngValue]="account.id">
+                        {{ account.name }} (₹{{ account.currentBalance | number:'1.0-0' }})
+                      </option>
+                    }
+                  }
+                </select>
+              </div>
+
+              @if (
+                addForm.get('accountId')?.touched &&
+                addForm.get('accountId')?.invalid
+              ) {
+                <div class="field-error">
+                  Please select an account.
+                </div>
+              }
+            </div>
+
+            <!-- NAME -->
+            <div class="form-group">
+              <label for="addName">Investment Name</label>
+              <div class="input-wrapper">
+                <mat-icon>business</mat-icon>
+                <input
+                  id="addName"
+                  type="text"
+                  formControlName="name"
+                  placeholder="e.g. SBI Mutual Fund" />
+              </div>
+
+              @if (
+                addForm.get('name')?.touched &&
+                addForm.get('name')?.invalid
+              ) {
+                <div class="field-error">
+                  Investment name is required.
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- ROW 2: TYPE & AMOUNT -->
+          <div class="form-row">
+            <!-- TYPE -->
+            <div class="form-group">
+              <label for="addType">Investment Type</label>
+              <div class="input-wrapper">
+                <mat-icon>category</mat-icon>
+                <select id="addType" formControlName="investmentType">
+                  @for (type of investmentTypes; track type) {
+                    <option [ngValue]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <!-- AMOUNT -->
+            <div class="form-group">
+              <label for="addAmount">Investment Amount</label>
+              <div class="input-wrapper">
+                <mat-icon>currency_rupee</mat-icon>
+                <input
+                  id="addAmount"
+                  type="number"
+                  formControlName="amount"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0.00" />
+              </div>
+
+              @if (
+                addForm.get('amount')?.touched &&
+                addForm.get('amount')?.invalid
+              ) {
+                <div class="field-error">
+                  Amount must be greater than zero.
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- ROW 3: DATE -->
+          <div class="form-group">
+            <label for="addDate">Investment Date</label>
+            <div class="input-wrapper">
+              <mat-icon>calendar_today</mat-icon>
+              <input
+                id="addDate"
+                type="date"
+                formControlName="investmentDate" />
+            </div>
+          </div>
+
+          <!-- ROW 4: DESCRIPTION -->
+          <div class="form-group">
+            <label for="addDescription">Description (Optional)</label>
+            <textarea
+              id="addDescription"
+              formControlName="description"
+              rows="2"
+              placeholder="Add optional notes or folio number...">
+            </textarea>
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="form-actions">
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="closeAddForm()">
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="addForm.invalid">
+              <mat-icon>add</mat-icon>
+              Save Investment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+
+  <!-- UPDATE FORM -->
+  @if (showUpdateForm) {
+
+    <div class="form-overlay">
+
+      <div class="investment-form-card">
+
+        <div class="form-header">
+          <div>
+            <h3>Update Investment Value</h3>
+            <p>Update the current market value of your investment.</p>
+          </div>
+
+          <button
+            type="button"
+            class="close-btn"
+            (click)="closeUpdateForm()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+
+        <form
+          [formGroup]="updateForm"
+          (ngSubmit)="submitUpdate()">
+
+          <div class="form-group">
+
+            <label for="currentValue">
+              Current Value
+            </label>
+
+            <div class="input-wrapper">
+
+              <mat-icon>currency_rupee</mat-icon>
+
+              <input
+                id="currentValue"
+                type="number"
+                formControlName="currentValue"
+                min="0"
+                step="0.01"
+                placeholder="Enter current value">
+
+            </div>
+
+
+            @if (
+              updateForm.get('currentValue')?.touched &&
+              updateForm.get('currentValue')?.invalid
+            ) {
+
+              <div class="field-error">
+                Current value must be 0 or greater.
+              </div>
+
+            }
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="updateForm.invalid">
+
+              <mat-icon>save</mat-icon>
+              Update
+
+            </button>
+
+
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="closeUpdateForm()">
+
+              Cancel
+
+            </button>
+
+          </div>
+
+        </form>
 
       </div>
 
     </div>
+  }
 
-  </ng-container>
 
+  <!-- SELL FORM -->
+  @if (showSellForm) {
 
-  <div
-  class="update-panel"
-  *ngIf="showUpdateForm">
+    <div class="form-overlay">
 
-  <div class="update-card">
+      <div class="investment-form-card">
 
-    <h3>Update Investment Value</h3>
+        <div class="form-header">
 
-    <form
-      [formGroup]="updateForm"
-      (ngSubmit)="submitUpdate()">
+          <div>
+            <h3>Sell Investment</h3>
+            <p>Sell part or all of your investment.</p>
+          </div>
 
-      <div class="form-group">
+          <button
+            type="button"
+            class="close-btn"
+            (click)="closeSellForm()">
 
-        <label for="currentValue">
-          Current Value
-        </label>
+            <mat-icon>close</mat-icon>
 
-        <input
-          id="currentValue"
-          type="number"
-          formControlName="currentValue"
-          min="0"
-          step="0.01"
-          placeholder="Enter current value">
-
-        <div
-          class="error"
-          *ngIf="
-            updateForm.get('currentValue')?.touched &&
-            updateForm.get('currentValue')?.invalid
-          ">
-
-          Current value must be 0 or greater.
+          </button>
 
         </div>
 
-      </div>
 
-      <div class="update-actions">
+        <div class="current-value-box">
 
-        <button
-          type="submit"
-          class="save-btn"
-          [disabled]="updateForm.invalid">
+          <span>Current Investment Value</span>
 
-          Update
-
-        </button>
-
-        <button
-          type="button"
-          class="cancel-btn"
-          (click)="closeUpdateForm()">
-
-          Cancel
-
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-
-</div>
-
-
-
-
-
-<div
-  class="update-panel"
-  *ngIf="showSellForm">
-
-  <div class="update-card">
-
-    <h3>Sell Investment</h3>
-
-    <p>
-      Current Investment Value:
-      <strong>
-        ₹{{ selectedInvestmentValue | number:'1.2-2' }}
-      </strong>
-    </p>
-
-    <form
-      [formGroup]="sellForm"
-      (ngSubmit)="submitSell()">
-
-      <div class="form-group">
-
-        <label for="sellAccount">
-          Receive Money In
-        </label>
-
-        <select
-          id="sellAccount"
-          formControlName="accountId">
-
-          <option [ngValue]="0">
-            Select Account
-          </option>
-
-          <ng-container
-            *ngIf="accounts$ | async as accounts">
-
-            <option
-              *ngFor="let account of accounts"
-              [ngValue]="account.id">
-
-              {{ account.name }}
-
-            </option>
-
-          </ng-container>
-
-        </select>
-
-        <div
-          class="error"
-          *ngIf="
-            sellForm.get('accountId')?.touched &&
-            sellForm.get('accountId')?.invalid
-          ">
-
-          Please select an account.
+          <strong>
+            ₹{{ selectedInvestmentValue | number:'1.2-2' }}
+          </strong>
 
         </div>
 
+
+        <form
+          [formGroup]="sellForm"
+          (ngSubmit)="submitSell()">
+
+
+          <!-- ACCOUNT -->
+          <div class="form-group">
+
+            <label for="sellAccount">
+              Receive Money In
+            </label>
+
+            <div class="input-wrapper">
+
+              <mat-icon>account_balance</mat-icon>
+
+              <select
+                id="sellAccount"
+                formControlName="accountId">
+
+                <option [ngValue]="0">
+                  Select Account
+                </option>
+
+                @if (accounts$ | async; as accounts) {
+
+                  @for (account of accounts; track account.id) {
+
+                    <option [ngValue]="account.id">
+                      {{ account.name }}
+                    </option>
+
+                  }
+
+                }
+
+              </select>
+
+            </div>
+
+
+            @if (
+              sellForm.get('accountId')?.touched &&
+              sellForm.get('accountId')?.invalid
+            ) {
+
+              <div class="field-error">
+                Please select an account.
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- SELL AMOUNT -->
+          <div class="form-group">
+
+            <label for="sellAmount">
+              Sell Amount
+            </label>
+
+            <div class="input-wrapper">
+
+              <mat-icon>currency_rupee</mat-icon>
+
+              <input
+                id="sellAmount"
+                type="number"
+                formControlName="sellAmount"
+                min="0.01"
+                step="0.01">
+
+            </div>
+
+
+            @if (
+              sellForm.get('sellAmount')?.touched &&
+              sellForm.get('sellAmount')?.hasError('exceedsValue')
+            ) {
+
+              <div class="field-error">
+                Sell amount cannot exceed the current investment value.
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- DATE -->
+          <div class="form-group">
+
+            <label for="sellDate">
+              Sell Date
+            </label>
+
+            <div class="input-wrapper">
+
+              <mat-icon>calendar_today</mat-icon>
+
+              <input
+                id="sellDate"
+                type="date"
+                formControlName="sellDate">
+
+            </div>
+
+          </div>
+
+
+          <!-- DESCRIPTION -->
+          <div class="form-group">
+
+            <label for="sellDescription">
+              Description
+            </label>
+
+            <textarea
+              id="sellDescription"
+              formControlName="description"
+              placeholder="Optional description">
+            </textarea>
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              type="submit"
+              class="sell-submit-btn"
+              [disabled]="sellForm.invalid">
+
+              <mat-icon>sell</mat-icon>
+              Sell Investment
+
+            </button>
+
+
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="closeSellForm()">
+
+              Cancel
+
+            </button>
+
+          </div>
+
+        </form>
+
       </div>
 
-
-      <div class="form-group">
-
-        <label for="sellAmount">
-          Sell Amount
-        </label>
-
-        <input
-          id="sellAmount"
-          type="number"
-          formControlName="sellAmount"
-          min="0.01"
-          step="0.01">
-
-        <div
-          class="error"
-          *ngIf="
-            sellForm.get('sellAmount')?.touched &&
-            sellForm.get('sellAmount')?.hasError('exceedsValue')
-          ">
-
-          Sell amount cannot exceed the current
-          investment value.
-
-        </div>
-
-      </div>
+    </div>
+  }
 
 
-      <div class="form-group">
-
-        <label for="sellDate">
-          Sell Date
-        </label>
-
-        <input
-          id="sellDate"
-          type="date"
-          formControlName="sellDate">
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label for="sellDescription">
-          Description
-        </label>
-
-        <textarea
-          id="sellDescription"
-          formControlName="description"
-          placeholder="Optional description">
-        </textarea>
-
-      </div>
-
-
-      <div class="update-actions">
-
-        <button
-          type="submit"
-          class="save-btn"
-          [disabled]="sellForm.invalid">
-
-          Sell Investment
-
-        </button>
-
-        <button
-          type="button"
-          class="cancel-btn"
-          (click)="closeSellForm()">
-
-          Cancel
-
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-
-</div>
   <!-- INVESTMENT TABLE -->
+  <div class="investment-card">
 
-  <div class="table-container">
+    <div class="table-header">
 
-    <table>
+      <div>
 
-      <thead>
+        <h2>Your Investments</h2>
 
-        <tr>
+        <p>
+          View and manage your investment portfolio
+        </p>
 
-          <th>Name</th>
+      </div>
 
-          <th>Type</th>
+      <div class="table-icon">
+        <mat-icon>pie_chart</mat-icon>
+      </div>
 
-          <th>Invested</th>
-
-          <th>Current Value</th>
-
-          <th>Profit / Loss</th>
-
-          <th>Return</th>
-
-          <th>Date</th>
-
-          <th>Actions</th>
-
-        </tr>
-
-      </thead>
+    </div>
 
 
-      <tbody>
+    <div class="table-wrapper">
 
-        <ng-container
-          *ngIf="investments$ | async as investments"
-        >
+      <table>
 
-          <tr
-            *ngFor="let investment of investments"
-          >
+        <thead>
 
-            <td>
-              {{ investment.name }}
-            </td>
-
-            <td>
-              {{ investment.investmentType }}
-            </td>
-
-            <td>
-              ₹{{ investment.investedAmount | number:'1.2-2' }}
-            </td>
-
-            <td>
-              ₹{{ investment.currentValue | number:'1.2-2' }}
-            </td>
-
-            <td>
-              ₹{{ investment.profitLoss | number:'1.2-2' }}
-            </td>
-
-            <td>
-              {{ investment.profitLossPercentage | number:'1.2-2' }}%
-            </td>
-
-            <td>
-              {{ investment.investmentDate | date:'dd MMM yyyy' }}
-            </td>
-
-            <td>
-
-             <td class="actions">
-
-  <button
-    type="button"
-    class="update-btn"
-    (click)="updateValue(
-      investment.id,
-      investment.currentValue
-    )">
-
-    Update Value
-
-  </button>
-
-  <button
-    type="button"
-    class="sell-btn"
-    (click)="sellInvestment(
-      investment.id,
-      investment.currentValue
-    )">
-
-    Sell
-
-  </button>
-
-
-
-             <button
-  type="button"
-  class="delete-btn"
-  (click)="deleteInvestment(investment.id)">
-  Cancel
-</button>
-
-            </td>
-
+          <tr>
+            <th>Investment</th>
+            <th>Type</th>
+            <th>Invested</th>
+            <th>Current Value</th>
+            <th>Profit / Loss</th>
+            <th>Return</th>
+            <th>Date</th>
+            <th>Actions</th>
           </tr>
 
+        </thead>
 
-          <tr
-            *ngIf="investments.length === 0"
-          >
 
-            <td
-              colspan="8"
-              class="empty"
-            >
-              No investments found.
-            </td>
+        <tbody>
 
-          </tr>
+          @if (investments$ | async; as investments) {
 
-        </ng-container>
+            @for (
+              investment of investments;
+              track investment.id
+            ) {
 
-      </tbody>
+              <tr>
 
-    </table>
+                <!-- NAME -->
+                <td>
+
+                  <div class="investment-name">
+
+                    <div class="investment-avatar">
+                      <mat-icon>trending_up</mat-icon>
+                    </div>
+
+                    <div>
+                      <strong>
+                        {{ investment.name }}
+                      </strong>
+
+                      <span>
+                        Investment
+                      </span>
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- TYPE -->
+                <td>
+
+                  <span class="type-badge">
+                    {{ investment.investmentType }}
+                  </span>
+
+                </td>
+
+
+                <!-- INVESTED -->
+                <td>
+
+                  <span class="amount">
+                    ₹{{ investment.investedAmount | number:'1.2-2' }}
+                  </span>
+
+                </td>
+
+
+                <!-- CURRENT VALUE -->
+                <td>
+
+                  <span class="amount">
+                    ₹{{ investment.currentValue | number:'1.2-2' }}
+                  </span>
+
+                </td>
+
+
+                <!-- PROFIT LOSS -->
+                <td>
+
+                  <span
+                    class="profit-value"
+                    [class.loss]="investment.profitLoss < 0">
+
+                    {{ investment.profitLoss >= 0 ? '+' : '' }}
+                    ₹{{ investment.profitLoss | number:'1.2-2' }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- RETURN -->
+                <td>
+
+                  <span
+                    class="return-badge"
+                    [class.loss]="investment.profitLossPercentage < 0">
+
+                    {{ investment.profitLossPercentage >= 0 ? '+' : '' }}
+                    {{ investment.profitLossPercentage | number:'1.2-2' }}%
+
+                  </span>
+
+                </td>
+
+
+                <!-- DATE -->
+                <td>
+
+                  {{ investment.investmentDate | date:'dd MMM yyyy' }}
+
+                </td>
+
+
+                <!-- ACTIONS -->
+                <td>
+
+                  <div class="actions">
+
+                    <button
+                      type="button"
+                      class="action-btn update-btn"
+                      title="Update Value"
+                      (click)="updateValue(
+                        investment.id,
+                        investment.currentValue
+                      )">
+
+                      <mat-icon>edit</mat-icon>
+                      Update
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="action-btn sell-btn"
+                      title="Sell Investment"
+                      (click)="sellInvestment(
+                        investment.id,
+                        investment.currentValue
+                      )">
+
+                      <mat-icon>sell</mat-icon>
+                      Sell
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="action-btn delete-btn"
+                      title="Delete Investment"
+                      (click)="deleteInvestment(investment.id)">
+
+                      <mat-icon>delete_outline</mat-icon>
+
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+
+            @if (investments.length === 0) {
+
+              <tr>
+
+                <td
+                  colspan="8"
+                  class="empty">
+
+                  <div class="empty-state">
+
+                    <mat-icon>trending_up</mat-icon>
+
+                    <h3>No investments yet</h3>
+
+                    <p>
+                      Add your first investment to start tracking
+                      your portfolio.
+                    </p>
+
+                    <button
+                      type="button"
+                      class="add-btn"
+                      (click)="addInvestment()">
+
+                      <mat-icon>add</mat-icon>
+                      Add Investment
+
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
 
   </div>
 

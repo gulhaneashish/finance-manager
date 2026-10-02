@@ -1,19 +1,26 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class CreditCardService
+public class CreditCardService : ICreditCardService
 {
-    private readonly FinanceDbContext _context;
+    private readonly IAccountRepository _accountRepository;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public CreditCardService(FinanceDbContext context)
+    public CreditCardService(
+        IAccountRepository accountRepository,
+        ICategoryRepository categoryRepository,
+        ITransactionRepository transactionRepository)
     {
-        _context = context;
+        _accountRepository = accountRepository;
+        _categoryRepository = categoryRepository;
+        _transactionRepository = transactionRepository;
     }
-
 
     // =========================================================
     // CREDIT CARD PURCHASE
@@ -23,11 +30,10 @@ public class CreditCardService
         CreditCardPurchaseDto dto,
         int userId)
     {
-        var card = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == dto.AccountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var card = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == dto.AccountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (card == null)
         {
@@ -54,23 +60,20 @@ public class CreditCardService
                 "Purchase amount must be greater than zero.");
         }
 
-
         // =====================================================
         // VALIDATE CATEGORY
         // =====================================================
 
-        var category = await _context.Categories
-            .FirstOrDefaultAsync(c =>
-                c.Id == dto.CategoryId &&
-                c.UserId == userId &&
-                c.Type == "EXPENSE");
+        var category = await _categoryRepository.FirstOrDefaultAsync(c =>
+            c.Id == dto.CategoryId &&
+            c.UserId == userId &&
+            c.Type == "EXPENSE");
 
         if (category == null)
         {
             throw new InvalidOperationException(
                 "Valid expense category not found.");
         }
-
 
         // =====================================================
         // CURRENT OUTSTANDING
@@ -79,7 +82,6 @@ public class CreditCardService
         var outstanding = await GetOutstandingAsync(
             card.Id,
             userId);
-
 
         // =====================================================
         // AVAILABLE CREDIT
@@ -94,7 +96,6 @@ public class CreditCardService
                 "Credit limit exceeded.");
         }
 
-
         // =====================================================
         // CREATE PURCHASE
         // =====================================================
@@ -102,35 +103,23 @@ public class CreditCardService
         var transaction = new Transaction
         {
             UserId = userId,
-
             AccountId = card.Id,
-
             CategoryId = dto.CategoryId,
-
             Amount = dto.Amount,
-
             Type = TransactionType.CreditCard,
-
-            Purpose =
-                TransactionPurpose.CreditCardPurchase,
-
-            Description =
-                string.IsNullOrWhiteSpace(dto.Description)
-                    ? "Credit card purchase"
-                    : dto.Description,
-
+            Purpose = TransactionPurpose.CreditCardPurchase,
+            Description = string.IsNullOrWhiteSpace(dto.Description)
+                ? "Credit card purchase"
+                : dto.Description,
             TransactionDate = dto.TransactionDate,
-
             CreatedAt = DateTime.UtcNow
         };
 
-        _context.Transactions.Add(transaction);
-
-        await _context.SaveChangesAsync();
+        await _transactionRepository.AddAsync(transaction);
+        await _transactionRepository.SaveChangesAsync();
 
         return transaction;
     }
-
 
     // =========================================================
     // GET CREDIT CARD OUTSTANDING
@@ -140,11 +129,10 @@ public class CreditCardService
         int creditCardAccountId,
         int userId)
     {
-        var card = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == creditCardAccountId &&
-                a.UserId == userId &&
-                a.AccountType == "CREDIT_CARD");
+        var card = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == creditCardAccountId &&
+            a.UserId == userId &&
+            a.AccountType == "CREDIT_CARD");
 
         if (card == null)
         {
@@ -152,44 +140,34 @@ public class CreditCardService
                 "Credit card not found.");
         }
 
-
         // -----------------------------------------------------
         // TOTAL PURCHASES
         // -----------------------------------------------------
 
-        var purchases = await _context.Transactions
+        var purchases = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == creditCardAccountId &&
-                t.Purpose ==
-                    TransactionPurpose.CreditCardPurchase)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
-
+                t.Purpose == TransactionPurpose.CreditCardPurchase)
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
         // -----------------------------------------------------
         // TOTAL PAYMENTS
         // -----------------------------------------------------
 
-        var payments = await _context.Transactions
+        var payments = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.ToAccountId == creditCardAccountId &&
-                t.Purpose ==
-                    TransactionPurpose.CreditCardPayment)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
-
+                t.Purpose == TransactionPurpose.CreditCardPayment)
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
         // -----------------------------------------------------
         // OUTSTANDING
         // -----------------------------------------------------
 
-        return Math.Max(
-            purchases - payments,
-            0);
+        return Math.Max(purchases - payments, 0);
     }
-
 
     // =========================================================
     // CREDIT CARD PAYMENT
@@ -209,16 +187,14 @@ public class CreditCardService
                 "Payment amount must be greater than zero.");
         }
 
-
         // =====================================================
         // SOURCE ACCOUNT
         // =====================================================
 
-        var fromAccount = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == dto.FromAccountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var fromAccount = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == dto.FromAccountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (fromAccount == null)
         {
@@ -226,23 +202,20 @@ public class CreditCardService
                 "Source account not found.");
         }
 
-
         if (fromAccount.AccountType == "CREDIT_CARD")
         {
             throw new InvalidOperationException(
                 "Source account cannot be a credit card.");
         }
 
-
         // =====================================================
         // CREDIT CARD
         // =====================================================
 
-        var card = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == dto.CreditCardAccountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var card = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == dto.CreditCardAccountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (card == null)
         {
@@ -250,13 +223,11 @@ public class CreditCardService
                 "Credit card account not found.");
         }
 
-
         if (card.AccountType != "CREDIT_CARD")
         {
             throw new InvalidOperationException(
                 "Destination account must be a credit card.");
         }
-
 
         // =====================================================
         // SAME ACCOUNT CHECK
@@ -267,7 +238,6 @@ public class CreditCardService
             throw new InvalidOperationException(
                 "Source account and credit card cannot be the same.");
         }
-
 
         // =====================================================
         // CURRENT CARD OUTSTANDING
@@ -283,13 +253,11 @@ public class CreditCardService
                 "Credit card has no outstanding amount.");
         }
 
-
         if (dto.Amount > outstanding)
         {
             throw new InvalidOperationException(
                 "Payment cannot exceed credit card outstanding.");
         }
-
 
         // =====================================================
         // SOURCE ACCOUNT BALANCE
@@ -305,7 +273,6 @@ public class CreditCardService
                 $"Insufficient balance. Available balance: ₹{sourceBalance}");
         }
 
-
         // =====================================================
         // CREATE PAYMENT TRANSACTION
         // =====================================================
@@ -313,35 +280,23 @@ public class CreditCardService
         var transaction = new Transaction
         {
             UserId = userId,
-
             FromAccountId = fromAccount.Id,
-
             ToAccountId = card.Id,
-
             Amount = dto.Amount,
-
             Type = TransactionType.Settlement,
-
-            Purpose =
-                TransactionPurpose.CreditCardPayment,
-
-            Description =
-                string.IsNullOrWhiteSpace(dto.Description)
-                    ? "Credit card payment"
-                    : dto.Description,
-
+            Purpose = TransactionPurpose.CreditCardPayment,
+            Description = string.IsNullOrWhiteSpace(dto.Description)
+                ? "Credit card payment"
+                : dto.Description,
             TransactionDate = dto.PaymentDate,
-
             CreatedAt = DateTime.UtcNow
         };
 
-        _context.Transactions.Add(transaction);
-
-        await _context.SaveChangesAsync();
+        await _transactionRepository.AddAsync(transaction);
+        await _transactionRepository.SaveChangesAsync();
 
         return transaction;
     }
-
 
     // =========================================================
     // SOURCE ACCOUNT BALANCE
@@ -351,11 +306,10 @@ public class CreditCardService
         int accountId,
         int userId)
     {
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == accountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == accountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (account == null)
         {
@@ -363,91 +317,48 @@ public class CreditCardService
                 "Account not found.");
         }
 
-
-        // =====================================================
-        // INCOME
-        // =====================================================
-
-        var income = await _context.Transactions
+        var income = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Type == TransactionType.Income &&
                 t.Purpose != TransactionPurpose.Deposit)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-
-        // =====================================================
-        // DEPOSITS
-        // =====================================================
-
-        var deposits = await _context.Transactions
+        var deposits = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
-                t.Purpose ==
-                    TransactionPurpose.Deposit)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+                t.Purpose == TransactionPurpose.Deposit)
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-
-        // =====================================================
-        // EXPENSES
-        // =====================================================
-
-        var expenses = await _context.Transactions
+        var expenses = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Type == TransactionType.Expense)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-
-        // =====================================================
-        // TRANSFERS IN
-        // =====================================================
-
-        var transfersIn = await _context.Transactions
+        var transfersIn = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.ToAccountId == accountId &&
                 t.Type == TransactionType.Transfer)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-
-        // =====================================================
-        // TRANSFERS OUT
-        // =====================================================
-
-        var transfersOut = await _context.Transactions
+        var transfersOut = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.FromAccountId == accountId &&
                 t.Type == TransactionType.Transfer)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-
-        // =====================================================
-        // CREDIT CARD PAYMENTS
-        // =====================================================
-
-        var creditCardPayments = await _context.Transactions
+        var creditCardPayments = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.FromAccountId == accountId &&
-                t.Purpose ==
-                    TransactionPurpose.CreditCardPayment)
-            .SumAsync(t =>
-                (decimal?)t.Amount) ?? 0;
-
-
-        // =====================================================
-        // FINAL BALANCE
-        // =====================================================
+                t.Purpose == TransactionPurpose.CreditCardPayment)
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
         return account.OpeningBalance
             + income

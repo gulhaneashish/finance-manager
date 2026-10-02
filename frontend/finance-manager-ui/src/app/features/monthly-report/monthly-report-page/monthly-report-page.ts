@@ -22,14 +22,16 @@ import {
   selectMonthlyReportTotalLent,
   selectMonthlyReportCategories
 } from '../../../store/monthly-report/monthly-report.selectors';
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-monthly-report-page',
   standalone: true,
   imports: [
     AsyncPipe,
-    DecimalPipe
-  ],
+    DecimalPipe,
+    MatIconModule
+],
   templateUrl: './monthly-report-page.html',
   styleUrl: './monthly-report-page.css'
 })

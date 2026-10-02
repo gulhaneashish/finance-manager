@@ -24,6 +24,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   createCategorySuccess
 } from '../../../store/categories/category.actions';
+import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-category-list',
   standalone: true,
@@ -31,7 +32,8 @@ import {
     CommonModule,
     ReactiveFormsModule,
     AsyncPipe,
-  ],
+    MatIconModule
+],
   templateUrl: './category-list.html',
   styleUrl: './category-list.css'
 })

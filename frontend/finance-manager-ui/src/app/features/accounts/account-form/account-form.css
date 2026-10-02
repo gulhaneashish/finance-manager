@@ -4,8 +4,15 @@
   padding: 24px;
 }
 
+@media (max-width: 480px) {
+  .form-container {
+    padding: 16px 14px;
+  }
+}
+
 .form-container h2 {
   margin-bottom: 24px;
+  color: #F8FAFC;
 }
 
 .form-group {
@@ -17,35 +24,58 @@
 
 .form-group label {
   font-weight: 600;
+  color: #CBD5E1;
+  font-size: 13px;
 }
 
 .form-group input,
 .form-group select {
   padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid #334155;
+  border-radius: 8px;
   font-size: 14px;
+  color: #F8FAFC;
+  background: #0B0F19;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 .form-group small {
-  color: #d32f2f;
+  color: #F87171;
+  font-size: 12px;
 }
 
 .error {
   margin-bottom: 16px;
-  padding: 10px;
-  border-radius: 6px;
-  background: #ffebee;
-  color: #c62828;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #F87171;
+  font-size: 13px;
 }
 
 button {
   width: 100%;
   padding: 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  background: #1d4ed8;
 }
 
 button:disabled {

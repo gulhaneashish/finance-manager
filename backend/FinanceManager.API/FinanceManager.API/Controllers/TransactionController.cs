@@ -1,6 +1,6 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using FinanceManager.API.DTOs;
-using FinanceManager.API.Services;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +11,10 @@ namespace FinanceManager.API.Controllers;
 [Route("api/[controller]")]
 public class TransactionController : ControllerBase
 {
-    private readonly TransactionService _transactionService;
+    private readonly ITransactionService _transactionService;
 
     public TransactionController(
-        TransactionService transactionService)
+        ITransactionService transactionService)
     {
         _transactionService = transactionService;
     }

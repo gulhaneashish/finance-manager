@@ -1,0 +1,516 @@
+<div class="admin-container">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-title-group">
+      <div class="header-badge">
+        <mat-icon>shield</mat-icon>
+        <span>Admin Control Center</span>
+      </div>
+      <h1>System Administration</h1>
+      <p class="subtitle">
+        Manage member access, oversee system categories, and monitor administrative security logs with strict user financial privacy.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-profile" (click)="openProfileModal()" title="View and edit profile information">
+        <mat-icon>manage_accounts</mat-icon>
+        <span>My Profile</span>
+      </button>
+
+      <button class="btn-refresh" (click)="loadAllData()" [disabled]="isLoading" title="Refresh administrative data">
+        <mat-icon [class.spinning]="isLoading">refresh</mat-icon>
+        <span>Refresh Data</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Feedback Alert Banner -->
+  @if (feedbackMessage) {
+    <div class="alert-banner" [ngClass]="feedbackMessage.type">
+      <div class="alert-content">
+        <mat-icon>{{ feedbackMessage.type === 'success' ? 'check_circle' : 'error' }}</mat-icon>
+        <span>{{ feedbackMessage.text }}</span>
+      </div>
+      <button class="btn-alert-close" (click)="clearFeedback()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Privacy Guarantee Banner -->
+  <div class="privacy-notice">
+    <mat-icon>lock</mat-icon>
+    <span>
+      <strong>Privacy Guard Enabled:</strong> User personal balances, net worth, bank accounts, and transactions are strictly confidential and completely isolated from the administration panel.
+    </span>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <nav class="admin-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'stats'"
+      (click)="setTab('stats')"
+    >
+      <mat-icon>insights</mat-icon>
+      <span>System Statistics</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'users'"
+      (click)="setTab('users')"
+    >
+      <mat-icon>manage_accounts</mat-icon>
+      <span>Manage Users</span>
+      <span class="count-badge" *ngIf="users.length">{{ users.length }}</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'categories'"
+      (click)="setTab('categories')"
+    >
+      <mat-icon>category</mat-icon>
+      <span>Expense Categories</span>
+      <span class="count-badge" *ngIf="categories.length">{{ categories.length }}</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'audit'"
+      (click)="setTab('audit')"
+    >
+      <mat-icon>history_edu</mat-icon>
+      <span>Audit Logs</span>
+      <span class="count-badge" *ngIf="auditLogs.length">{{ auditLogs.length }}</span>
+    </button>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- TAB 1: SYSTEM STATISTICS                   -->
+  <!-- ========================================== -->
+  @if (activeTab === 'stats') {
+    <section class="tab-content stats-section">
+      @if (stats) {
+        <!-- Operational Metrics Grid -->
+        <div class="kpi-grid">
+          <!-- Total Registered Users -->
+          <div class="kpi-card user-card">
+            <div class="kpi-icon-wrap">
+              <mat-icon>group</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">Registered Members</span>
+              <span class="kpi-value">{{ stats.totalUsers }}</span>
+              <div class="kpi-subinfo">
+                <span class="pill-active"><mat-icon>check_circle</mat-icon> {{ stats.activeUsers }} Active</span>
+                <span class="pill-inactive" *ngIf="stats.deactivatedUsers > 0">
+                  <mat-icon>pause_circle</mat-icon> {{ stats.deactivatedUsers }} Inactive
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- New Signups This Month -->
+          <div class="kpi-card growth-card">
+            <div class="kpi-icon-wrap">
+              <mat-icon>person_add</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">New Members (This Month)</span>
+              <span class="kpi-value">+{{ stats.newUsersThisMonth }}</span>
+              <div class="kpi-subinfo">
+                <span>Recent account registrations</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories Configured -->
+          <div class="kpi-card category-card">
+            <div class="kpi-icon-wrap">
+              <mat-icon>category</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">System Categories</span>
+              <span class="kpi-value">{{ stats.totalCategories }}</span>
+              <div class="kpi-subinfo">
+                <span>{{ stats.totalExpenseCategories }} Expense / {{ stats.totalIncomeCategories }} Income</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Events -->
+          <div class="kpi-card audit-card">
+            <div class="kpi-icon-wrap">
+              <mat-icon>security</mat-icon>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">Security & Audit Events</span>
+              <span class="kpi-value">{{ stats.totalAuditLogs }}</span>
+              <div class="kpi-subinfo">
+                <span>Verified chronological logs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Administrative Activity Stream -->
+        <div class="section-card mt-6">
+          <div class="card-header">
+            <div class="ch-left">
+              <mat-icon>stream</mat-icon>
+              <h3>Recent Administrative & Security Events</h3>
+            </div>
+            <button class="btn-link" (click)="setTab('audit')">View full audit trail →</button>
+          </div>
+
+          <div class="activity-feed">
+            @for (act of stats.recentActivities; track act.timestamp) {
+              <div class="activity-item">
+                <div class="activity-indicator audit">
+                  <mat-icon>security</mat-icon>
+                </div>
+                <div class="activity-info">
+                  <div class="activity-title">
+                    <strong>{{ act.title }}</strong>
+                    <span class="activity-time">{{ act.timestamp | date:'short' }}</span>
+                  </div>
+                  <div class="activity-details">{{ act.details }}</div>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-state">
+                <mat-icon>check_circle_outline</mat-icon>
+                <p>No recent security events logged.</p>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="loading-state">
+          <mat-icon class="spinning">sync</mat-icon>
+          <p>Gathering system statistics...</p>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ========================================== -->
+  <!-- TAB 2: MANAGE USERS (Privacy-Preserved)    -->
+  <!-- ========================================== -->
+  @if (activeTab === 'users') {
+    <section class="tab-content users-section">
+      <div class="filter-bar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Search members by name or email..."
+            [(ngModel)]="userSearch"
+          />
+          @if (userSearch) {
+            <button class="clear-search" (click)="userSearch = ''">✕</button>
+          }
+        </div>
+
+        <div class="filter-dropdown">
+          <label>Role:</label>
+          <select [(ngModel)]="userRoleFilter">
+            <option value="ALL">All Roles</option>
+            <option value="ADMIN">Admin</option>
+            <option value="USER">User</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Member Name</th>
+              <th>Email Address</th>
+              <th>System Role</th>
+              <th>Account Status</th>
+              <th>Joined Date</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of filteredUsers; track u.id) {
+              <tr [class.inactive-row]="!u.isActive">
+                <td class="text-muted">#{{ u.id }}</td>
+                <td>
+                  <span class="user-name">{{ u.name }}</span>
+                </td>
+                <td>
+                  <span class="user-email-text">{{ u.email }}</span>
+                </td>
+                <td>
+                  <span class="role-badge" [ngClass]="u.role.toLowerCase()">
+                    <mat-icon>{{ u.role.toLowerCase() === 'admin' ? 'verified_user' : 'person' }}</mat-icon>
+                    {{ u.role }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-pill" [class.active]="u.isActive" [class.inactive]="!u.isActive">
+                    {{ u.isActive ? 'Active' : 'Deactivated' }}
+                  </span>
+                </td>
+                <td class="text-muted text-sm">
+                  {{ u.createdAt | date:'mediumDate' }}
+                </td>
+                <td class="text-right action-cells">
+                  <!-- Toggle Role -->
+                  <button
+                    class="btn-action-icon role-btn"
+                    (click)="toggleUserRole(u)"
+                    [title]="u.role === 'Admin' ? 'Demote to regular User' : 'Promote to Admin'"
+                  >
+                    <mat-icon>{{ u.role === 'Admin' ? 'person_remove' : 'verified_user' }}</mat-icon>
+                  </button>
+
+                  <!-- Toggle Active / Inactive Status -->
+                  <button
+                    class="btn-action-icon status-btn"
+                    [class.btn-deactivate]="u.isActive"
+                    [class.btn-activate]="!u.isActive"
+                    (click)="toggleUserStatus(u)"
+                    [title]="u.isActive ? 'Deactivate this user' : 'Activate this user'"
+                  >
+                    <mat-icon>{{ u.isActive ? 'block' : 'check_circle' }}</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-state">
+                  <mat-icon>person_off</mat-icon>
+                  <p>No members found matching your search criteria.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  <!-- ========================================== -->
+  <!-- TAB 3: MANAGE EXPENSE CATEGORIES           -->
+  <!-- ========================================== -->
+  @if (activeTab === 'categories') {
+    <section class="tab-content categories-section">
+      <div class="filter-bar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Search categories..."
+            [(ngModel)]="categorySearch"
+          />
+          @if (categorySearch) {
+            <button class="clear-search" (click)="categorySearch = ''">✕</button>
+          }
+        </div>
+
+        <div class="filter-dropdown">
+          <label>Type:</label>
+          <select [(ngModel)]="categoryTypeFilter">
+            <option value="ALL">All Types</option>
+            <option value="EXPENSE">Expense Only</option>
+            <option value="INCOME">Income Only</option>
+          </select>
+        </div>
+
+        <button class="btn-primary" (click)="openAddCategoryModal()">
+          <mat-icon>add</mat-icon>
+          <span>Create Category</span>
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Category Name</th>
+              <th>Type</th>
+              <th>Configuration</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of filteredCategories; track cat.id) {
+              <tr>
+                <td class="text-muted">#{{ cat.id }}</td>
+                <td>
+                  <strong class="cat-name">{{ cat.name }}</strong>
+                </td>
+                <td>
+                  <span class="type-badge" [ngClass]="cat.type.toLowerCase()">
+                    <mat-icon>{{ cat.type.toUpperCase() === 'EXPENSE' ? 'trending_down' : 'trending_up' }}</mat-icon>
+                    {{ cat.type }}
+                  </span>
+                </td>
+                <td>
+                  <span class="system-tag">
+                    <mat-icon>tune</mat-icon> System Standard
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button
+                    class="btn-action-icon btn-delete"
+                    (click)="deleteCategory(cat)"
+                    title="Delete Category"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-state">
+                  <mat-icon>category</mat-icon>
+                  <p>No categories found matching your filter.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add Category Modal -->
+      @if (showAddCategoryModal) {
+        <div class="modal-backdrop" (click)="closeAddCategoryModal()">
+          <div class="modal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Create System Category</h3>
+              <button class="btn-close" (click)="closeAddCategoryModal()">✕</button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Category Name</label>
+                <input
+                  type="text"
+                  [(ngModel)]="newCategory.name"
+                  placeholder="e.g. Utilities, Groceries, Cloud Services, Travel..."
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Category Type</label>
+                <div class="radio-pill-group">
+                  <label [class.selected]="newCategory.type === 'EXPENSE'">
+                    <input type="radio" value="EXPENSE" [(ngModel)]="newCategory.type" />
+                    <mat-icon>trending_down</mat-icon> Expense
+                  </label>
+                  <label [class.selected]="newCategory.type === 'INCOME'">
+                    <input type="radio" value="INCOME" [(ngModel)]="newCategory.type" />
+                    <mat-icon>trending_up</mat-icon> Income
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-secondary" (click)="closeAddCategoryModal()">Cancel</button>
+              <button class="btn-primary" (click)="submitAddCategory()">Create Category</button>
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ========================================== -->
+  <!-- TAB 4: AUDIT LOGS                          -->
+  <!-- ========================================== -->
+  @if (activeTab === 'audit') {
+    <section class="tab-content audit-section">
+      <div class="filter-bar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Search audit details or user..."
+            [(ngModel)]="auditSearch"
+          />
+          @if (auditSearch) {
+            <button class="clear-search" (click)="auditSearch = ''">✕</button>
+          }
+        </div>
+
+        <div class="filter-dropdown">
+          <label>Action:</label>
+          <select [(ngModel)]="auditActionFilter">
+            <option value="ALL">All Actions</option>
+            <option value="USER_STATUS_CHANGE">User Status Change</option>
+            <option value="USER_ROLE_CHANGE">User Role Change</option>
+            <option value="CATEGORY_CREATED">Category Created</option>
+            <option value="CATEGORY_UPDATED">Category Updated</option>
+            <option value="CATEGORY_DELETED">Category Deleted</option>
+            <option value="SYSTEM_INIT">System Init</option>
+          </select>
+        </div>
+
+        <button class="btn-refresh-sm" (click)="loadAuditLogs()" title="Refresh Logs">
+          <mat-icon>sync</mat-icon>
+          <span>Refresh</span>
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Action</th>
+              <th>Actor / Target</th>
+              <th>Administrative Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (log of filteredAuditLogs; track log.id) {
+              <tr>
+                <td class="text-muted text-sm whitespace-nowrap">
+                  <div class="log-time-block">
+                    <span class="log-date">{{ log.timestamp | date:'MMM d, y' }}</span>
+                    <span class="log-time">{{ log.timestamp | date:'shortTime' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="audit-action-tag" [ngClass]="log.action.toLowerCase()">
+                    {{ log.action }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actor-box">
+                    <mat-icon>account_circle</mat-icon>
+                    <span>{{ log.userEmail || 'System' }}</span>
+                  </div>
+                </td>
+                <td class="log-details-cell">
+                  {{ log.details }}
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">
+                  <mat-icon>verified</mat-icon>
+                  <p>No audit log events found matching your search.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>
+
+<app-profile-modal
+  [isOpen]="showProfileModal"
+  (closed)="closeProfileModal()">
+</app-profile-modal>

@@ -1,6 +1,18 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, Routes } from '@angular/router';
 
+import { Auth } from './core/services/auth';
 import { authGuard } from './core/guards/auth-guard';
+import { adminGuard } from './core/guards/admin.guard';
+import { userGuard } from './core/guards/user.guard';
+
+const rootRedirectGuard: CanActivateFn = () => {
+  const auth = inject(Auth);
+  const router = inject(Router);
+  return auth.isAdmin()
+    ? router.createUrlTree(['/admin'])
+    : router.createUrlTree(['/dashboard']);
+};
 
 export const routes: Routes = [
 
@@ -29,12 +41,14 @@ export const routes: Routes = [
 
       {
         path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
+        pathMatch: 'full',
+        canActivate: [rootRedirectGuard],
+        children: []
       },
 
       {
         path: 'dashboard',
+        canActivate: [userGuard],
         loadComponent: () =>
           import(
             './features/dashboard/dashboard/dashboard'
@@ -132,10 +146,17 @@ export const routes: Routes = [
 
       {
         path: 'investments/add',
+        redirectTo: 'investments',
+        pathMatch: 'full'
+      },
+
+      {
+        path: 'admin',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import(
-            './features/investments/investment-form/investment-form'
-          ).then(m => m.InvestmentForm)
+            './features/admin/admin-portal/admin-portal'
+          ).then(m => m.AdminPortal)
       }
 
     ]

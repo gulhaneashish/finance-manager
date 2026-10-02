@@ -1,27 +1,31 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class AccountBalanceService
+public class AccountBalanceService : IAccountBalanceService
 {
-    private readonly FinanceDbContext _context;
+    private readonly IAccountRepository _accountRepository;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public AccountBalanceService(FinanceDbContext context)
+    public AccountBalanceService(
+        IAccountRepository accountRepository,
+        ITransactionRepository transactionRepository)
     {
-        _context = context;
+        _accountRepository = accountRepository;
+        _transactionRepository = transactionRepository;
     }
 
     public async Task<decimal> GetAccountBalanceAsync(
         int accountId,
         int userId)
     {
-        var account = await _context.Accounts
-            .FirstOrDefaultAsync(a =>
-                a.Id == accountId &&
-                a.UserId == userId &&
-                a.IsActive);
+        var account = await _accountRepository.FirstOrDefaultAsync(a =>
+            a.Id == accountId &&
+            a.UserId == userId &&
+            a.IsActive);
 
         if (account == null)
         {
@@ -31,46 +35,42 @@ public class AccountBalanceService
 
         if (account.AccountType == "CREDIT_CARD")
         {
-            var purchases = await _context.Transactions
+            var purchases = await _transactionRepository.Query()
                 .Where(t =>
                     t.UserId == userId &&
                     t.AccountId == accountId &&
-                    t.Purpose ==
-                        TransactionPurpose.CreditCardPurchase)
+                    t.Purpose == TransactionPurpose.CreditCardPurchase)
                 .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-            var payments = await _context.Transactions
+            var payments = await _transactionRepository.Query()
                 .Where(t =>
                     t.UserId == userId &&
                     t.ToAccountId == accountId &&
-                    t.Purpose ==
-                        TransactionPurpose.CreditCardPayment)
+                    t.Purpose == TransactionPurpose.CreditCardPayment)
                 .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-            return Math.Max(
-                purchases - payments,
-                0);
+            return Math.Max(purchases - payments, 0);
         }
 
-        var income = await _context.Transactions
-    .Where(t =>
-        t.UserId == userId &&
-        t.AccountId == accountId &&
-        t.Type == TransactionType.Income &&
-        t.Purpose != TransactionPurpose.Deposit &&
-        t.Purpose != TransactionPurpose.LoanBorrowed &&
-        t.Purpose != TransactionPurpose.LoanReceived &&
-        t.Purpose != TransactionPurpose.InvestmentSale)
-    .SumAsync(t => (decimal?)t.Amount) ?? 0;
+        var income = await _transactionRepository.Query()
+            .Where(t =>
+                t.UserId == userId &&
+                t.AccountId == accountId &&
+                t.Type == TransactionType.Income &&
+                t.Purpose != TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.LoanBorrowed &&
+                t.Purpose != TransactionPurpose.LoanReceived &&
+                t.Purpose != TransactionPurpose.InvestmentSale)
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var deposits = await _context.Transactions
+        var deposits = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Purpose == TransactionPurpose.Deposit)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var expenses = await _context.Transactions
+        var expenses = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
@@ -78,49 +78,49 @@ public class AccountBalanceService
                 t.Purpose != TransactionPurpose.Investment)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var investments = await _context.Transactions
+        var investments = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Purpose == TransactionPurpose.Investment)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var transfersIn = await _context.Transactions
+        var transfersIn = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.ToAccountId == accountId &&
                 t.Type == TransactionType.Transfer)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var transfersOut = await _context.Transactions
+        var transfersOut = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.FromAccountId == accountId &&
                 t.Type == TransactionType.Transfer)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        var creditCardPayments = await _context.Transactions
+        var creditCardPayments = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.FromAccountId == accountId &&
-                t.Purpose ==
-                    TransactionPurpose.CreditCardPayment)
+                t.Purpose == TransactionPurpose.CreditCardPayment)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
-        var investmentSales = await _context.Transactions
-    .Where(t =>
-        t.UserId == userId &&
-        t.AccountId == accountId &&
-        t.Purpose == TransactionPurpose.InvestmentSale)
-    .SumAsync(t => (decimal?)t.Amount) ?? 0;
-        return
-     account.OpeningBalance
-     + income
-     + deposits
-     + investmentSales
-     - expenses
-     - investments
-     + transfersIn
-     - transfersOut
-     - creditCardPayments;
+
+        var investmentSales = await _transactionRepository.Query()
+            .Where(t =>
+                t.UserId == userId &&
+                t.AccountId == accountId &&
+                t.Purpose == TransactionPurpose.InvestmentSale)
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+        return account.OpeningBalance
+             + income
+             + deposits
+             + investmentSales
+             - expenses
+             - investments
+             + transfersIn
+             - transfersOut
+             - creditCardPayments;
     }
 }

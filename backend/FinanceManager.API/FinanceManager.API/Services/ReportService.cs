@@ -1,17 +1,18 @@
-﻿using FinanceManager.API.Data;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
+using FinanceManager.API.Repositories.Interfaces;
+using FinanceManager.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceManager.API.Services;
 
-public class ReportService
+public class ReportService : IReportService
 {
-    private readonly FinanceDbContext _context;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public ReportService(FinanceDbContext context)
+    public ReportService(ITransactionRepository transactionRepository)
     {
-        _context = context;
+        _transactionRepository = transactionRepository;
     }
 
     public async Task<ReportSummaryDto> GetSummaryAsync(
@@ -19,7 +20,7 @@ public class ReportService
         DateTime? fromDate,
         DateTime? toDate)
     {
-        var query = _context.Transactions
+        var query = _transactionRepository.Query()
             .Include(t => t.Category)
             .Where(t => t.UserId == userId)
             .AsQueryable();
@@ -41,49 +42,49 @@ public class ReportService
         var transactions = await query.ToListAsync();
 
         var totalIncome = transactions
-    .Where(t =>
-        t.Type == TransactionType.Income &&
-        t.Purpose != TransactionPurpose.Deposit &&
-        t.Purpose != TransactionPurpose.LoanBorrowed &&
-        t.Purpose != TransactionPurpose.LoanReceived &&
-        t.Purpose != TransactionPurpose.InvestmentSale &&
-        t.Purpose != TransactionPurpose.LoanRepayment)
-    .Sum(t => t.Amount);
+            .Where(t =>
+                t.Type == TransactionType.Income &&
+                t.Purpose != TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.LoanBorrowed &&
+                t.Purpose != TransactionPurpose.LoanReceived &&
+                t.Purpose != TransactionPurpose.InvestmentSale &&
+                t.Purpose != TransactionPurpose.LoanRepayment)
+            .Sum(t => t.Amount);
 
         var totalExpense = transactions
-     .Where(t =>
-         (t.Type == TransactionType.Expense ||
-          t.Type == TransactionType.CreditCard) &&
-         t.Purpose != TransactionPurpose.Investment &&
-         t.Purpose != TransactionPurpose.LoanLent &&
-         t.Purpose != TransactionPurpose.LoanRepayment &&
-         t.Purpose != TransactionPurpose.LoanPayment)
-     .Sum(t => t.Amount);
+            .Where(t =>
+                (t.Type == TransactionType.Expense ||
+                 t.Type == TransactionType.CreditCard) &&
+                t.Purpose != TransactionPurpose.Investment &&
+                t.Purpose != TransactionPurpose.LoanLent &&
+                t.Purpose != TransactionPurpose.LoanRepayment &&
+                t.Purpose != TransactionPurpose.LoanPayment)
+            .Sum(t => t.Amount);
 
         var categoryExpenses = transactions
-    .Where(t =>
-        (t.Type == TransactionType.Expense ||
-         t.Type == TransactionType.CreditCard) &&
-        t.Purpose != TransactionPurpose.Investment &&
-        t.Purpose != TransactionPurpose.LoanLent &&
-        t.Purpose != TransactionPurpose.LoanRepayment &&
-        t.Purpose != TransactionPurpose.LoanPayment)
-    .GroupBy(t => new
-    {
-        t.CategoryId,
-        CategoryName =
-            t.Category != null
-                ? t.Category.Name
-                : "Uncategorized"
-    })
-    .Select(g => new CategoryReportsDto
-    {
-        CategoryId = g.Key.CategoryId,
-        CategoryName = g.Key.CategoryName,
-        Amount = g.Sum(t => t.Amount)
-    })
-    .OrderByDescending(x => x.Amount)
-    .ToList();
+            .Where(t =>
+                (t.Type == TransactionType.Expense ||
+                 t.Type == TransactionType.CreditCard) &&
+                t.Purpose != TransactionPurpose.Investment &&
+                t.Purpose != TransactionPurpose.LoanLent &&
+                t.Purpose != TransactionPurpose.LoanRepayment &&
+                t.Purpose != TransactionPurpose.LoanPayment)
+            .GroupBy(t => new
+            {
+                t.CategoryId,
+                CategoryName =
+                    t.Category != null
+                        ? t.Category.Name
+                        : "Uncategorized"
+            })
+            .Select(g => new CategoryReportsDto
+            {
+                CategoryId = g.Key.CategoryId,
+                CategoryName = g.Key.CategoryName,
+                Amount = g.Sum(t => t.Amount)
+            })
+            .OrderByDescending(x => x.Amount)
+            .ToList();
 
         return new ReportSummaryDto
         {

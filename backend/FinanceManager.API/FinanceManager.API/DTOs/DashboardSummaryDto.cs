@@ -1,10 +1,18 @@
-﻿namespace FinanceManager.API.DTOs;
+namespace FinanceManager.API.DTOs;
 
 public class DashboardSummaryDto
 {
     public int Year { get; set; }
 
     public int Month { get; set; }
+
+    public DateTime? StartDate { get; set; }
+
+    public DateTime? EndDate { get; set; }
+
+    public string Period { get; set; } = string.Empty;
+
+    public string PeriodLabel { get; set; } = string.Empty;
 
     public decimal TotalBalance { get; set; }
 
