@@ -70,8 +70,8 @@ public class AccountBalanceService : IAccountBalanceService
 
         // Normal income.
         //
-        // OpeningBalance transactions are NOT included because their
-        // purpose is OpeningBalance, not Income.
+        // OpeningBalance transactions are NOT included because the opening balance
+        // is already added directly via account.OpeningBalance.
         var income = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
@@ -79,6 +79,7 @@ public class AccountBalanceService : IAccountBalanceService
                 t.Type == TransactionType.Income &&
                 t.Purpose != TransactionPurpose.Deposit &&
                 t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance" &&
                 t.Purpose != TransactionPurpose.LoanBorrowed &&
                 t.Purpose != TransactionPurpose.LoanReceived &&
                 t.Purpose != TransactionPurpose.InvestmentSale)
@@ -97,7 +98,9 @@ public class AccountBalanceService : IAccountBalanceService
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
-                t.Purpose == TransactionPurpose.Deposit)
+                t.Purpose == TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance")
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
 

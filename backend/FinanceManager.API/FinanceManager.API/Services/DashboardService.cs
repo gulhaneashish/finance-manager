@@ -205,6 +205,8 @@ public class DashboardService : IDashboardService
             .Where(t =>
                 t.Type == TransactionType.Income &&
                 t.Purpose != TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance" &&
                 t.Purpose != TransactionPurpose.LoanBorrowed &&
                 t.Purpose != TransactionPurpose.LoanReceived &&
                 t.Purpose != TransactionPurpose.InvestmentSale &&
@@ -255,13 +257,17 @@ public class DashboardService : IDashboardService
                 .Where(t =>
                     t.AccountId == account.Id &&
                     t.Type == TransactionType.Income &&
-                    t.Purpose != TransactionPurpose.Deposit)
+                    t.Purpose != TransactionPurpose.Deposit &&
+                    t.Purpose != TransactionPurpose.OpeningBalance &&
+                    t.Description != "Opening balance")
                 .Sum(t => t.Amount);
 
             var deposits = transactions
                 .Where(t =>
                     t.AccountId == account.Id &&
-                    t.Purpose == TransactionPurpose.Deposit)
+                    t.Purpose == TransactionPurpose.Deposit &&
+                    t.Purpose != TransactionPurpose.OpeningBalance &&
+                    t.Description != "Opening balance")
                 .Sum(t => t.Amount);
 
             var accountExpenses = transactions
@@ -473,6 +479,8 @@ public class DashboardService : IDashboardService
                 .Where(t =>
                     t.Type == TransactionType.Income &&
                     t.Purpose != TransactionPurpose.Deposit &&
+                    t.Purpose != TransactionPurpose.OpeningBalance &&
+                    t.Description != "Opening balance" &&
                     t.Purpose != TransactionPurpose.LoanBorrowed &&
                     t.Purpose != TransactionPurpose.LoanReceived &&
                     t.Purpose != TransactionPurpose.InvestmentSale &&
@@ -625,13 +633,17 @@ public class DashboardService : IDashboardService
                     .Where(t =>
                         t.AccountId == account.Id &&
                         t.Type == TransactionType.Income &&
-                        t.Purpose != TransactionPurpose.Deposit)
+                        t.Purpose != TransactionPurpose.Deposit &&
+                        t.Purpose != TransactionPurpose.OpeningBalance &&
+                        t.Description != "Opening balance")
                     .Sum(t => t.Amount);
 
                 var deposits = transactions
                     .Where(t =>
                         t.AccountId == account.Id &&
-                        t.Purpose == TransactionPurpose.Deposit)
+                        t.Purpose == TransactionPurpose.Deposit &&
+                        t.Purpose != TransactionPurpose.OpeningBalance &&
+                        t.Description != "Opening balance")
                     .Sum(t => t.Amount);
 
                 var accountExpenses = transactions

@@ -322,14 +322,18 @@ public class CreditCardService : ICreditCardService
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Type == TransactionType.Income &&
-                t.Purpose != TransactionPurpose.Deposit)
+                t.Purpose != TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance")
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
         var deposits = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
-                t.Purpose == TransactionPurpose.Deposit)
+                t.Purpose == TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance")
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
         var expenses = await _transactionRepository.Query()

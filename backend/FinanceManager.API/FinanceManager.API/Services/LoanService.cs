@@ -330,6 +330,8 @@ public class LoanService : ILoanService
                 t.AccountId == accountId &&
                 t.Type == TransactionType.Income &&
                 t.Purpose != TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance" &&
                 t.Purpose != TransactionPurpose.LoanBorrowed &&
                 t.Purpose != TransactionPurpose.LoanReceived &&
                 t.Purpose != TransactionPurpose.InvestmentSale)
@@ -339,7 +341,9 @@ public class LoanService : ILoanService
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
-                t.Purpose == TransactionPurpose.Deposit)
+                t.Purpose == TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance")
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
         var expenses = await _transactionRepository.Query()

@@ -45,6 +45,8 @@ public class ReportService : IReportService
             .Where(t =>
                 t.Type == TransactionType.Income &&
                 t.Purpose != TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
+                t.Description != "Opening balance" &&
                 t.Purpose != TransactionPurpose.LoanBorrowed &&
                 t.Purpose != TransactionPurpose.LoanReceived &&
                 t.Purpose != TransactionPurpose.InvestmentSale &&
