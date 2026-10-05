@@ -9,13 +9,14 @@ import {
   AdminSystemStats,
   AuditLog
 } from '../models/admin.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5228/api/Admin';
+  private readonly apiUrl = `${environment.apiUrl}/Admin`;
 
   // Users
   getUsers(): Observable<AdminUser[]> {

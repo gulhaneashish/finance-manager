@@ -90,14 +90,35 @@ public class AuthService : IAuthService
         }
 
         var user = await _userRepository.GetByIdAsync(userId);
-        if (user == null ||
-            !user.IsActive ||
-            user.RefreshToken != dto.RefreshToken ||
-            user.RefreshTokenExpiryTime == null ||
-            user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-        {
-            return null;
-        }
+        if (user == null)
+{
+    Console.WriteLine($"Refresh failed: User {userId} not found.");
+    return null;
+}
+
+if (!user.IsActive)
+{
+    Console.WriteLine($"Refresh failed: User {userId} is inactive.");
+    return null;
+}
+
+if (user.RefreshToken != dto.RefreshToken)
+{
+    Console.WriteLine("Refresh failed: Refresh token does not match.");
+    return null;
+}
+
+if (user.RefreshTokenExpiryTime == null)
+{
+    Console.WriteLine("Refresh failed: Refresh token expiry is null.");
+    return null;
+}
+
+if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+{
+    Console.WriteLine($"Refresh failed: Refresh token expired at {user.RefreshTokenExpiryTime}.");
+    return null;
+}
 
         // Refresh token rotation: issue a new access token and a new refresh token
         var newAccessToken = GenerateToken(user);

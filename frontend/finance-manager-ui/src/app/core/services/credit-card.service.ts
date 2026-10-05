@@ -8,6 +8,7 @@ import {
   CreditCardPurchaseResponse,
   CreditCardPaymentResponse
 } from '../models/credit-card.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class CreditCardService {
   private http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:5228/api/CreditCard';
+    `${environment.apiUrl}/CreditCard`;
 
   purchase(
     data: CreditCardPurchaseCreate

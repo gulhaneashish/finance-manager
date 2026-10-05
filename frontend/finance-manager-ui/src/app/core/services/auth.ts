@@ -12,6 +12,8 @@ import {
   RefreshTokenRequest
 } from '../models/auth.model';
 
+import { environment } from '../../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,7 +22,7 @@ export class Auth {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
 
-  private readonly apiUrl = 'http://localhost:5228/api/User';
+  private readonly apiUrl = `${environment.apiUrl}/User`;
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(

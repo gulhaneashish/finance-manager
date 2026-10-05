@@ -11,6 +11,7 @@ import {
   SavingsInvestmentSummary
 } from '../models/dashboard.model';
 import { LoanDebtSummary } from '../models/loan-debt.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,7 @@ export class DashboardService {
   private http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:5228/api/Dashboard';
+    `${environment.apiUrl}/Dashboard`;
 
   private buildParams(filter?: DashboardFilter | { year?: number; month?: number }): HttpParams {
     let params = new HttpParams();

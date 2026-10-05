@@ -6,6 +6,7 @@ import { Transaction, TransactionPurpose, TransactionType } from '../models/tran
 import { TransferCreate } from '../models/transfer.model';
 import { TransactionList } from '../../features/transactions/transaction-list/transaction-list';
 import { TransactionFilter } from '../models/transaction-filter.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class TransactionService {
   private http = inject(HttpClient);
 
   private apiUrl =
-    'http://localhost:5228/api/Transaction';
+    `${environment.apiUrl}/Transaction`;
 
   getAll(): Observable<Transaction[]> {
     return this.http.get<Transaction[]>(
@@ -48,49 +49,49 @@ export class TransactionService {
   }
 
   transfer(transfer: TransferCreate): Observable<void> {
-  return this.http.post<void>(
-    `${this.apiUrl}/transfer`,
-    transfer
-  );
-}
-
-getFiltered(
-  filter: TransactionFilter
-): Observable<Transaction[]> {
-
-  let params = new HttpParams();
-
-  if (filter.fromDate) {
-    params = params.set(
-      'fromDate',
-      filter.fromDate
+    return this.http.post<void>(
+      `${this.apiUrl}/transfer`,
+      transfer
     );
   }
 
-  if (filter.toDate) {
-    params = params.set(
-      'toDate',
-      filter.toDate
+  getFiltered(
+    filter: TransactionFilter
+  ): Observable<Transaction[]> {
+
+    let params = new HttpParams();
+
+    if (filter.fromDate) {
+      params = params.set(
+        'fromDate',
+        filter.fromDate
+      );
+    }
+
+    if (filter.toDate) {
+      params = params.set(
+        'toDate',
+        filter.toDate
+      );
+    }
+
+    if (filter.accountId) {
+      params = params.set(
+        'accountId',
+        filter.accountId
+      );
+    }
+
+    if (filter.type) {
+      params = params.set(
+        'type',
+        filter.type
+      );
+    }
+
+    return this.http.get<Transaction[]>(
+      `${this.apiUrl}/filter`,
+      { params }
     );
   }
-
-  if (filter.accountId) {
-    params = params.set(
-      'accountId',
-      filter.accountId
-    );
-  }
-
-  if (filter.type) {
-    params = params.set(
-      'type',
-      filter.type
-    );
-  }
-
-  return this.http.get<Transaction[]>(
-    `${this.apiUrl}/filter`,
-    { params }
-  );
-}
 }

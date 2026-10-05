@@ -7,6 +7,7 @@ import {
   LoanPaymentCreate,
   LoanUpdate
 } from '../models/loan.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class LoanService {
 
   private http = inject(HttpClient);
 
-  private apiUrl = 'http://localhost:5228/api/Loan';
+  private apiUrl = `${environment.apiUrl}/Loan`;
 
   getAll() {
     return this.http.get<Loan[]>(this.apiUrl);
@@ -39,12 +40,12 @@ export class LoanService {
   }
 
   update(
-  loanId: number,
-  loan: LoanUpdate
-) {
-  return this.http.put<Loan>(
-    `${this.apiUrl}/${loanId}`,
-    loan
-  );
-}
+    loanId: number,
+    loan: LoanUpdate
+  ) {
+    return this.http.put<Loan>(
+      `${this.apiUrl}/${loanId}`,
+      loan
+    );
+  }
 }

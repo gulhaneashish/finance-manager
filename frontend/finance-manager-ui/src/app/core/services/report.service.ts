@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { ReportSummary } from '../models/report.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class ReportService {
   private http = inject(HttpClient);
 
   private apiUrl =
-    'http://localhost:5228/api/Report';
+    `${environment.apiUrl}/Report`;
 
   getSummary(
     fromDate?: string,

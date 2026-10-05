@@ -7,15 +7,15 @@ import {
   InvestmentSummary,
   InvestmentType
 } from '../models/investment.model';
-
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class InvestmentService {
 
-  private apiUrl = 'http://localhost:5228/api/Investment';
+  private apiUrl = `${environment.apiUrl}/Investment`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getInvestments(): Observable<Investment[]> {
     return this.http.get<Investment[]>(this.apiUrl);

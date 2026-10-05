@@ -6,7 +6,7 @@ import {
   Budget,
   BudgetCreate
 } from '../models/budget.model';
-
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -15,7 +15,7 @@ export class BudgetService {
   private http = inject(HttpClient);
 
   private apiUrl =
-    'http://localhost:5228/api/Budget';
+    `${environment.apiUrl}/Budget`;
 
   create(
     budget: BudgetCreate
@@ -38,14 +38,14 @@ export class BudgetService {
   }
 
   update(
-  year: number,
-  month: number,
-  budget: BudgetCreate
-): Observable<{ message: string }> {
+    year: number,
+    month: number,
+    budget: BudgetCreate
+  ): Observable<{ message: string }> {
 
-  return this.http.put<{ message: string }>(
-    `${this.apiUrl}/${year}/${month}`,
-    budget
-  );
-}
+    return this.http.put<{ message: string }>(
+      `${this.apiUrl}/${year}/${month}`,
+      budget
+    );
+  }
 }

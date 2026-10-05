@@ -130,7 +130,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 builder.Services.AddDbContext<FinanceDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -211,16 +211,20 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-    try
+  try
+{
+    await db.Database.MigrateAsync();
+    logger.LogInformation("Database migrations applied successfully.");
+}
+catch (Exception ex)
+{
+    logger.LogCritical(ex, "Database migration failed. Application cannot start.");
+
+    if (app.Environment.IsProduction())
     {
-        // Automatically create and migrate tables on cloud deployment
-        db.Database.Migrate();
-        logger.LogInformation("Database migrations applied successfully.");
+        throw;
     }
-    catch (Exception ex)
-    {
-        logger.LogWarning(ex, "Database migration skipped or encountered an error. Proceeding with application startup.");
-    }
+}
 
     try
     {
