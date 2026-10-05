@@ -1,0 +1,9 @@
+{
+    "$schema": "./node_modules/wrangler/config-schema.json",
+    "name": "finance-manager",
+    "compatibility_date": "2026-10-01",
+    "assets": {
+        "directory": "./dist/finance-manager-ui/browser",
+        "not_found_handling": "single-page-application"
+    }
+}
