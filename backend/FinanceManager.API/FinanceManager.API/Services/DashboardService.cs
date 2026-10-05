@@ -28,62 +28,158 @@ public class DashboardService : IDashboardService
         _investmentRepository = investmentRepository;
     }
 
-    private (DateTime StartDate, DateTime EndDateExclusive, int Year, int Month, string Period, string PeriodLabel) ResolveDateRange(
-        string? period,
-        DateTime? startDate,
-        DateTime? endDate,
-        int? year,
-        int? month)
-    {
-        var today = DateTime.Today;
+    private (
+    DateTime StartDate,
+    DateTime EndDateExclusive,
+    int Year,
+    int Month,
+    string Period,
+    string PeriodLabel
+) ResolveDateRange(
+    string? period,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? year,
+    int? month)
+{
+    // Always work with UTC dates when querying PostgreSQL
+    // timestamp with time zone columns.
+    var today = DateTime.UtcNow.Date;
 
-        if (startDate.HasValue && endDate.HasValue)
+    if (startDate.HasValue && endDate.HasValue)
+    {
+        var start = DateTime.SpecifyKind(
+            startDate.Value.Date,
+            DateTimeKind.Utc);
+
+        var endExclusive = DateTime.SpecifyKind(
+            endDate.Value.Date.AddDays(1),
+            DateTimeKind.Utc);
+
+        return (
+            start,
+            endExclusive,
+            start.Year,
+            start.Month,
+            "custom",
+            $"{start:MMM dd, yyyy} - {endDate.Value.Date:MMM dd, yyyy}"
+        );
+    }
+
+    var normalizedPeriod = (period ?? string.Empty)
+        .Trim()
+        .ToLowerInvariant()
+        .Replace("-", "")
+        .Replace("_", "");
+
+    switch (normalizedPeriod)
+    {
+        case "today":
         {
-            var start = startDate.Value.Date;
-            var endExclusive = endDate.Value.Date.AddDays(1);
-            return (start, endExclusive, start.Year, start.Month, "custom", $"{start:MMM dd, yyyy} - {endDate.Value.Date:MMM dd, yyyy}");
+            var start = today;
+            var endExclusive = start.AddDays(1);
+            var endInclusive = start;
+
+            return (
+                start,
+                endExclusive,
+                start.Year,
+                start.Month,
+                "today",
+                $"Today • {start:MMM dd, yyyy}"
+            );
         }
 
-        var normalizedPeriod = (period ?? string.Empty).Trim().ToLowerInvariant().Replace("-", "").Replace("_", "");
-
-        switch (normalizedPeriod)
+        case "thisweek":
+        case "week":
         {
-            case "today":
+            int diff =
+                (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+
+            var start = today
+                .AddDays(-diff)
+                .Date;
+
+            var endExclusive = start.AddDays(7);
+            var endInclusive = start.AddDays(6);
+
+            return (
+                start,
+                endExclusive,
+                start.Year,
+                start.Month,
+                "this_week",
+                $"This Week • {start:MMM dd} - {endInclusive:MMM dd, yyyy}"
+            );
+        }
+
+        case "thisyear":
+        case "year":
+        {
+            int y = year ?? today.Year;
+
+            var start = new DateTime(
+                y,
+                1,
+                1,
+                0,
+                0,
+                0,
+                DateTimeKind.Utc);
+
+            var endExclusive = new DateTime(
+                y + 1,
+                1,
+                1,
+                0,
+                0,
+                0,
+                DateTimeKind.Utc);
+
+            return (
+                start,
+                endExclusive,
+                y,
+                1,
+                "this_year",
+                $"This Year • {y}"
+            );
+        }
+
+        case "thismonth":
+        case "month":
+        default:
+        {
+            int y = year ?? today.Year;
+            int m = month ?? today.Month;
+
+            if (m < 1 || m > 12)
             {
-                var start = today;
-                var endExclusive = today.AddDays(1);
-                return (start, endExclusive, start.Year, start.Month, "today", $"Today • {start:MMM dd, yyyy}");
+                m = today.Month;
             }
-            case "thisweek":
-            case "week":
-            {
-                int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-                var start = today.AddDays(-1 * diff).Date;
-                var endExclusive = start.AddDays(7);
-                var endInclusive = start.AddDays(6);
-                return (start, endExclusive, start.Year, start.Month, "this_week", $"This Week • {start:MMM dd} - {endInclusive:MMM dd, yyyy}");
-            }
-            case "thisyear":
-            case "year":
-            {
-                int y = year ?? today.Year;
-                var start = new DateTime(y, 1, 1);
-                var endExclusive = new DateTime(y + 1, 1, 1);
-                return (start, endExclusive, y, 1, "this_year", $"This Year • {y}");
-            }
-            case "thismonth":
-            case "month":
-            default:
-            {
-                int y = year ?? today.Year;
-                int m = month ?? today.Month;
-                if (m < 1 || m > 12) m = today.Month;
-                var start = new DateTime(y, m, 1);
-                var endExclusive = start.AddMonths(1);
-                return (start, endExclusive, y, m, "this_month", $"This Month • {start:MMMM yyyy}");
-            }
+
+            var start = new DateTime(
+                y,
+                m,
+                1,
+                0,
+                0,
+                0,
+                DateTimeKind.Utc);
+
+            var endExclusive = start.AddMonths(1);
+
+            return (
+                start,
+                endExclusive,
+                y,
+                m,
+                "this_month",
+                $"This Month • {start:MMMM yyyy}"
+            );
         }
     }
+}
 
     public async Task<DashboardSummaryDto> GetSummaryAsync(
         int userId,
@@ -344,60 +440,69 @@ public class DashboardService : IDashboardService
     }
 
     public async Task<List<MonthlyCashFlowDto>> GetMonthlyCashFlowAsync(
-        int userId,
-        int year)
-    {
-        var startDate = new DateTime(year, 1, 1);
-        var endDate = startDate.AddYears(1);
+    int userId,
+    int year)
+{
+    var startDate = new DateTime(
+        year,
+        1,
+        1,
+        0,
+        0,
+        0,
+        DateTimeKind.Utc);
 
-        var transactions = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                t.TransactionDate >= startDate &&
-                t.TransactionDate < endDate)
-            .ToListAsync();
+    var endDate = startDate.AddYears(1);
 
-        return Enumerable
-            .Range(1, 12)
-            .Select(month =>
+    var transactions = await _transactionRepository.Query()
+        .Where(t =>
+            t.UserId == userId &&
+            t.TransactionDate >= startDate &&
+            t.TransactionDate < endDate)
+        .ToListAsync();
+
+    return Enumerable
+        .Range(1, 12)
+        .Select(month =>
+        {
+            var monthlyTransactions = transactions
+                .Where(t => t.TransactionDate.Month == month)
+                .ToList();
+
+            var income = monthlyTransactions
+                .Where(t =>
+                    t.Type == TransactionType.Income &&
+                    t.Purpose != TransactionPurpose.Deposit &&
+                    t.Purpose != TransactionPurpose.LoanBorrowed &&
+                    t.Purpose != TransactionPurpose.LoanReceived &&
+                    t.Purpose != TransactionPurpose.InvestmentSale &&
+                    t.Purpose != TransactionPurpose.LoanRepayment)
+                .Sum(t => t.Amount);
+
+            var expenses = monthlyTransactions
+                .Where(t =>
+                    (
+                        t.Type == TransactionType.Expense ||
+                        t.Type == TransactionType.CreditCard
+                    ) &&
+                    t.Purpose != TransactionPurpose.Investment &&
+                    t.Purpose != TransactionPurpose.LoanRepayment &&
+                    t.Purpose != TransactionPurpose.LoanLent)
+                .Sum(t => t.Amount);
+
+            return new MonthlyCashFlowDto
             {
-                var monthlyTransactions = transactions
-                    .Where(t => t.TransactionDate.Month == month)
-                    .ToList();
-
-                var income = monthlyTransactions
-                    .Where(t =>
-                        t.Type == TransactionType.Income &&
-                        t.Purpose != TransactionPurpose.Deposit &&
-                        t.Purpose != TransactionPurpose.LoanBorrowed &&
-                        t.Purpose != TransactionPurpose.LoanReceived &&
-                        t.Purpose != TransactionPurpose.InvestmentSale &&
-                        t.Purpose != TransactionPurpose.LoanRepayment)
-                    .Sum(t => t.Amount);
-
-                var expenses = monthlyTransactions
-                    .Where(t =>
-                        (
-                            t.Type == TransactionType.Expense ||
-                            t.Type == TransactionType.CreditCard
-                        ) &&
-                        t.Purpose != TransactionPurpose.Investment &&
-                        t.Purpose != TransactionPurpose.LoanRepayment &&
-                        t.Purpose != TransactionPurpose.LoanLent)
-                    .Sum(t => t.Amount);
-
-                return new MonthlyCashFlowDto
-                {
-                    Year = year,
-                    Month = month,
-                    MonthName = new DateTime(year, month, 1).ToString("MMM"),
-                    Income = income,
-                    Expenses = expenses,
-                    Savings = income - expenses
-                };
-            })
-            .ToList();
-    }
+                Year = year,
+                Month = month,
+                MonthName = new DateTime(year, month, 1)
+                    .ToString("MMM"),
+                Income = income,
+                Expenses = expenses,
+                Savings = income - expenses
+            };
+        })
+        .ToList();
+}
 
     public async Task<LoanDebtSummaryDto> GetLoanDebtSummaryAsync(int userId)
     {

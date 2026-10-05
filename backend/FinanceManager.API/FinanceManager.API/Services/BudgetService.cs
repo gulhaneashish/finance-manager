@@ -102,64 +102,73 @@ public class BudgetService : IBudgetService
         await _budgetRepository.SaveChangesAsync();
     }
 
-    public async Task<BudgetResponseDto?> GetAsync(
-        int year,
-        int month,
-        int userId)
+   public async Task<BudgetResponseDto?> GetAsync(
+    int year,
+    int month,
+    int userId)
+{
+    var budget = await _budgetRepository.Query()
+        .Include(b => b.CategoryBudgets)
+            .ThenInclude(cb => cb.Category)
+        .FirstOrDefaultAsync(b =>
+            b.UserId == userId &&
+            b.Year == year &&
+            b.Month == month);
+
+    if (budget == null)
     {
-        var budget = await _budgetRepository.Query()
-            .Include(b => b.CategoryBudgets)
-                .ThenInclude(cb => cb.Category)
-            .FirstOrDefaultAsync(b =>
-                b.UserId == userId &&
-                b.Year == year &&
-                b.Month == month);
-
-        if (budget == null)
-        {
-            return null;
-        }
-
-        var startDate = new DateTime(year, month, 1);
-        var endDate = startDate.AddMonths(1);
-
-        var spent = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                (
-                    t.Type == TransactionType.Expense ||
-                    t.Type == TransactionType.CreditCard
-                ) &&
-                t.TransactionDate >= startDate &&
-                t.TransactionDate < endDate &&
-                t.Purpose != TransactionPurpose.LoanRepayment &&
-                t.Purpose != TransactionPurpose.LoanLent)
-            .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-        var remaining = budget.ExpenseBudget - spent;
-
-        return new BudgetResponseDto
-        {
-            Id = budget.Id,
-            Year = budget.Year,
-            Month = budget.Month,
-            Income = budget.ExpectedIncome,
-            ExpenseBudget = budget.ExpenseBudget,
-            SavingsTarget = budget.SavingsTarget,
-            InvestmentTarget = budget.InvestmentTarget,
-            Spent = spent,
-            Remaining = remaining,
-            Categories = budget.CategoryBudgets
-                .Select(cb => new BudgetCategoryResponseDto
-                {
-                    CategoryId = cb.CategoryId,
-                    CategoryName = cb.Category.Name,
-                    Amount = cb.Amount
-                })
-                .ToList()
-        };
+        return null;
     }
 
+    // PostgreSQL timestamp with time zone requires UTC DateTime values.
+    var startDate = new DateTime(
+        year,
+        month,
+        1,
+        0,
+        0,
+        0,
+        DateTimeKind.Utc);
+
+    var endDate = startDate.AddMonths(1);
+
+    var spent = await _transactionRepository.Query()
+        .Where(t =>
+            t.UserId == userId &&
+            (
+                t.Type == TransactionType.Expense ||
+                t.Type == TransactionType.CreditCard
+            ) &&
+            t.TransactionDate >= startDate &&
+            t.TransactionDate < endDate &&
+            t.Purpose != TransactionPurpose.LoanRepayment &&
+            t.Purpose != TransactionPurpose.LoanLent)
+        .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    var remaining = budget.ExpenseBudget - spent;
+
+    return new BudgetResponseDto
+    {
+        Id = budget.Id,
+        Year = budget.Year,
+        Month = budget.Month,
+        Income = budget.ExpectedIncome,
+        ExpenseBudget = budget.ExpenseBudget,
+        SavingsTarget = budget.SavingsTarget,
+        InvestmentTarget = budget.InvestmentTarget,
+        Spent = spent,
+        Remaining = remaining,
+
+        Categories = budget.CategoryBudgets
+            .Select(cb => new BudgetCategoryResponseDto
+            {
+                CategoryId = cb.CategoryId,
+                CategoryName = cb.Category.Name,
+                Amount = cb.Amount
+            })
+            .ToList()
+    };
+}
     public async Task UpdateAsync(
         int year,
         int month,
