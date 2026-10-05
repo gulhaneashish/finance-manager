@@ -53,8 +53,14 @@
         }
       </div>
 
+      @if (successMessage) {
+        <div class="login-alert-success">
+          {{ successMessage }}
+        </div>
+      }
+
       @if (errorMessage) {
-        <div>
+        <div class="login-alert-error">
           {{ errorMessage }}
         </div>
       }
@@ -66,6 +72,11 @@
         {{ isLoading ? 'Signing in...' : 'Sign In' }}
 
       </button>
+
+      <div class="auth-switch">
+        <span>Don't have an account?</span>
+        <a routerLink="/register" class="switch-link">Create an Account</a>
+      </div>
 
     </form>
 

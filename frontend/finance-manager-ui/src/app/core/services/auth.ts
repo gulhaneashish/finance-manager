@@ -9,7 +9,9 @@ import {
   LoginRequest,
   LoginResponse,
   AuthUser,
-  RefreshTokenRequest
+  RefreshTokenRequest,
+  RegisterRequest,
+  RegisterResponse
 } from '../models/auth.model';
 
 import { environment } from '../../../environments/environment';
@@ -23,6 +25,10 @@ export class Auth {
   private platformId = inject(PLATFORM_ID);
 
   private readonly apiUrl = `${environment.apiUrl}/User`;
+
+  register(request: RegisterRequest): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, request);
+  }
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(

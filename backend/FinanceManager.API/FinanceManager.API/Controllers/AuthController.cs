@@ -11,10 +11,19 @@ namespace FinanceManager.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IUserService _userService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IUserService userService)
     {
         _authService = authService;
+        _userService = userService;
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(UserCreateDto dto)
+    {
+        var result = await _userService.CreateUserAsync(dto);
+        return CreatedAtAction(nameof(Register), new { id = result.Id }, result);
     }
 
     [HttpPost("login")]
