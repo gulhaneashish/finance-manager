@@ -10,13 +10,15 @@ public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
     private readonly ITransactionRepository _transactionRepository;
-
+    private readonly IAccountBalanceService _accountBalanceService;
     public AccountService(
         IAccountRepository accountRepository,
-        ITransactionRepository transactionRepository)
+        ITransactionRepository transactionRepository,
+        IAccountBalanceService accountBalanceService)
     {
         _accountRepository = accountRepository;
         _transactionRepository = transactionRepository;
+        _accountBalanceService = accountBalanceService;
     }
 
     // ============================================================
@@ -151,7 +153,7 @@ public class AccountService : IAccountService
 
                 Type = TransactionType.Income,
 
-                Purpose = TransactionPurpose.Deposit,
+                Purpose = TransactionPurpose.OpeningBalance,
 
                 Description = "Opening balance",
 
@@ -309,105 +311,123 @@ public class AccountService : IAccountService
     // GET ACCOUNT BALANCE
     // ============================================================
 
+    // public async Task<decimal?> GetBalanceAsync(
+    //  int accountId,
+    //  int userId)
+    // {
+    //     var account = await _accountRepository.FirstOrDefaultAsync(a =>
+    //         a.Id == accountId &&
+    //         a.UserId == userId);
+
+    //     if (account == null)
+    //     {
+    //         return null;
+    //     }
+
+    //     // ========================================================
+    //     // CREDIT CARD CALCULATION
+    //     // ========================================================
+
+    //     if (account.AccountType == "CREDIT_CARD")
+    //     {
+    //         var purchases = await _transactionRepository.Query()
+    //             .Where(t =>
+    //                 t.UserId == userId &&
+    //                 t.AccountId == accountId &&
+    //                 t.Purpose ==
+    //                     TransactionPurpose.CreditCardPurchase)
+    //             .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //         var payments = await _transactionRepository.Query()
+    //             .Where(t =>
+    //                 t.UserId == userId &&
+    //                 t.ToAccountId == accountId &&
+    //                 t.Purpose ==
+    //                     TransactionPurpose.CreditCardPayment)
+    //             .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //         var outstanding = purchases - payments;
+
+    //         return Math.Max(outstanding, 0);
+    //     }
+
+    //     // ========================================================
+    //     // NORMAL ACCOUNT CALCULATION
+    //     // ========================================================
+
+    //     var income = await _transactionRepository.Query()
+    //         .Where(t =>
+    //             t.UserId == userId &&
+    //             t.AccountId == accountId &&
+    //             t.Type == TransactionType.Income &&
+    //             t.Purpose != TransactionPurpose.Deposit)
+    //         .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //     var deposits = await _transactionRepository.Query()
+    //         .Where(t =>
+    //             t.UserId == userId &&
+    //             t.AccountId == accountId &&
+    //             t.Purpose == TransactionPurpose.Deposit)
+    //         .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //     var expenses = await _transactionRepository.Query()
+    //         .Where(t =>
+    //             t.UserId == userId &&
+    //             t.AccountId == accountId &&
+    //             t.Type == TransactionType.Expense)
+    //         .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //     var transfersIn = await _transactionRepository.Query()
+    //         .Where(t =>
+    //             t.UserId == userId &&
+    //             t.ToAccountId == accountId &&
+    //             t.Type == TransactionType.Transfer)
+    //         .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //     var transfersOut = await _transactionRepository.Query()
+    //         .Where(t =>
+    //             t.UserId == userId &&
+    //             t.FromAccountId == accountId &&
+    //             t.Type == TransactionType.Transfer)
+    //         .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //     var creditCardPayments = await _transactionRepository.Query()
+    //         .Where(t =>
+    //             t.UserId == userId &&
+    //             t.FromAccountId == accountId &&
+    //             t.Purpose ==
+    //                 TransactionPurpose.CreditCardPayment)
+    //         .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+    //     var currentBalance =
+    //         account.OpeningBalance
+    //         + income
+    //         + deposits
+    //         - expenses
+    //         + transfersIn
+    //         - transfersOut
+    //         - creditCardPayments;
+
+    //     return currentBalance;
+    // }
     public async Task<decimal?> GetBalanceAsync(
-     int accountId,
-     int userId)
+    int accountId,
+    int userId)
+{
+    var account = await _accountRepository.FirstOrDefaultAsync(a =>
+        a.Id == accountId &&
+        a.UserId == userId);
+
+    if (account == null)
     {
-        var account = await _accountRepository.FirstOrDefaultAsync(a =>
-            a.Id == accountId &&
-            a.UserId == userId);
-
-        if (account == null)
-        {
-            return null;
-        }
-
-        // ========================================================
-        // CREDIT CARD CALCULATION
-        // ========================================================
-
-        if (account.AccountType == "CREDIT_CARD")
-        {
-            var purchases = await _transactionRepository.Query()
-                .Where(t =>
-                    t.UserId == userId &&
-                    t.AccountId == accountId &&
-                    t.Purpose ==
-                        TransactionPurpose.CreditCardPurchase)
-                .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-            var payments = await _transactionRepository.Query()
-                .Where(t =>
-                    t.UserId == userId &&
-                    t.ToAccountId == accountId &&
-                    t.Purpose ==
-                        TransactionPurpose.CreditCardPayment)
-                .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-            var outstanding = purchases - payments;
-
-            return Math.Max(outstanding, 0);
-        }
-
-        // ========================================================
-        // NORMAL ACCOUNT CALCULATION
-        // ========================================================
-
-        var income = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                t.AccountId == accountId &&
-                t.Type == TransactionType.Income &&
-                t.Purpose != TransactionPurpose.Deposit)
-            .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-        var deposits = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                t.AccountId == accountId &&
-                t.Purpose == TransactionPurpose.Deposit)
-            .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-        var expenses = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                t.AccountId == accountId &&
-                t.Type == TransactionType.Expense)
-            .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-        var transfersIn = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                t.ToAccountId == accountId &&
-                t.Type == TransactionType.Transfer)
-            .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-        var transfersOut = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                t.FromAccountId == accountId &&
-                t.Type == TransactionType.Transfer)
-            .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-        var creditCardPayments = await _transactionRepository.Query()
-            .Where(t =>
-                t.UserId == userId &&
-                t.FromAccountId == accountId &&
-                t.Purpose ==
-                    TransactionPurpose.CreditCardPayment)
-            .SumAsync(t => (decimal?)t.Amount) ?? 0;
-
-        var currentBalance =
-            account.OpeningBalance
-            + income
-            + deposits
-            - expenses
-            + transfersIn
-            - transfersOut
-            - creditCardPayments;
-
-        return currentBalance;
+        return null;
     }
+
+    var balance = await _accountBalanceService
+        .GetAccountBalanceAsync(accountId, userId);
+
+    return balance;
+}
 
 
     // ============================================================

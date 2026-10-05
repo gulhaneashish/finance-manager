@@ -33,9 +33,24 @@ public class MonthlyReportService : IMonthlyReportService
         int year,
         int month)
     {
-        var startDate = new DateTime(year, month, 1);
+        if (month < 1 || month > 12)
+        {
+            throw new InvalidOperationException("Invalid month.");
+        }
+
+        // PostgreSQL timestamp with time zone requires UTC DateTime values.
+        var startDate = new DateTime(
+            year,
+            month,
+            1,
+            0,
+            0,
+            0,
+            DateTimeKind.Utc);
+
         var endDate = startDate.AddMonths(1);
 
+        // Get transactions for the selected month.
         var transactions = await _transactionRepository.Query()
             .Include(t => t.Category)
             .Where(t =>
@@ -44,6 +59,7 @@ public class MonthlyReportService : IMonthlyReportService
                 t.TransactionDate < endDate)
             .ToListAsync();
 
+        // Calculate total income.
         var income = transactions
             .Where(t =>
                 t.Type == TransactionType.Income &&
@@ -52,35 +68,34 @@ public class MonthlyReportService : IMonthlyReportService
                 t.Purpose != TransactionPurpose.LoanReceived)
             .Sum(t => t.Amount);
 
+        // Calculate total expenses.
         var expenses = transactions
             .Where(t =>
-                (t.Type == TransactionType.Expense ||
-                 t.Type == TransactionType.CreditCard) &&
+                (
+                    t.Type == TransactionType.Expense ||
+                    t.Type == TransactionType.CreditCard
+                ) &&
                 t.Purpose != TransactionPurpose.Investment &&
                 t.Purpose != TransactionPurpose.LoanLent &&
                 t.Purpose != TransactionPurpose.LoanRepayment &&
                 t.Purpose != TransactionPurpose.LoanPayment)
             .Sum(t => t.Amount);
 
+        // Get budget for the selected month.
         var budget = await _budgetRepository.Query()
             .Include(b => b.CategoryBudgets)
-            .ThenInclude(cb => cb.Category)
+                .ThenInclude(cb => cb.Category)
             .FirstOrDefaultAsync(b =>
                 b.UserId == userId &&
                 b.Year == year &&
                 b.Month == month);
 
-        var expenseBudget =
-            budget?.ExpenseBudget ?? 0;
+        var expenseBudget = budget?.ExpenseBudget ?? 0;
+        var savingsTarget = budget?.SavingsTarget ?? 0;
+        var investmentTarget = budget?.InvestmentTarget ?? 0;
 
-        var savingsTarget =
-            budget?.SavingsTarget ?? 0;
-
-        var investmentTarget =
-            budget?.InvestmentTarget ?? 0;
-
-        var categoryReports =
-            new List<CategoryReportDto>();
+        // Calculate category-wise budget report.
+        var categoryReports = new List<CategoryReportDto>();
 
         if (budget != null)
         {
@@ -88,8 +103,10 @@ public class MonthlyReportService : IMonthlyReportService
             {
                 var spent = transactions
                     .Where(t =>
-                        (t.Type == TransactionType.Expense ||
-                         t.Type == TransactionType.CreditCard) &&
+                        (
+                            t.Type == TransactionType.Expense ||
+                            t.Type == TransactionType.CreditCard
+                        ) &&
                         t.CategoryId == categoryBudget.CategoryId &&
                         t.Purpose != TransactionPurpose.Investment &&
                         t.Purpose != TransactionPurpose.LoanLent &&
@@ -118,6 +135,7 @@ public class MonthlyReportService : IMonthlyReportService
             }
         }
 
+        // Get active borrowed loans.
         var borrowed = await _loanRepository.Query()
             .Where(l =>
                 l.UserId == userId &&
@@ -126,6 +144,7 @@ public class MonthlyReportService : IMonthlyReportService
             .Include(l => l.Payments)
             .ToListAsync();
 
+        // Get active lent loans.
         var lent = await _loanRepository.Query()
             .Where(l =>
                 l.UserId == userId &&
@@ -134,6 +153,7 @@ public class MonthlyReportService : IMonthlyReportService
             .Include(l => l.Payments)
             .ToListAsync();
 
+        // Calculate remaining borrowed amount.
         var totalBorrowed =
             borrowed.Sum(l =>
                 Math.Max(
@@ -141,6 +161,7 @@ public class MonthlyReportService : IMonthlyReportService
                     l.Payments.Sum(p => p.Amount),
                     0));
 
+        // Calculate remaining lent amount.
         var totalLent =
             lent.Sum(l =>
                 Math.Max(
@@ -148,13 +169,13 @@ public class MonthlyReportService : IMonthlyReportService
                     l.Payments.Sum(p => p.Amount),
                     0));
 
-        // Savings during selected month
+        // Calculate savings during selected month.
         var savingsAmount =
             await CalculateSavingsAsync(
                 userId,
                 transactions);
 
-        // Investment during selected month
+        // Calculate investments during selected month.
         var investmentAmount =
             await CalculateInvestmentsAsync(
                 userId,
@@ -165,18 +186,24 @@ public class MonthlyReportService : IMonthlyReportService
         {
             Year = year,
             Month = month,
+
             TotalIncome = income,
             TotalExpenses = expenses,
             NetCashFlow = income - expenses,
+
             ExpenseBudget = expenseBudget,
             BudgetSpent = expenses,
             BudgetRemaining = expenseBudget - expenses,
+
             SavingsTarget = savingsTarget,
             InvestmentTarget = investmentTarget,
+
             SavingsAmount = savingsAmount,
             InvestmentAmount = investmentAmount,
+
             TotalBorrowed = totalBorrowed,
             TotalLent = totalLent,
+
             Categories = categoryReports
         };
     }

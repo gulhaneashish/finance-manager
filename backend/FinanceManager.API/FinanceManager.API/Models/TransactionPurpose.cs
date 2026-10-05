@@ -32,5 +32,6 @@ public enum TransactionPurpose
 
     LoanPayment = 14,
 
-    InvestmentSale = 15
+    InvestmentSale = 15,
+    OpeningBalance=16
 }

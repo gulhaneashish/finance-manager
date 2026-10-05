@@ -22,6 +22,10 @@ public class AccountBalanceService : IAccountBalanceService
         int accountId,
         int userId)
     {
+        // ============================================================
+        // GET ACCOUNT
+        // ============================================================
+
         var account = await _accountRepository.FirstOrDefaultAsync(a =>
             a.Id == accountId &&
             a.UserId == userId &&
@@ -32,6 +36,11 @@ public class AccountBalanceService : IAccountBalanceService
             throw new InvalidOperationException(
                 "Account not found.");
         }
+
+
+        // ============================================================
+        // CREDIT CARD BALANCE
+        // ============================================================
 
         if (account.AccountType == "CREDIT_CARD")
         {
@@ -49,26 +58,52 @@ public class AccountBalanceService : IAccountBalanceService
                     t.Purpose == TransactionPurpose.CreditCardPayment)
                 .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-            return Math.Max(purchases - payments, 0);
+            var outstanding = purchases - payments;
+
+            return Math.Max(outstanding, 0);
         }
 
+
+        // ============================================================
+        // NORMAL ACCOUNT
+        // ============================================================
+
+        // Normal income.
+        //
+        // OpeningBalance transactions are NOT included because their
+        // purpose is OpeningBalance, not Income.
         var income = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Type == TransactionType.Income &&
                 t.Purpose != TransactionPurpose.Deposit &&
+                t.Purpose != TransactionPurpose.OpeningBalance &&
                 t.Purpose != TransactionPurpose.LoanBorrowed &&
                 t.Purpose != TransactionPurpose.LoanReceived &&
                 t.Purpose != TransactionPurpose.InvestmentSale)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
+
+        // ============================================================
+        // NORMAL DEPOSITS
+        // ============================================================
+
+        // This includes money added AFTER account creation.
+        //
+        // The initial OpeningBalance transaction is NOT a Deposit
+        // anymore, so it will not be counted here.
         var deposits = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Purpose == TransactionPurpose.Deposit)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+
+        // ============================================================
+        // EXPENSES
+        // ============================================================
 
         var expenses = await _transactionRepository.Query()
             .Where(t =>
@@ -78,12 +113,22 @@ public class AccountBalanceService : IAccountBalanceService
                 t.Purpose != TransactionPurpose.Investment)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
+
+        // ============================================================
+        // INVESTMENTS
+        // ============================================================
+
         var investments = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.AccountId == accountId &&
                 t.Purpose == TransactionPurpose.Investment)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+
+        // ============================================================
+        // TRANSFERS IN
+        // ============================================================
 
         var transfersIn = await _transactionRepository.Query()
             .Where(t =>
@@ -92,12 +137,22 @@ public class AccountBalanceService : IAccountBalanceService
                 t.Type == TransactionType.Transfer)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
+
+        // ============================================================
+        // TRANSFERS OUT
+        // ============================================================
+
         var transfersOut = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
                 t.FromAccountId == accountId &&
                 t.Type == TransactionType.Transfer)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+
+        // ============================================================
+        // CREDIT CARD PAYMENTS
+        // ============================================================
 
         var creditCardPayments = await _transactionRepository.Query()
             .Where(t =>
@@ -106,6 +161,11 @@ public class AccountBalanceService : IAccountBalanceService
                 t.Purpose == TransactionPurpose.CreditCardPayment)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
+
+        // ============================================================
+        // INVESTMENT SALES
+        // ============================================================
+
         var investmentSales = await _transactionRepository.Query()
             .Where(t =>
                 t.UserId == userId &&
@@ -113,14 +173,22 @@ public class AccountBalanceService : IAccountBalanceService
                 t.Purpose == TransactionPurpose.InvestmentSale)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
-        return account.OpeningBalance
-             + income
-             + deposits
-             + investmentSales
-             - expenses
-             - investments
-             + transfersIn
-             - transfersOut
-             - creditCardPayments;
+
+        // ============================================================
+        // FINAL BALANCE
+        // ============================================================
+
+        var currentBalance =
+            account.OpeningBalance
+            + income
+            + deposits
+            + investmentSales
+            - expenses
+            - investments
+            + transfersIn
+            - transfersOut
+            - creditCardPayments;
+
+        return currentBalance;
     }
 }
