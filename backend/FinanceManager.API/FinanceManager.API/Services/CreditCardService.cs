@@ -1,3 +1,4 @@
+using FinanceManager.API.Common;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
 using FinanceManager.API.Repositories.Interfaces;
@@ -111,7 +112,7 @@ public class CreditCardService : ICreditCardService
             Description = string.IsNullOrWhiteSpace(dto.Description)
                 ? "Credit card purchase"
                 : dto.Description,
-            TransactionDate = dto.TransactionDate,
+            TransactionDate = dto.TransactionDate.ToUniversalUtc(),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -288,7 +289,7 @@ public class CreditCardService : ICreditCardService
             Description = string.IsNullOrWhiteSpace(dto.Description)
                 ? "Credit card payment"
                 : dto.Description,
-            TransactionDate = dto.PaymentDate,
+            TransactionDate = dto.PaymentDate.ToUniversalUtc(),
             CreatedAt = DateTime.UtcNow
         };
 

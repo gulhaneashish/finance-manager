@@ -90,7 +90,11 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByEmailAsync(string email)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (string.IsNullOrWhiteSpace(email))
+            return null;
+
+        var normalized = email.Trim().ToLower();
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalized);
     }
 
     public async Task<User?> GetByRefreshTokenAsync(string refreshToken)

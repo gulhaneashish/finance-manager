@@ -1,3 +1,4 @@
+using FinanceManager.API.Common;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
 using FinanceManager.API.Repositories.Interfaces;
@@ -83,7 +84,7 @@ public class InvestmentService : IInvestmentService
                 Amount = dto.Amount,
                 Type = TransactionType.Expense,
                 Purpose = TransactionPurpose.Investment,
-                TransactionDate = dto.InvestmentDate,
+                TransactionDate = dto.InvestmentDate.ToUniversalUtc(),
                 Description = dto.Description ?? $"Investment in {dto.Name}",
                 CreatedAt = DateTime.UtcNow
             };
@@ -323,7 +324,7 @@ public class InvestmentService : IInvestmentService
                 Type = TransactionType.Income,
                 Purpose = TransactionPurpose.InvestmentSale,
                 Description = dto.Description ?? $"Investment sale: {investment.Name}",
-                TransactionDate = dto.SellDate,
+                TransactionDate = dto.SellDate.ToUniversalUtc(),
                 CreatedAt = DateTime.UtcNow
             };
 

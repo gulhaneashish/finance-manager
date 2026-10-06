@@ -70,16 +70,19 @@ export class TransactionEffects {
                     createdTransaction
                 })
             ),
-            catchError(error =>
-              of(
+            catchError(error => {
+              const errorMessage =
+                error.error?.detail ||
+                error.error?.message ||
+                error.error?.title ||
+                'Failed to create transaction.';
+              return of(
                 TransactionActions
                   .createTransactionFailure({
-                    error:
-                      error.error?.message ??
-                      'Failed to create transaction.'
+                    error: errorMessage
                   })
-              )
-            )
+              );
+            })
           )
       )
     )

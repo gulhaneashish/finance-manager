@@ -10,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using System.Text.Json.Serialization;
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 var port = Environment.GetEnvironmentVariable("PORT");
@@ -130,7 +133,10 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 builder.Services.AddDbContext<FinanceDbContext>(options =>
-    options.UseNpgsql(connectionString));
+{
+    options.UseNpgsql(connectionString);
+    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+});
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -314,10 +320,63 @@ catch (Exception ex)
             }
         }
     }
-    else
-    {
-        logger.LogInformation("ADMIN_EMAIL or ADMIN_PASSWORD not configured. Skipping default administrator seeding.");
-    }
+        // 3. Ensure standard demo account exists for testing (demo@gmail.com / password123)
+        var existingDemo = db.Users.FirstOrDefault(u => u.Email.ToLower() == "demo@gmail.com");
+        if (existingDemo == null)
+        {
+            var demoUser = new FinanceManager.API.Models.User
+            {
+                Name = "Demo User",
+                Email = "demo@gmail.com",
+                Username = "demo",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+                Role = "User",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.Users.Add(demoUser);
+            db.SaveChanges();
+
+            var demoCategories = new List<FinanceManager.API.Models.Category>
+            {
+                new() { UserId = demoUser.Id, Name = "Salary", Type = "INCOME" },
+                new() { UserId = demoUser.Id, Name = "Freelance / Side Gig", Type = "INCOME" },
+                new() { UserId = demoUser.Id, Name = "Investments & Dividends", Type = "INCOME" },
+                new() { UserId = demoUser.Id, Name = "Other Income", Type = "INCOME" },
+                new() { UserId = demoUser.Id, Name = "Food & Dining", Type = "EXPENSE" },
+                new() { UserId = demoUser.Id, Name = "Groceries", Type = "EXPENSE" },
+                new() { UserId = demoUser.Id, Name = "Housing & Rent", Type = "EXPENSE" },
+                new() { UserId = demoUser.Id, Name = "Utilities & Bills", Type = "EXPENSE" },
+                new() { UserId = demoUser.Id, Name = "Transportation & Fuel", Type = "EXPENSE" },
+                new() { UserId = demoUser.Id, Name = "Shopping", Type = "EXPENSE" },
+                new() { UserId = demoUser.Id, Name = "Healthcare & Medical", Type = "EXPENSE" },
+                new() { UserId = demoUser.Id, Name = "Entertainment & Leisure", Type = "EXPENSE" }
+            };
+            db.Categories.AddRange(demoCategories);
+
+            var demoAccount = new FinanceManager.API.Models.Account
+            {
+                UserId = demoUser.Id,
+                Name = "Main Checking",
+                AccountType = "SAVINGS",
+                OpeningBalance = 10000m,
+                IsActive = true
+            };
+            db.Accounts.Add(demoAccount);
+            db.SaveChanges();
+
+            logger.LogInformation("Demo account initialized (demo@gmail.com / password123).");
+        }
+        else
+        {
+            if (!BCrypt.Net.BCrypt.Verify("password123", existingDemo.PasswordHash))
+            {
+                existingDemo.PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123");
+                existingDemo.IsActive = true;
+                db.SaveChanges();
+                logger.LogInformation("Demo account password reset to default.");
+            }
+        }
     }
     catch (Exception ex)
     {

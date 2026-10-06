@@ -1,3 +1,4 @@
+using FinanceManager.API.Common;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
 using FinanceManager.API.Repositories.Interfaces;
@@ -584,7 +585,7 @@ public class AccountService : IAccountService
                     : dto.Description,
 
             TransactionDate =
-                dto.TransactionDate,
+                dto.TransactionDate.ToUniversalUtc(),
 
             CreatedAt =
                 DateTime.UtcNow

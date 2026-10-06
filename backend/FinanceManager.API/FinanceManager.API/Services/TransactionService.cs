@@ -1,3 +1,4 @@
+using FinanceManager.API.Common;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
 using FinanceManager.API.Repositories.Interfaces;
@@ -143,7 +144,7 @@ public class TransactionService : ITransactionService
             Type = dto.Type,
             Purpose = purpose,
             Description = dto.Description,
-            TransactionDate = dto.TransactionDate,
+            TransactionDate = dto.TransactionDate.ToUniversalUtc(),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -272,7 +273,7 @@ public class TransactionService : ITransactionService
                 Amount = dto.Amount,
                 Type = TransactionType.Transfer,
                 Purpose = dto.TransactionPurpose,
-                TransactionDate = dto.TransactionDate,
+                TransactionDate = dto.TransactionDate.ToUniversalUtc(),
                 Description = dto.Description ?? $"Transfer from {fromAccount.Name} to {toAccount.Name}",
                 CreatedAt = DateTime.UtcNow
             };

@@ -175,10 +175,12 @@ export class TransactionForm implements OnInit {
             value.description,
 
           transactionDate:
-            `${value.transactionDate}T00:00:00`,
+            value.transactionDate ? `${value.transactionDate}T00:00:00Z` : new Date().toISOString(),
 
           purpose:
-            value.purpose
+            value.type === TransactionType.Income
+              ? TransactionPurpose.Income
+              : TransactionPurpose.Expense
 
         }
       })

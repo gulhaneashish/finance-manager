@@ -1,3 +1,4 @@
+using FinanceManager.API.Common;
 using FinanceManager.API.DTOs;
 using FinanceManager.API.Models;
 using FinanceManager.API.Repositories.Interfaces;
@@ -99,7 +100,7 @@ public class LoanService : ILoanService
                 Amount = dto.OriginalAmount,
                 Type = transactionType,
                 Purpose = purpose,
-                TransactionDate = dto.LoanDate,
+                TransactionDate = dto.LoanDate.ToUniversalUtc(),
                 Description =
                     dto.Type == LoanType.Borrowed
                         ? $"Borrowed from {dto.PersonName}"
@@ -260,7 +261,7 @@ public class LoanService : ILoanService
                     loan.Type == LoanType.Borrowed
                         ? $"Loan repayment to {loan.PersonName}"
                         : $"Loan received from {loan.PersonName}",
-                TransactionDate = dto.PaymentDate,
+                TransactionDate = dto.PaymentDate.ToUniversalUtc(),
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -489,7 +490,7 @@ public class LoanService : ILoanService
                     Amount = dto.OriginalAmount,
                     Type = newTransactionType,
                     Purpose = newPurpose,
-                    TransactionDate = dto.LoanDate,
+                    TransactionDate = dto.LoanDate.ToUniversalUtc(),
                     Description =
                         dto.Type == LoanType.Borrowed
                             ? $"Borrowed from {dto.PersonName}"
@@ -521,7 +522,7 @@ public class LoanService : ILoanService
                     Amount = dto.OriginalAmount,
                     Type = newTransactionType,
                     Purpose = newPurpose,
-                    TransactionDate = dto.LoanDate,
+                    TransactionDate = dto.LoanDate.ToUniversalUtc(),
                     Description =
                         dto.Type == LoanType.Borrowed
                             ? $"Borrowed from {dto.PersonName}"
