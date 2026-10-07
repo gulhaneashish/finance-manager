@@ -38,7 +38,10 @@ import {
 } from '../../../store/categories/category.actions';
 import { TransactionFilter } from '../../../core/models/transaction-filter.model';
 
+import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { QrScannerModal } from '../../../shared/components/qr-scanner-modal/qr-scanner-modal';
+import { QrPaymentPayload } from '../../../core/services/qr-code.service';
 
 @Component({
   selector: 'app-transaction-list',
@@ -50,6 +53,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule,
     TransactionForm,
     TransferForm,
+    QrScannerModal,
     FormsModule,
     ReactiveFormsModule
   ],
@@ -73,6 +77,10 @@ export class TransactionList implements OnInit {
 
   private store = inject(Store);
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+
+  showQrScanner = false;
+  qrTransferData: { toAccountId?: number; amount?: number | null; description?: string | null } | null = null;
   
 categories$ =
   this.store.select(selectAllCategories);
@@ -100,7 +108,6 @@ categories$ =
   });
 
   ngOnInit(): void {
-
     this.store.dispatch(
       loadTransactions()
     );
@@ -108,6 +115,35 @@ categories$ =
     this.store.dispatch(
       loadAccounts()
     );
+
+    this.route.queryParams.subscribe(params => {
+      if (params['openTransfer'] === 'true') {
+        this.qrTransferData = {
+          toAccountId: params['toAccountId'] ? Number(params['toAccountId']) : undefined,
+          amount: params['amount'] ? Number(params['amount']) : undefined,
+          description: params['note'] || (params['toAccountName'] ? `Transfer to ${params['toAccountName']}` : undefined)
+        };
+        this.showTransferForm = true;
+      }
+    });
+  }
+
+  openQrScanner(): void {
+    this.showQrScanner = true;
+  }
+
+  closeQrScanner(): void {
+    this.showQrScanner = false;
+  }
+
+  onQrScanned(payload: QrPaymentPayload): void {
+    this.qrTransferData = {
+      toAccountId: payload.accountId,
+      amount: payload.amount,
+      description: payload.note || `Transfer to ${payload.accountName}`
+    };
+    this.showQrScanner = false;
+    this.showTransferForm = true;
   }
 
   deleteTransaction(id: number): void {

@@ -1,5 +1,6 @@
 using FinanceManager.API.Data;
 using FinanceManager.API.Exceptions;
+using FinanceManager.API.Hubs;
 using FinanceManager.API.Repositories;
 using FinanceManager.API.Repositories.Interfaces;
 using FinanceManager.API.Services;
@@ -114,6 +115,9 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IInvestmentService, InvestmentService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+builder.Services.AddSignalR();
 
 builder.Services
     .AddControllers()
@@ -205,6 +209,20 @@ builder.Services.AddAuthentication(
                 ValidAudience = jwtAudience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
             };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -401,4 +419,5 @@ if (enableSwagger)
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.Run();

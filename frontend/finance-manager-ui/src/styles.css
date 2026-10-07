@@ -72,6 +72,16 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
 }
 
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input, select, textarea, button {
+    touch-action: manipulation;
+  }
+}
+
 /* Material Card Global Dark Override */
 .mat-mdc-card {
   background-color: var(--color-card, #1E293B) !important;

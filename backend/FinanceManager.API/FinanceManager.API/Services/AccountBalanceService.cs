@@ -28,8 +28,7 @@ public class AccountBalanceService : IAccountBalanceService
 
         var account = await _accountRepository.FirstOrDefaultAsync(a =>
             a.Id == accountId &&
-            a.UserId == userId &&
-            a.IsActive);
+            a.UserId == userId);
 
         if (account == null)
         {

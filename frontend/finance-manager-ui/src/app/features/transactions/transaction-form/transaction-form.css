@@ -113,14 +113,23 @@
 @media (max-width: 600px) {
   .transaction-form-body form {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .dialog-actions-footer {
-    flex-direction: column-reverse;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
   }
 
   .btn-cancel,
   .btn-submit {
     width: 100%;
+    padding: 10px 8px;
+    font-size: 13px;
+    text-align: center;
+    box-sizing: border-box;
   }
 }

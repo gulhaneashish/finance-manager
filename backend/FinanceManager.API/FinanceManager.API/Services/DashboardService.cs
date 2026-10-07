@@ -225,8 +225,8 @@ public class DashboardService : IDashboardService
             .Sum(t => t.Amount);
 
         var accounts = await _accountRepository.Query()
-            .Where(a => a.UserId == userId)
-            .ToListAsync();
+    .Where(a => a.UserId == userId && a.IsActive)
+    .ToListAsync();
 
         decimal totalBalance = 0;
 

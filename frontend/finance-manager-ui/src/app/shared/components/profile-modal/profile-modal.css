@@ -2,16 +2,18 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 1200;
+  background: rgba(10, 15, 29, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 3000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 16px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -23,13 +25,14 @@
 .modal-card {
   width: 100%;
   max-width: 680px;
-  max-height: 90vh;
+  max-height: calc(100dvh - 32px);
+  margin: auto;
   display: flex;
   flex-direction: column;
   background: #1E293B;
   border: 1px solid #334155;
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(51, 65, 85, 0.4);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(51, 65, 85, 0.4);
   overflow: hidden;
   animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -904,8 +907,14 @@
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
+  .modal-backdrop {
+    padding: 10px 8px;
+    align-items: flex-start;
+  }
+
   .modal-card {
-    max-height: 96vh;
+    margin: 6px auto;
+    max-height: calc(100dvh - 16px);
     border-radius: 16px;
   }
 

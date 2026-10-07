@@ -477,25 +477,31 @@ tbody tr:hover {
   inset: 0;
   z-index: 3000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(8px);
+  padding: 16px;
+  background: rgba(10, 15, 29, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .investment-form-card {
   width: 100%;
   max-width: 520px;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 24px;
   box-sizing: border-box;
-  border-radius: 16px;
+  border-radius: 18px;
   background: #1E293B;
   border: 1px solid #334155;
   color: #F8FAFC;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
 }
 
 .form-header {
@@ -749,6 +755,18 @@ textarea:focus {
 
 @media (max-width: 500px) {
 
+  .form-overlay {
+    padding: 10px 8px;
+    align-items: flex-start;
+  }
+
+  .investment-form-card {
+    margin: 6px auto;
+    max-height: calc(100dvh - 16px);
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+
   .page-title h1 {
     font-size: 22px;
   }
@@ -759,7 +777,9 @@ textarea:focus {
   }
 
   .form-actions {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .save-btn,

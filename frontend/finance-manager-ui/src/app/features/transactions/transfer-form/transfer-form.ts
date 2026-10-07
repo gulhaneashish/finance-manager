@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  Input,
   Output,
   inject,
   OnInit
@@ -46,6 +47,20 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 })
 export class TransferForm implements OnInit {
   @Output() formClosed = new EventEmitter<void>();
+
+  @Input() set initialData(data: { toAccountId?: number; amount?: number | null; description?: string | null } | null | undefined) {
+    if (data) {
+      if (data.toAccountId) {
+        this.transferForm.patchValue({ toAccountId: data.toAccountId });
+      }
+      if (data.amount && data.amount > 0) {
+        this.transferForm.patchValue({ amount: data.amount });
+      }
+      if (data.description) {
+        this.transferForm.patchValue({ description: data.description });
+      }
+    }
+  }
 
   private fb = inject(FormBuilder);
   private store = inject(Store);

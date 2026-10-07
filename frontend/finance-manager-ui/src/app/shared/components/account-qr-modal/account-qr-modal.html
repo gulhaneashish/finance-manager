@@ -1,0 +1,88 @@
+@if (isOpen && account) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <div class="header-title">
+          <div class="icon-bubble">
+            <mat-icon>qr_code_2</mat-icon>
+          </div>
+          <div>
+            <h3>Account QR Code</h3>
+            <p>Share to receive funds directly into this account</p>
+          </div>
+        </div>
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <!-- ACCOUNT INFO BADGE -->
+        <div class="account-card-header">
+          <div class="type-pill">{{ account.accountType }}</div>
+          <h4 class="acc-name">{{ account.name }}</h4>
+          <p class="acc-owner">Holder: <strong>{{ userName }}</strong> • ID: #{{ account.id }}</p>
+        </div>
+
+        <!-- QR CODE FRAME -->
+        <div class="qr-code-frame">
+          @if (qrDataUrl) {
+            <img [src]="qrDataUrl" alt="Account QR Code" class="qr-image" />
+          } @else {
+            <div class="qr-loading">Generating QR Code...</div>
+          }
+          <div class="brand-subtext">Finance Manager Verified</div>
+        </div>
+
+        <!-- CUSTOMIZE FIELDS (OPTIONAL REQUEST AMOUNT & NOTE) -->
+        <div class="customize-box">
+          <div class="customize-title">
+            <mat-icon>tune</mat-icon>
+            <span>Request Specific Amount (Optional)</span>
+          </div>
+
+          <div class="input-grid">
+            <div class="field-group">
+              <label>Amount (₹)</label>
+              <input
+                type="number"
+                min="1"
+                step="any"
+                placeholder="Open amount"
+                [(ngModel)]="customAmount"
+                (ngModelChange)="onParamChange()" />
+            </div>
+
+            <div class="field-group">
+              <label>Purpose / Note</label>
+              <input
+                type="text"
+                placeholder="e.g. Rent, Dinner split"
+                maxlength="50"
+                [(ngModel)]="customNote"
+                (ngModelChange)="onParamChange()" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="action-grid">
+          <button type="button" class="btn btn-secondary" (click)="copyPayload()">
+            <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+            {{ copied ? 'Copied!' : 'Copy Data' }}
+          </button>
+          <button type="button" class="btn btn-primary" (click)="downloadQr()">
+            <mat-icon>download</mat-icon>
+            Download PNG
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+}

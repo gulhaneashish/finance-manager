@@ -9,6 +9,7 @@ import { Store } from '@ngrx/store';
 
 import { setUser } from '../../../store/auth/auth.actions';
 import { Auth } from '../../../core/services/auth';
+import { SignalRNotificationService } from '../../../core/services/signalr-notification.service';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,7 @@ export class Login implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
+  private signalRService = inject(SignalRNotificationService);
 
   isLoading = false;
   errorMessage = '';
@@ -72,6 +74,7 @@ export class Login implements OnInit {
       .subscribe({
         next: response => {
           this.authService.saveTokens(response.token, response.refreshToken, response.role);
+          this.signalRService.initConnection();
 
           this.store.dispatch(
             setUser({

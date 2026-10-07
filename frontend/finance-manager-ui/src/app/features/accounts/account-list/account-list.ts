@@ -36,6 +36,9 @@ import { Account }
   from '../../../core/models/account.model';
 
 
+import { AccountQrModal }
+  from '../../../shared/components/account-qr-modal/account-qr-modal';
+
 @Component({
   selector: 'app-account-list',
 
@@ -43,6 +46,7 @@ import { Account }
 
   imports: [
     AccountForm,
+    AccountQrModal,
     AsyncPipe,
     DecimalPipe,
     CreditCardPurchaseForm,
@@ -77,11 +81,21 @@ selectedCreditCardId: number | null = null;
 
 
   showForm = false;
-
   selectedAccount: Account | null = null;
-
-
   showPurchaseForm = false;
+
+  showQrModal = false;
+  qrSelectedAccount: Account | null = null;
+
+  openQrModal(account: Account): void {
+    this.qrSelectedAccount = account;
+    this.showQrModal = true;
+  }
+
+  closeQrModal(): void {
+    this.showQrModal = false;
+    this.qrSelectedAccount = null;
+  }
 
 
   ngOnInit(): void {

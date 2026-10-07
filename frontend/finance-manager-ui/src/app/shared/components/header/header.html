@@ -24,16 +24,108 @@
 
   <div class="header-actions">
 
+    <!-- QUICK QR SCANNER BUTTON -->
     <button
-      mat-icon-button
+      class="header-icon-btn qr-btn"
       type="button"
-      aria-label="Notifications">
-
-      <mat-icon>
-        notifications
-      </mat-icon>
-
+      (click)="openQrScanner()"
+      title="Scan QR Code to Pay / Transfer"
+      aria-label="Scan QR Code">
+      <mat-icon>qr_code_scanner</mat-icon>
+      <span class="qr-label">Scan QR</span>
     </button>
+
+    <!-- NOTIFICATIONS BELL WITH REAL-TIME BADGE -->
+    <div class="notification-container">
+      <button
+        class="header-icon-btn bell-btn"
+        type="button"
+        (click)="toggleNotifications()"
+        [class.active]="showNotificationsMenu"
+        aria-label="Notifications">
+
+        <mat-icon>
+          notifications
+        </mat-icon>
+
+        @if (signalRService.unreadCount() > 0) {
+          <span class="notification-badge pulse-badge">
+            {{ signalRService.unreadCount() > 9 ? '9+' : signalRService.unreadCount() }}
+          </span>
+        }
+
+      </button>
+
+      <!-- NOTIFICATIONS DROPDOWN PANEL -->
+      @if (showNotificationsMenu) {
+        <div class="notifications-dropdown">
+          <div class="notifications-header">
+            <div class="header-info">
+              <h4>Notifications</h4>
+              @if (signalRService.unreadCount() > 0) {
+                <span class="unread-pill">{{ signalRService.unreadCount() }} new</span>
+              }
+            </div>
+
+            <div class="header-tools">
+              @if (signalRService.unreadCount() > 0) {
+                <button type="button" class="tool-btn" (click)="signalRService.markAllAsRead()">
+                  Mark read
+                </button>
+              }
+              @if (signalRService.notifications().length > 0) {
+                <button type="button" class="tool-btn clear-btn" (click)="signalRService.clearAll()">
+                  Clear
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="notifications-list">
+            @if (signalRService.notifications().length === 0) {
+              <div class="notifications-empty">
+                <mat-icon>notifications_none</mat-icon>
+                <p>No notifications yet</p>
+                <span>Live updates will appear here in real-time</span>
+              </div>
+            } @else {
+              @for (item of signalRService.notifications(); track item.id) {
+                <div
+                  class="notification-item"
+                  [class.unread]="!item.read"
+                  (click)="signalRService.markAsRead(item.id)">
+
+                  <div class="item-icon-wrapper" [ngClass]="item.type">
+                    <mat-icon>
+                      {{
+                        item.type === 'success' ? 'check_circle' :
+                        item.type === 'danger' ? 'error' :
+                        item.type === 'warning' ? 'warning' : 'info'
+                      }}
+                    </mat-icon>
+                  </div>
+
+                  <div class="item-content">
+                    <div class="item-title">{{ item.title }}</div>
+                    <div class="item-message">{{ item.message }}</div>
+                    <div class="item-time">{{ item.timestamp | date:'shortTime' }}</div>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="item-delete-btn"
+                    (click)="$event.stopPropagation(); signalRService.remove(item.id)"
+                    title="Dismiss">
+                    <mat-icon>close</mat-icon>
+                  </button>
+
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
 
 
     @if (user$ | async; as user) {
@@ -112,7 +204,36 @@
   </div>
 </header>
 
+<!-- REAL-TIME SIGNALR FLOATING TOAST BANNER -->
+@if (signalRService.activeToast(); as toast) {
+  <div class="floating-toast" [ngClass]="toast.type" (click)="signalRService.dismissToast()">
+    <div class="toast-icon">
+      <mat-icon>
+        {{
+          toast.type === 'success' ? 'check_circle' :
+          toast.type === 'danger' ? 'error' :
+          toast.type === 'warning' ? 'warning' : 'info'
+        }}
+      </mat-icon>
+    </div>
+    <div class="toast-body">
+      <div class="toast-title">{{ toast.title }}</div>
+      <div class="toast-msg">{{ toast.message }}</div>
+    </div>
+    <button type="button" class="toast-close" (click)="$event.stopPropagation(); signalRService.dismissToast()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+}
+
 <app-profile-modal
   [isOpen]="showProfileModal"
   (closed)="closeProfileModal()">
 </app-profile-modal>
+
+<!-- QR SCANNER MODAL -->
+<app-qr-scanner-modal
+  [isOpen]="showQrScannerModal"
+  (closed)="closeQrScanner()"
+  (qrScanned)="onQrScanned($event)">
+</app-qr-scanner-modal>

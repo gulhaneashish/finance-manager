@@ -13,17 +13,32 @@ public class TransactionService : ITransactionService
     private readonly IAccountRepository _accountRepository;
     private readonly ICategoryRepository _categoryRepository;
     private readonly IAccountBalanceService _accountBalanceService;
+    private readonly INotificationService? _notificationService;
+    private readonly IBudgetRepository? _budgetRepository;
 
     public TransactionService(
         ITransactionRepository transactionRepository,
         IAccountRepository accountRepository,
         ICategoryRepository categoryRepository,
         IAccountBalanceService accountBalanceService)
+        : this(transactionRepository, accountRepository, categoryRepository, accountBalanceService, null, null)
+    {
+    }
+
+    public TransactionService(
+        ITransactionRepository transactionRepository,
+        IAccountRepository accountRepository,
+        ICategoryRepository categoryRepository,
+        IAccountBalanceService accountBalanceService,
+        INotificationService? notificationService = null,
+        IBudgetRepository? budgetRepository = null)
     {
         _transactionRepository = transactionRepository;
         _accountRepository = accountRepository;
         _categoryRepository = categoryRepository;
         _accountBalanceService = accountBalanceService;
+        _notificationService = notificationService;
+        _budgetRepository = budgetRepository;
     }
 
     public async Task<TransactionResponseDto> CreateAsync(
@@ -150,6 +165,19 @@ public class TransactionService : ITransactionService
 
         await _transactionRepository.AddAsync(transaction);
         await _transactionRepository.SaveChangesAsync();
+
+        if (_notificationService != null)
+        {
+            var typeText = transaction.Type.ToString();
+            var title = transaction.Type == TransactionType.Income ? "💰 Income Recorded" : "💸 Expense Recorded";
+            var message = $"₹{transaction.Amount:N2} {typeText.ToLower()} recorded successfully.";
+            await _notificationService.SendTransactionAlertAsync(userId, title, message, new { transactionId = transaction.Id, amount = transaction.Amount, type = typeText });
+
+            if (transaction.Type == TransactionType.Expense && transaction.CategoryId.HasValue && _budgetRepository != null)
+            {
+                await CheckBudgetAlertAsync(userId, transaction.CategoryId.Value, transaction.TransactionDate);
+            }
+        }
 
         return MapToDto(transaction);
     }
@@ -282,6 +310,13 @@ public class TransactionService : ITransactionService
             await _transactionRepository.SaveChangesAsync();
 
             await transaction.CommitAsync();
+
+            if (_notificationService != null)
+            {
+                await _notificationService.SendTransactionAlertAsync(userId, "↔️ Transfer Completed",
+                    $"Transferred ₹{dto.Amount:N2} from {fromAccount.Name} to {toAccount.Name}.",
+                    new { fromAccountId = dto.FromAccountId, toAccountId = dto.ToAccountId, amount = dto.Amount });
+            }
         }
         catch
         {
@@ -366,5 +401,48 @@ public class TransactionService : ITransactionService
             TransactionDate = transaction.TransactionDate,
             CreatedAt = transaction.CreatedAt
         };
+    }
+
+    private async Task CheckBudgetAlertAsync(int userId, int categoryId, DateTime date)
+    {
+        try
+        {
+            var year = date.Year;
+            var month = date.Month;
+
+            var budget = await _budgetRepository!.Query()
+                .Include(b => b.CategoryBudgets)
+                .FirstOrDefaultAsync(b => b.UserId == userId && b.Year == year && b.Month == month);
+
+            if (budget == null) return;
+
+            var categoryBudget = budget.CategoryBudgets.FirstOrDefault(cb => cb.CategoryId == categoryId);
+            if (categoryBudget == null || categoryBudget.Amount <= 0) return;
+
+            var category = await _categoryRepository.FirstOrDefaultAsync(c => c.Id == categoryId && c.UserId == userId);
+            var categoryName = category?.Name ?? "Category";
+
+            var startDate = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endDate = startDate.AddMonths(1);
+
+            var totalSpent = await _transactionRepository.Query()
+                .Where(t => t.UserId == userId &&
+                            t.CategoryId == categoryId &&
+                            t.Type == TransactionType.Expense &&
+                            t.TransactionDate >= startDate &&
+                            t.TransactionDate < endDate)
+                .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+            var percentage = (totalSpent / categoryBudget.Amount) * 100m;
+
+            if (percentage >= 80m && _notificationService != null)
+            {
+                await _notificationService.SendBudgetAlertAsync(userId, categoryName, totalSpent, categoryBudget.Amount, percentage);
+            }
+        }
+        catch
+        {
+            // Non-critical background alert failure should not affect transaction flow
+        }
     }
 }

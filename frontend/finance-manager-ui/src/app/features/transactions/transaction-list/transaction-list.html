@@ -46,6 +46,19 @@
 
       </button>
 
+      <!-- SCAN QR CODE TO PAY -->
+      <button
+        type="button"
+        class="action-button qr-scan-button"
+        (click)="openQrScanner()"
+        title="Scan QR Code to prefill transfer">
+
+        <span class="button-icon">📷</span>
+
+        Scan QR
+
+      </button>
+
 
       <!-- FILTER -->
 
@@ -132,6 +145,7 @@
         <!-- Dialog Body -->
         <div class="dialog-body">
           <app-transfer-form
+            [initialData]="qrTransferData"
             (formClosed)="closeTransferForm()">
           </app-transfer-form>
         </div>
@@ -811,3 +825,10 @@
 </section>
 
 </div>
+
+<!-- QR SCANNER MODAL -->
+<app-qr-scanner-modal
+  [isOpen]="showQrScanner"
+  (closed)="closeQrScanner()"
+  (qrScanned)="onQrScanned($event)">
+</app-qr-scanner-modal>

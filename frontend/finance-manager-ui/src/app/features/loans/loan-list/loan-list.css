@@ -456,22 +456,18 @@
 
 .form-overlay {
   position: fixed;
-
   inset: 0;
-
-  z-index: 1000;
-
+  z-index: 3000;
   display: flex;
-
-  align-items: center;
-
+  align-items: flex-start;
   justify-content: center;
-
-  padding: 15px;
-
-  background: rgba(15, 23, 42, 0.75);
-
-  backdrop-filter: blur(8px);
+  padding: 16px;
+  background: rgba(10, 15, 29, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 
@@ -481,24 +477,16 @@
 
 .form-modal {
   position: relative;
-
   width: 100%;
-
   max-width: 520px;
-
-  max-height: 90vh;
-
+  max-height: calc(100dvh - 32px);
+  margin: auto;
   overflow-y: auto;
-
+  -webkit-overflow-scrolling: touch;
   background: #1E293B;
-
   border: 1px solid #334155;
-
-  border-radius: 14px;
-
-  box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.6);
-
+  border-radius: 18px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
   animation: modalIn 0.2s ease-out;
 }
 
@@ -608,14 +596,23 @@
 @media (max-width: 499px) {
 
   .loan-page {
-    padding: 12px;
+    padding: 8px 4px 28px;
+  }
+
+  .form-overlay {
+    padding: 10px 8px;
+    align-items: flex-start;
+  }
+
+  .form-modal {
+    margin: 6px auto;
+    max-height: calc(100dvh - 16px);
+    border-radius: 16px;
   }
 
   .page-header {
     align-items: flex-start;
-
     flex-direction: column;
-
     gap: 10px;
   }
 
@@ -625,6 +622,8 @@
 
   .page-header > button {
     width: 100%;
+    height: 38px;
+    font-size: 13px;
   }
 
   .loan-grid {
@@ -632,8 +631,7 @@
   }
 
   .loan-actions {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
 }

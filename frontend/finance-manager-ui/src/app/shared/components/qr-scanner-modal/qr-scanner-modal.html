@@ -1,0 +1,142 @@
+@if (isOpen) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <div class="header-title">
+          <div class="icon-bubble">
+            <mat-icon>qr_code_scanner</mat-icon>
+          </div>
+          <div>
+            <h3>Scan QR Code</h3>
+            <p>Scan to send money or prefill transfer details</p>
+          </div>
+        </div>
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- SCANNER MODES TOGGLE -->
+      @if (!scannedPayload) {
+        <div class="mode-tabs">
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="scanMode === 'camera'"
+            (click)="setMode('camera')">
+            <mat-icon>photo_camera</mat-icon>
+            Live Camera
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="scanMode === 'file'"
+            (click)="setMode('file')">
+            <mat-icon>image</mat-icon>
+            Upload QR Image
+          </button>
+        </div>
+      }
+
+      <!-- MODAL BODY -->
+      <div class="modal-body">
+
+        <!-- SCANNED RESULT VIEW -->
+        @if (scannedPayload) {
+          <div class="scanned-result">
+            <div class="success-badge">
+              <mat-icon>check_circle</mat-icon>
+              <span>QR Code Verified</span>
+            </div>
+
+            <div class="account-card-preview">
+              <div class="account-badge">
+                <mat-icon>account_balance</mat-icon>
+                <span>{{ scannedPayload.accountType || 'ACCOUNT' }}</span>
+              </div>
+              <h4 class="dest-account-name">{{ scannedPayload.accountName }}</h4>
+              <p class="dest-owner" *ngIf="scannedPayload.userName">
+                Beneficiary: <strong>{{ scannedPayload.userName }}</strong>
+              </p>
+              <div class="dest-id-pill">
+                Account #{{ scannedPayload.accountId }}
+              </div>
+
+              <div class="amount-preview" *ngIf="scannedPayload.amount">
+                <span class="currency">₹</span>
+                <span class="value">{{ scannedPayload.amount | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="note-preview" *ngIf="scannedPayload.note">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <span>"{{ scannedPayload.note }}"</span>
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button type="button" class="btn btn-secondary" (click)="retryScan()">
+                <mat-icon>refresh</mat-icon>
+                Scan Again
+              </button>
+              <button type="button" class="btn btn-primary" (click)="confirmScannedPayment()">
+                <mat-icon>send</mat-icon>
+                Proceed to Transfer
+              </button>
+            </div>
+          </div>
+        } @else {
+
+          <!-- CAMERA SCANNER VIEW -->
+          @if (scanMode === 'camera') {
+            <div class="scanner-viewport">
+              <div id="qr-reader-container" class="qr-reader-box"></div>
+              <div class="scan-frame-guide" *ngIf="scannerActive">
+                <div class="laser-line"></div>
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+              </div>
+            </div>
+            <p class="scan-instructions">
+              Align the QR code within the frame to scan automatically
+            </p>
+          }
+
+          <!-- FILE SCANNER VIEW -->
+          @if (scanMode === 'file') {
+            <div class="file-drop-zone" (click)="fileInput.click()">
+              <input
+                #fileInput
+                type="file"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                style="display: none;" />
+              <div class="drop-icon-wrapper">
+                <mat-icon>cloud_upload</mat-icon>
+              </div>
+              <h4>Choose or Drop QR Image</h4>
+              <p>Supports PNG, JPG, WebP screenshots or photos</p>
+              <button type="button" class="btn btn-outline" (click)="$event.stopPropagation(); fileInput.click()">
+                Select QR Image
+              </button>
+            </div>
+          }
+
+          <!-- ERROR MESSAGE -->
+          @if (errorMessage) {
+            <div class="error-banner">
+              <mat-icon>error_outline</mat-icon>
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
+
+        }
+
+      </div>
+
+    </div>
+  </div>
+}
