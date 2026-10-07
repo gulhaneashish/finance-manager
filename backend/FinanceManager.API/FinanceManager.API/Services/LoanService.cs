@@ -14,17 +14,21 @@ public class LoanService : ILoanService
     private readonly ITransactionRepository _transactionRepository;
     private readonly ILoanPaymentRepository _loanPaymentRepository;
 
-    public LoanService(
-        ILoanRepository loanRepository,
-        IAccountRepository accountRepository,
-        ITransactionRepository transactionRepository,
-        ILoanPaymentRepository loanPaymentRepository)
-    {
-        _loanRepository = loanRepository;
-        _accountRepository = accountRepository;
-        _transactionRepository = transactionRepository;
-        _loanPaymentRepository = loanPaymentRepository;
-    }
+   private readonly IAccountBalanceService _accountBalanceService;
+
+public LoanService(
+    ILoanRepository loanRepository,
+    IAccountRepository accountRepository,
+    ITransactionRepository transactionRepository,
+    ILoanPaymentRepository loanPaymentRepository,
+    IAccountBalanceService accountBalanceService)
+{
+    _loanRepository = loanRepository;
+    _accountRepository = accountRepository;
+    _transactionRepository = transactionRepository;
+    _loanPaymentRepository = loanPaymentRepository;
+    _accountBalanceService = accountBalanceService;
+}
 
     // ============================================================
     // CREATE LOAN
@@ -235,9 +239,10 @@ public class LoanService : ILoanService
                     $"Payment cannot exceed remaining loan amount. Remaining amount: ₹{remaining}");
             }
 
-            var accountBalance = await GetAccountBalanceAsync(
-                dto.AccountId,
-                userId);
+            var accountBalance =
+    await _accountBalanceService.GetAccountBalanceAsync(
+        dto.AccountId,
+        userId);
 
             if (dto.Amount > accountBalance)
             {

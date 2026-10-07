@@ -79,8 +79,8 @@ public class AccountBalanceService : IAccountBalanceService
                 t.Purpose != TransactionPurpose.Deposit &&
                 t.Purpose != TransactionPurpose.OpeningBalance &&
                 t.Description != "Opening balance" &&
-                t.Purpose != TransactionPurpose.LoanBorrowed &&
-                t.Purpose != TransactionPurpose.LoanReceived &&
+                // t.Purpose != TransactionPurpose.LoanBorrowed &&
+                // t.Purpose != TransactionPurpose.LoanReceived &&
                 t.Purpose != TransactionPurpose.InvestmentSale)
             .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
