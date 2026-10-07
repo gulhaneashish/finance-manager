@@ -201,16 +201,6 @@
 
               </button>
 
-              <button
-                type="button"
-                class="qr-account-button"
-                (click)="openQrModal(account)"
-                title="View & Share Account QR">
-
-                QR Code
-
-              </button>
-
                <!-- <button
                 type="button"
                 class="edit-button"
@@ -364,10 +354,3 @@
   </div>
 
 }
-
-<!-- ACCOUNT QR MODAL -->
-<app-account-qr-modal
-  [isOpen]="showQrModal"
-  [account]="qrSelectedAccount"
-  (closed)="closeQrModal()">
-</app-account-qr-modal>

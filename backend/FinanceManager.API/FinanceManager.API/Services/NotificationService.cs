@@ -18,20 +18,29 @@ public class NotificationService : INotificationService
         _logger = logger;
     }
 
-    public async Task SendNotificationToUserAsync(int userId, NotificationMessageDto notification)
+    public async Task SendNotificationToUserAsync(
+    int userId,
+    NotificationMessageDto notification)
+{
+    try
     {
-        try
-        {
-            var groupName = $"user_{userId}";
-            await _hubContext.Clients.Group(groupName).SendAsync("ReceiveNotification", notification);
-            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", notification);
-            _logger.LogInformation("Sent notification '{Title}' to user {UserId}", notification.Title, userId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send SignalR notification to user {UserId}", userId);
-        }
+        await _hubContext.Clients
+            .User(userId.ToString())
+            .SendAsync("ReceiveNotification", notification);
+
+        _logger.LogInformation(
+            "Sent notification '{Title}' to user {UserId}",
+            notification.Title,
+            userId);
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(
+            ex,
+            "Failed to send SignalR notification to user {UserId}",
+            userId);
+    }
+}
 
     public async Task BroadcastNotificationAsync(NotificationMessageDto notification)
     {

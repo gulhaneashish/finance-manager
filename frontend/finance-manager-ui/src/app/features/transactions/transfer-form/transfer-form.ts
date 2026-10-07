@@ -93,7 +93,7 @@ export class TransferForm implements OnInit {
       ],
 
       transactionPurpose: [
-        TransactionPurpose.Expense,
+        TransactionPurpose.Transfer,
         Validators.required
       ],
 

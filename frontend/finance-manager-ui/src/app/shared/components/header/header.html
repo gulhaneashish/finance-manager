@@ -24,16 +24,7 @@
 
   <div class="header-actions">
 
-    <!-- QUICK QR SCANNER BUTTON -->
-    <button
-      class="header-icon-btn qr-btn"
-      type="button"
-      (click)="openQrScanner()"
-      title="Scan QR Code to Pay / Transfer"
-      aria-label="Scan QR Code">
-      <mat-icon>qr_code_scanner</mat-icon>
-      <span class="qr-label">Scan QR</span>
-    </button>
+
 
     <!-- NOTIFICATIONS BELL WITH REAL-TIME BADGE -->
     <div class="notification-container">
@@ -230,10 +221,3 @@
   [isOpen]="showProfileModal"
   (closed)="closeProfileModal()">
 </app-profile-modal>
-
-<!-- QR SCANNER MODAL -->
-<app-qr-scanner-modal
-  [isOpen]="showQrScannerModal"
-  (closed)="closeQrScanner()"
-  (qrScanned)="onQrScanned($event)">
-</app-qr-scanner-modal>

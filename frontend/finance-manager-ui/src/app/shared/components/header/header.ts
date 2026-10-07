@@ -25,8 +25,6 @@ import { Store } from '@ngrx/store';
 import { selectUser } from '../../../store/auth/auth.selectors';
 import { ProfileModal } from '../profile-modal/profile-modal';
 import { SignalRNotificationService } from '../../../core/services/signalr-notification.service';
-import { QrScannerModal } from '../qr-scanner-modal/qr-scanner-modal';
-import { QrPaymentPayload } from '../../../core/services/qr-code.service';
 
 @Component({
   selector: 'app-header',
@@ -37,8 +35,7 @@ import { QrPaymentPayload } from '../../../core/services/qr-code.service';
     MatButtonModule,
     AsyncPipe,
     RouterLink,
-    ProfileModal,
-    QrScannerModal
+    ProfileModal
   ],
   templateUrl: './header.html',
   styleUrl: './header.css'
@@ -54,7 +51,6 @@ export class Header implements OnInit {
   showProfileMenu = false;
   showProfileModal = false;
   showNotificationsMenu = false;
-  showQrScannerModal = false;
   isDarkMode = false;
 
   ngOnInit(): void {
@@ -76,29 +72,6 @@ export class Header implements OnInit {
     if (this.showProfileMenu) {
       this.showProfileMenu = false;
     }
-  }
-
-  openQrScanner(): void {
-    this.showQrScannerModal = true;
-    this.showNotificationsMenu = false;
-    this.showProfileMenu = false;
-  }
-
-  closeQrScanner(): void {
-    this.showQrScannerModal = false;
-  }
-
-  onQrScanned(payload: QrPaymentPayload): void {
-    this.showQrScannerModal = false;
-    this.router.navigate(['/transactions'], {
-      queryParams: {
-        toAccountId: payload.accountId,
-        toAccountName: payload.accountName,
-        amount: payload.amount || null,
-        note: payload.note || null,
-        openTransfer: 'true'
-      }
-    });
   }
 
   toggleProfileMenu(): void {
