@@ -79,6 +79,7 @@ jobs:
                 "OLD='finance-manager-api-v1'",
                 "BACKUP='finance-manager-api-rollback'",
                 "NEW='finance-manager-api-v1'",
+                "aws ecr get-login-password --region \"$REGION\" | docker login --username AWS --password-stdin 658469472676.dkr.ecr.ap-south-1.amazonaws.com",
                 "docker pull \"$IMAGE_URI\"",
                 "if docker inspect \"$BACKUP\" >/dev/null 2>&1; then echo 'Rollback container already exists; refusing to overwrite it'; exit 1; fi",
                 "docker stop \"$OLD\"",
