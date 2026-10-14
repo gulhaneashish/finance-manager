@@ -118,6 +118,7 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddSignalR();
+builder.Services.AddHealthChecks();
 
 builder.Services
     .AddControllers()
@@ -429,4 +430,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapHealthChecks("/health");
 app.Run();

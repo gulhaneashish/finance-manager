@@ -1,6 +1,43 @@
+# Git & VCS
 **/.git
+**/.gitignore
+**/.gitattributes
+
+# IDE & Editor artifacts
 **/.vs
 **/.vscode
-**/bin
-**/obj
-**/publish
+**/.idea
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+
+# Build outputs & caches
+**/bin/
+**/obj/
+**/publish/
+**/out/
+
+# Sensitive files & Environment variables
+**/.env
+**/.env.*
+!**/.env.example
+**/appsettings.Development.json
+**/secrets.json
+
+# Logs & temporary files
+**/*.log
+**/*.tmp
+**/TestResults/
+**/coverage/
+
+# Database dumps, archives & local SQL scripts
+**/*.zip
+**/*.tar.gz
+**/*.sql
+
+# Documentation & miscellaneous
+**/*.md
+**/*.docx
+**/Dockerfile*
+**/docker-compose*

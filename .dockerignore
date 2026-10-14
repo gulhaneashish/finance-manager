@@ -1,0 +1,35 @@
+# Git & VCS
+**/.git
+**/.gitignore
+**/.gitattributes
+
+# IDE & Editor artifacts
+**/.vs
+**/.vscode
+**/.idea
+**/*.user
+**/*.suo
+
+# Build outputs & caches
+**/bin/
+**/obj/
+**/publish/
+**/dist/
+**/node_modules/
+**/.angular/
+
+# Sensitive files & Environment variables
+**/.env
+**/.env.*
+!**/.env.example
+
+# Logs & temporary files
+**/*.log
+**/*.tmp
+**/TestResults/
+**/coverage/
+
+# Large files & binaries
+**/*.zip
+**/*.tar.gz
+**/*.docx
