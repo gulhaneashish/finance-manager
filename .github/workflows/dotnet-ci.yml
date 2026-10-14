@@ -1,14 +1,22 @@
 
-name: FinanceManager .NET CI
+name: FinanceManager .NET CI and ECR
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: finance-manager-api
 
 jobs:
-  build:
+  build-test-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,12 +26,35 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
-      - name: Restore dependencies
+      - name: Restore API dependencies
         run: dotnet restore FinanceManager.API.csproj
         working-directory: backend/FinanceManager.API/FinanceManager.API
 
-      - name: Build application
+      - name: Build API
         run: dotnet build FinanceManager.API.csproj --configuration Release --no-restore
         working-directory: backend/FinanceManager.API/FinanceManager.API
+
+      - name: Run automated tests
+        run: dotnet test backend/FinanceManager.API/FinanceManager.Tests/FinanceManager.Tests.csproj --configuration Release
+
+      # - name: Configure AWS credentials using OIDC
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+      #     aws-region: ${{ env.AWS_REGION }}
+
+      # - name: Login to Amazon ECR
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v2
+
+      # - name: Build and push Docker image
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: backend/FinanceManager.API/FinanceManager.API
+      #     push: true
+      #     tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
